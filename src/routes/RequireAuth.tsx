@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 
+import { LoadingScreen } from "@/components/ui/loading-screen";
 import { useAuth } from "@/hooks/useAuth";
 
 /** Private routes — send guests to /login. */
@@ -17,7 +18,7 @@ export function RequireAuth({
   }
 
   if (status === "loading") {
-    return <p>Ładowanie…</p>;
+    return <LoadingScreen />;
   }
 
   if (!isAuthenticated) {

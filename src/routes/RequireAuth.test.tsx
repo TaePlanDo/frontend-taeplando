@@ -45,7 +45,7 @@ describe("RequireAuth", () => {
   it("shows loading state", () => {
     authState.status = "loading";
     renderAtHome();
-    expect(screen.getByText("Ładowanie…")).toBeTruthy();
+    expect(screen.getByRole("status", { name: "Ładowanie…" })).toBeTruthy();
   });
 
   it("redirects guests to /login", () => {

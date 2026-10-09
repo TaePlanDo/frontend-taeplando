@@ -45,7 +45,7 @@ describe("RedirectIfAuth", () => {
   it("shows loading state", () => {
     authState.status = "loading";
     renderAtLogin();
-    expect(screen.getByText("Ładowanie…")).toBeTruthy();
+    expect(screen.getByRole("status", { name: "Ładowanie…" })).toBeTruthy();
   });
 
   it("redirects authenticated users to /", () => {
