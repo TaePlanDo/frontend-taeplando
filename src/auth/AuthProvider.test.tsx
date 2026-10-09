@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAuth } from "@/hooks/useAuth";
 
 import { AuthProvider } from "./AuthProvider";
+import { setAccessToken } from "./tokenRef";
 
 function createWrapper() {
   const client = new QueryClient({
@@ -23,26 +24,30 @@ function createWrapper() {
   };
 }
 
+function jsonResponse(status: number, body: unknown) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => body,
+    statusText: status === 401 ? "Unauthorized" : "OK",
+  };
+}
+
 describe("AuthProvider", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    setAccessToken(null);
   });
 
   it("sets invalidCredentials when login returns 401", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 401,
-        json: async () => ({ detail: "Invalid or expired refresh token" }),
-        statusText: "Unauthorized",
-      })
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 401,
-        json: async () => ({ detail: "Invalid credentials" }),
-        statusText: "Unauthorized",
-      });
+      .mockResolvedValueOnce(
+        jsonResponse(401, { detail: "Invalid or expired refresh token" }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse(401, { detail: "Invalid credentials" }),
+      );
     vi.stubGlobal("fetch", fetchMock);
 
     const { result } = renderHook(() => useAuth(), {
@@ -63,6 +68,54 @@ describe("AuthProvider", () => {
     await waitFor(() => {
       expect(result.current.status).toBe("error");
       expect(result.current.errorCode).toBe("invalidCredentials");
+    });
+  });
+
+  it("restores session from refresh cookie when there is no access token", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse(200, {
+          access_token: "access-token",
+          token_type: "bearer",
+          expires_in: 900,
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse(200, {
+          id: "1",
+          email: "trainer@example.com",
+          full_name: "Trainer",
+          auth_method: "email",
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("authenticated");
+      expect(result.current.user?.email).toBe("trainer@example.com");
+    });
+  });
+
+  it("stays unauthenticated when refresh fails on load", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse(401, { detail: "Invalid or expired refresh token" }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("unauthenticated");
+      expect(result.current.user).toBeNull();
     });
   });
 });
