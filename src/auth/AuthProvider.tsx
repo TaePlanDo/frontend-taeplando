@@ -2,25 +2,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
 
 import { fetchMe, loginRequest, refreshRequest } from "@/lib/api/auth";
-import { setRefreshHandler } from "@/lib/api/client";
+import { setOnAuthLost } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
-import type {
-  AuthErrorCode,
-  AuthStatus,
-  LoginCredentials,
-  User,
-} from "@/types/auth";
+import type { AuthStatus, LoginCredentials, User } from "@/types/auth";
 
 import { AuthContext } from "./authContext";
 import { getAccessToken, setAccessToken } from "./tokenRef";
 
 const meKey = ["auth", "me"] as const;
 
-function mapLoginError(error: unknown): AuthErrorCode {
+function loginErrorMessage(error: unknown): string {
   if (error instanceof ApiError && error.status === 401) {
-    return "invalidCredentials";
+    return "Nieprawidłowy email lub hasło";
   }
-  return "unknown";
+  return "Nie udało się zalogować";
 }
 
 /** Restore access token from refresh cookie, then load the current user. */
@@ -63,18 +58,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    setRefreshHandler(async () => {
-      try {
-        const tokens = await refreshRequest();
-        setAccessToken(tokens.access_token);
-        return tokens.access_token;
-      } catch {
-        setAccessToken(null);
-        queryClient.setQueryData(meKey, null);
-        return null;
-      }
+    setOnAuthLost(() => {
+      queryClient.setQueryData(meKey, null);
     });
-    return () => setRefreshHandler(null);
+    return () => setOnAuthLost(null);
   }, [queryClient]);
 
   const login = useCallback(
@@ -84,35 +71,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [loginMutation],
   );
 
-  const status: AuthStatus = useMemo(() => {
-    if (meQuery.isPending || loginMutation.isPending) {
-      return "loading";
-    }
-    if (loginMutation.isError) {
-      return "error";
-    }
-    if (meQuery.data) {
-      return "authenticated";
-    }
-    return "unauthenticated";
-  }, [
-    meQuery.isPending,
-    meQuery.data,
-    loginMutation.isPending,
-    loginMutation.isError,
-  ]);
+  const status: AuthStatus = meQuery.isPending
+    ? "loading"
+    : meQuery.data
+      ? "authenticated"
+      : "unauthenticated";
 
   const value = useMemo(
     () => ({
       user: meQuery.data ?? null,
       status,
-      errorCode: loginMutation.isError
-        ? mapLoginError(loginMutation.error)
-        : null,
       isAuthenticated: status === "authenticated",
+      isLoggingIn: loginMutation.isPending,
+      loginError: loginMutation.isError
+        ? loginErrorMessage(loginMutation.error)
+        : null,
       login,
     }),
-    [meQuery.data, status, loginMutation.isError, loginMutation.error, login],
+    [
+      meQuery.data,
+      status,
+      loginMutation.isPending,
+      loginMutation.isError,
+      loginMutation.error,
+      login,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -19,7 +19,7 @@ export function App() {
       <Route
         path="/"
         element={
-          <RequireAuth override={true}>
+          <RequireAuth>
             <HomePage />
           </RequireAuth>
         }

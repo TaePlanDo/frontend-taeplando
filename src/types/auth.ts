@@ -1,4 +1,4 @@
-export type AuthMethod = "email" | "google";
+export type AuthMethod = "LOCAL" | "GOOGLE";
 
 export type User = {
   id: string;
@@ -18,7 +18,4 @@ export type TokenResponse = {
   expires_in: number;
 };
 
-export type AuthStatus =
-  "loading" | "authenticated" | "unauthenticated" | "error";
-
-export type AuthErrorCode = "invalidCredentials" | "unknown";
+export type AuthStatus = "loading" | "authenticated" | "unauthenticated";

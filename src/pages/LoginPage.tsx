@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { AuthButton } from "@/components/auth/AuthButton";
 import { AuthGoogleButton } from "@/components/auth/AuthGoogleButton";
@@ -7,38 +7,29 @@ import { AuthHeader } from "@/components/auth/AuthHeader";
 import { AuthInput } from "@/components/auth/AuthInput";
 import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/hooks/useAuth";
-import { ApiError } from "@/lib/api/errors";
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { login, status, errorCode } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { login, isLoggingIn, loginError: authLoginError } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [formError, setFormError] = useState<string | null>(null);
+
+  const loginError =
+    authLoginError ??
+    (searchParams.get("error") === "oauth"
+      ? "Logowanie przez Google nie powiodło się"
+      : null);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    setFormError(null);
     try {
       await login({ email, password });
       navigate("/", { replace: true });
-    } catch (error) {
-      if (error instanceof ApiError) {
-        setFormError(`${error.status}: ${error.message}`);
-      } else {
-        setFormError("Logowanie nie powiodło się");
-      }
+    } catch {
+      // Polish message comes from useAuth().loginError
     }
   }
-
-  const busy = status === "loading";
-  const showError =
-    formError ??
-    (errorCode === "invalidCredentials"
-      ? "Nieprawidłowy email lub hasło"
-      : errorCode
-        ? "Nie udało się zalogować"
-        : null);
 
   return (
     <div className="flex min-h-dvh bg-[#181818] text-white">
@@ -76,18 +67,18 @@ export function LoginPage() {
               minLength={8}
             />
 
-            {showError ? (
+            {loginError ? (
               <p role="alert" className="text-sm text-red-300">
-                {showError}
+                {loginError}
               </p>
             ) : null}
 
-            <AuthButton type="submit" disabled={busy} className="mt-2">
+            <AuthButton type="submit" disabled={isLoggingIn} className="mt-2">
               Zaloguj się
             </AuthButton>
           </form>
 
-          <AuthGoogleButton disabled={busy} className="mt-3" />
+          <AuthGoogleButton disabled={isLoggingIn} className="mt-3" />
 
           <p className="mt-4 w-full text-center text-base leading-snug">
             Nie posiadasz konta?{" "}

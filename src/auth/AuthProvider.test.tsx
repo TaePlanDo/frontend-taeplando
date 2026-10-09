@@ -39,7 +39,7 @@ describe("AuthProvider", () => {
     setAccessToken(null);
   });
 
-  it("sets invalidCredentials when login returns 401", async () => {
+  it("sets Polish loginError when login returns 401", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -66,8 +66,8 @@ describe("AuthProvider", () => {
     ).rejects.toThrow();
 
     await waitFor(() => {
-      expect(result.current.status).toBe("error");
-      expect(result.current.errorCode).toBe("invalidCredentials");
+      expect(result.current.status).toBe("unauthenticated");
+      expect(result.current.loginError).toBe("Nieprawidłowy email lub hasło");
     });
   });
 
@@ -86,7 +86,7 @@ describe("AuthProvider", () => {
           id: "1",
           email: "trainer@example.com",
           full_name: "Trainer",
-          auth_method: "email",
+          auth_method: "LOCAL",
         }),
       );
     vi.stubGlobal("fetch", fetchMock);

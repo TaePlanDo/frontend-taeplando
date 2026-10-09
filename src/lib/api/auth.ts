@@ -10,14 +10,12 @@ export async function loginRequest(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials),
-    skipAuthRetry: true,
   });
 }
 
 export async function refreshRequest(): Promise<TokenResponse> {
   return apiJson<TokenResponse>(apiUrl("/auth/refresh"), {
     method: "POST",
-    skipAuthRetry: true,
   });
 }
 

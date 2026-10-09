@@ -1,7 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ApiError } from "@/lib/api/errors";
 import type { AuthContextValue } from "@/auth/authContext";
 
 import { LoginPage } from "./LoginPage";
@@ -13,10 +12,13 @@ const startGoogleLogin = vi.fn();
 const authState: AuthContextValue = {
   user: null,
   status: "unauthenticated",
-  errorCode: null,
   isAuthenticated: false,
+  isLoggingIn: false,
+  loginError: null,
   login,
 };
+
+const searchParams = new URLSearchParams();
 
 vi.mock("react-router-dom", async () => {
   const actual =
@@ -26,6 +28,7 @@ vi.mock("react-router-dom", async () => {
   return {
     ...actual,
     useNavigate: () => navigate,
+    useSearchParams: () => [searchParams, vi.fn()],
   };
 });
 
@@ -52,8 +55,10 @@ describe("LoginPage", () => {
     navigate.mockReset();
     login.mockReset();
     startGoogleLogin.mockReset();
+    searchParams.delete("error");
     authState.status = "unauthenticated";
-    authState.errorCode = null;
+    authState.isLoggingIn = false;
+    authState.loginError = null;
     authState.isAuthenticated = false;
   });
 
@@ -72,9 +77,8 @@ describe("LoginPage", () => {
     });
   });
 
-  it("shows invalid credentials message from errorCode", () => {
-    authState.errorCode = "invalidCredentials";
-    authState.status = "error";
+  it("shows Polish loginError from auth context", () => {
+    authState.loginError = "Nieprawidłowy email lub hasło";
     render(<LoginPage />);
 
     expect(screen.getByRole("alert").textContent).toBe(
@@ -82,22 +86,39 @@ describe("LoginPage", () => {
     );
   });
 
-  it("shows ApiError message when login throws", async () => {
-    login.mockRejectedValue(new ApiError(401, "Invalid credentials"));
+  it("shows OAuth error from query when auth loginError is null", () => {
+    searchParams.set("error", "oauth");
+    render(<LoginPage />);
+
+    expect(screen.getByRole("alert").textContent).toBe(
+      "Logowanie przez Google nie powiodło się",
+    );
+  });
+
+  it("prefers auth loginError over OAuth query error", () => {
+    searchParams.set("error", "oauth");
+    authState.loginError = "Nieprawidłowy email lub hasło";
+    render(<LoginPage />);
+
+    expect(screen.getByRole("alert").textContent).toBe(
+      "Nieprawidłowy email lub hasło",
+    );
+  });
+
+  it("does not navigate when login rejects", async () => {
+    login.mockRejectedValue(new Error("fail"));
     render(<LoginPage />);
 
     fillAndSubmit("trainer@example.com", "password123");
 
     await waitFor(() => {
-      expect(screen.getByRole("alert").textContent).toBe(
-        "401: Invalid credentials",
-      );
+      expect(login).toHaveBeenCalled();
     });
     expect(navigate).not.toHaveBeenCalled();
   });
 
-  it("disables buttons while loading", () => {
-    authState.status = "loading";
+  it("disables buttons while logging in", () => {
+    authState.isLoggingIn = true;
     render(<LoginPage />);
 
     expect(screen.getByRole("button", { name: "Zaloguj się" })).toBeDisabled();
