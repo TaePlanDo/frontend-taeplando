@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { HomePage } from "@/pages/HomePage";
 
-vi.mock("@/lib/api", () => ({
+vi.mock("@/lib/api/health", () => ({
   fetchHealth: vi.fn().mockResolvedValue({ status: "ok" }),
 }));
 
