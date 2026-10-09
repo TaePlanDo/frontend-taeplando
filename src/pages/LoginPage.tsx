@@ -5,6 +5,7 @@ import { AuthButton } from "@/components/auth/AuthButton";
 import { AuthGoogleButton } from "@/components/auth/AuthGoogleButton";
 import { AuthHeader } from "@/components/auth/AuthHeader";
 import { AuthInput } from "@/components/auth/AuthInput";
+import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/hooks/useAuth";
 import { ApiError } from "@/lib/api/errors";
 
@@ -40,9 +41,13 @@ export function LoginPage() {
         : null);
 
   return (
-    <div className="flex min-h-screen bg-[#181818] text-white">
+    <div className="flex min-h-dvh bg-[#181818] text-white">
       <div className="flex flex-1 items-center justify-center p-6">
         <div className="flex w-full max-w-88 flex-col">
+          <Logo
+            className="mx-auto mb-3 h-28 w-auto max-h-[24vh] lg:hidden"
+            aria-hidden
+          />
           <AuthHeader />
 
           <form
@@ -93,7 +98,12 @@ export function LoginPage() {
         </div>
       </div>
 
-      <div className="hidden flex-1 lg:block" aria-hidden />
+      <div className="hidden flex-1 items-center justify-center lg:flex">
+        <Logo
+          className="h-auto max-h-[min(420px,70vh)] w-[420px]"
+          aria-hidden
+        />
+      </div>
     </div>
   );
 }
