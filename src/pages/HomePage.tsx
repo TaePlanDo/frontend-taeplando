@@ -4,7 +4,7 @@ import { Logo } from "@/components/ui/logo";
 
 export function HomePage() {
   return (
-    <div className="flex min-h-dvh bg-[#181818] text-white">
+    <div className="flex flex-1">
       <div className="flex flex-1 items-center justify-center p-6">
         <div className="flex w-full max-w-96 flex-col lg:items-start items-center">
           <Logo className="mx-auto mb-18 h-64 w-auto lg:hidden" aria-hidden />
