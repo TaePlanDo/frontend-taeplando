@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
 
-import { HomePage } from "@/pages/HomePage";
+import { HealthCheckPage } from "@/pages/HealthCheckPage";
 
 vi.mock("@/lib/api/health", () => ({
   fetchHealth: vi.fn().mockResolvedValue({ status: "ok" }),
@@ -14,12 +14,12 @@ function renderPage() {
   });
   return render(
     <QueryClientProvider client={client}>
-      <HomePage />
+      <HealthCheckPage />
     </QueryClientProvider>,
   );
 }
 
-describe("HomePage", () => {
+describe("HealthCheckPage", () => {
   it("renders heading", () => {
     renderPage();
     expect(screen.getByRole("heading", { name: "Frontend" })).toBeTruthy();

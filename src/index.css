@@ -30,12 +30,14 @@
   --radius: 0.5rem;
 }
 
-* {
-  @apply border-border;
-}
+@layer base {
+  * {
+    @apply border-border;
+  }
 
-body {
-  @apply bg-background text-foreground antialiased;
-  margin: 0;
-  min-height: 100vh;
+  body {
+    @apply bg-background text-foreground antialiased;
+    margin: 0;
+    min-height: 100vh;
+  }
 }
