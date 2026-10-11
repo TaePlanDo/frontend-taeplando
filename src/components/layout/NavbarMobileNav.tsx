@@ -7,9 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 
-import { NAV_ITEMS } from "./navItems";
+import { NAV_ITEMS, navLinkClassName } from "./navItems";
 
 export function NavbarMobileNav() {
   return (
@@ -36,9 +35,7 @@ export function NavbarMobileNav() {
             <NavLink
               to={item.to}
               end={item.end}
-              className={({ isActive }) =>
-                cn(isActive ? "text-[#EC6212]" : "text-white")
-              }
+              className={({ isActive }) => navLinkClassName({ isActive })}
             >
               {item.label}
             </NavLink>
