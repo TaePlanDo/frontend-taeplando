@@ -1,9 +1,8 @@
-import { seedDatabase } from "./backend";
 import { psql } from "./compose";
 
 /**
- * Restore the e2e DB to the seeded baseline (truncate app tables, keep alembic_version).
- * Call from a test, beforeEach, or beforeAll when you need a clean slate.
+ * Clear all app tables (keep alembic_version).
+ * Re-create needed data via API helpers (e.g. createLocalTrainer), not backend seed.
  * Safe only against the taeplando-e2e Compose project.
  */
 export async function resetDb(): Promise<void> {
@@ -24,5 +23,4 @@ BEGIN
   END IF;
 END $$;
 `);
-  seedDatabase();
 }

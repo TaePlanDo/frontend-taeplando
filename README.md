@@ -20,7 +20,7 @@ npm run test:e2e
 What it does:
 
 1. Starts Postgres via the **backend** `docker-compose.yml` under project `taeplando-e2e` (port `5439`, separate volume)
-2. Runs Alembic migrate + system seed against that DB
+2. Runs Alembic migrate (no `seed-system-data` — tests create data via API)
 3. Starts the API on `8001` and Vite on `5174`
 4. Runs Playwright (Chromium)
 5. Tears down the e2e Postgres container and volume
@@ -41,7 +41,14 @@ What it does:
 | E2E API      | 8001 |
 | E2E frontend | 5174 |
 
+### Test data (API only)
+
+E2E does **not** call backend `seed-system-data`. Create what you need through public APIs
+(e.g. `createLocalTrainer()` → `POST /auth/register`). Later features (groups/plans) will
+need more helpers — and may still require system catalogs (`training_segments`) that today
+only come from seed/migrations, until an API exists for them.
+
 ### DB reset from tests
 
-Call `resetDb()` from `e2e/helpers/resetDb` when a test needs a clean seeded baseline
-(truncate + re-seed). Also fine in `test.beforeEach` / `test.beforeAll` if a whole file needs it.
+Import from `./playwright` instead of `@playwright/test` (same API: `test`, `expect`, …).
+An auto fixture clears the DB before every test; re-create data with API helpers in the test body.

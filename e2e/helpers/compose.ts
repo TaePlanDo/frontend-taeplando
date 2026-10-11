@@ -58,6 +58,7 @@ export function psql(sql: string): void {
       `PGPASSWORD=${pgPassword}`,
       "postgres",
       "psql",
+      "-q",
       "-U",
       pgUser,
       "-d",
