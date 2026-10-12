@@ -3,6 +3,8 @@ import type { LoginCredentials, TokenResponse, User } from "@/types/auth";
 
 import { apiJson } from "./client";
 
+export const meKey = ["auth", "me"] as const;
+
 export async function loginRequest(
   credentials: LoginCredentials,
 ): Promise<TokenResponse> {
@@ -21,6 +23,14 @@ export async function refreshRequest(): Promise<TokenResponse> {
 
 export async function fetchMe(): Promise<User> {
   return apiJson<User>(apiUrl("/auth/me"));
+}
+
+export async function updateMeRequest(fullName: string): Promise<User> {
+  return apiJson<User>(apiUrl("/auth/me"), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ full_name: fullName }),
+  });
 }
 
 export function startGoogleLogin(): void {

@@ -1,15 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
 
-import { fetchMe, loginRequest, refreshRequest } from "@/lib/api/auth";
+import { fetchMe, loginRequest, meKey, refreshRequest } from "@/lib/api/auth";
 import { setOnAuthLost } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import type { AuthStatus, LoginCredentials, User } from "@/types/auth";
 
 import { AuthContext } from "./authContext";
 import { getAccessToken, setAccessToken } from "./tokenRef";
-
-const meKey = ["auth", "me"] as const;
 
 function loginErrorMessage(error: unknown): string {
   if (error instanceof ApiError && error.status === 401) {
