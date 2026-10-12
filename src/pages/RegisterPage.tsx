@@ -3,8 +3,13 @@ import { Logo } from "@/components/ui/logo";
 import { AuthInput } from "@/components/auth/AuthInput";
 import { type SubmitEvent, useState } from "react";
 import { AuthButton } from "@/components/auth/AuthButton";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { AuthGoogleButton } from "@/components/auth/AuthGoogleButton";
 
 export function RegisterPage() {
+  const navigate = useNavigate();
+  const { register, registerError, isRegistering } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -35,11 +40,20 @@ export function RegisterPage() {
     return true;
   }
 
-  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+
     const isPasswordValid = validatePassword();
-    if (isPasswordValid) {
-      console.log("Formularz jest poprawny");
+
+    if (!isPasswordValid) {
+      return;
+    }
+
+    try {
+      await register({ email, password });
+      navigate("/", { replace: true });
+    } catch {
+      // Polish message comes from useAuth().registerError
     }
   }
 
@@ -52,7 +66,10 @@ export function RegisterPage() {
             aria-hidden
           />
           <AuthHeader />
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={(event) => void handleSubmit(event)}
+          >
             <AuthInput
               label="Email"
               name="email"
@@ -73,8 +90,6 @@ export function RegisterPage() {
                 placeholder="Podaj swoje hasło"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
               />
               {passwordError && (
                 <p role="alert" className="text-sm text-red-400">
@@ -83,18 +98,31 @@ export function RegisterPage() {
               )}
             </div>
             <AuthInput
-              label="Potwierdź hasło"
+              label="Powtórz hasło"
               name="confirmPassword"
               type="password"
               autoComplete="new-password"
-              placeholder="Potwierdź swoje hasło"
+              placeholder="Powtórz swoje hasło"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={8}
             />
-            <AuthButton type="submit">Zarejestruj się</AuthButton>
+            <AuthButton type="submit" disabled={isRegistering}>
+              {isRegistering ? "Rejestrowanie..." : "Zarejestruj się"}
+            </AuthButton>
+            {registerError && (
+              <p role="alert" className="text-sm text-red-400">
+                {registerError}
+              </p>
+            )}
           </form>
+          <AuthGoogleButton disabled={isRegistering} className="mt-3" />
+
+          <p className="mt-4 w-full text-center text-base leading-snug">
+            Masz już konto?{" "}
+            <Link to="/login" className="font-medium text-[#EC6212]">
+              Zaloguj się
+            </Link>
+          </p>
         </div>
       </div>
 

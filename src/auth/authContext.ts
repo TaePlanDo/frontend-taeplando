@@ -8,7 +8,10 @@ export type AuthContextValue = {
   isAuthenticated: boolean;
   isLoggingIn: boolean;
   loginError: string | null;
+  registerError: string | null;
+  isRegistering: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
+  register: (credentials: LoginCredentials) => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

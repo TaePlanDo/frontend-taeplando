@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { AuthButton } from "@/components/auth/AuthButton";
 import { AuthGoogleButton } from "@/components/auth/AuthGoogleButton";
@@ -82,9 +82,9 @@ export function LoginPage() {
 
           <p className="mt-4 w-full text-center text-base leading-snug">
             Nie posiadasz konta?{" "}
-            <a href="/register" className="font-medium text-[#EC6212]">
+            <Link to="/register" className="font-medium text-[#EC6212]">
               Zarejestruj się już teraz
-            </a>
+            </Link>
           </p>
         </div>
       </div>

@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
 
-import { fetchMe, loginRequest, refreshRequest } from "@/lib/api/auth";
+import {
+  fetchMe,
+  loginRequest,
+  refreshRequest,
+  registerRequest,
+} from "@/lib/api/auth";
 import { setOnAuthLost } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import type { AuthStatus, LoginCredentials, User } from "@/types/auth";
@@ -16,6 +21,13 @@ function loginErrorMessage(error: unknown): string {
     return "Nieprawidłowy email lub hasło";
   }
   return "Nie udało się zalogować";
+}
+
+function registerErrorMessage(error: unknown): string {
+  if (error instanceof ApiError && error.status === 409) {
+    return "Użytkownik o podanym emailu już istnieje";
+  }
+  return "Nie udało się zarejestrować";
 }
 
 /** Restore access token from refresh cookie, then load the current user. */
@@ -57,6 +69,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
   });
 
+  const registerMutation = useMutation({
+    mutationFn: async (credentials: LoginCredentials) => {
+      const tokens = await registerRequest(credentials);
+      setAccessToken(tokens.access_token);
+      return fetchMe();
+    },
+    onSuccess: (user) => {
+      queryClient.setQueryData(meKey, user);
+    },
+    onError: () => {
+      setAccessToken(null);
+      queryClient.setQueryData(meKey, null);
+    },
+  });
+
   useEffect(() => {
     setOnAuthLost(() => {
       queryClient.setQueryData(meKey, null);
@@ -71,6 +98,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [loginMutation],
   );
 
+  const register = useCallback(
+    async (credentials: LoginCredentials) => {
+      await registerMutation.mutateAsync(credentials);
+    },
+    [registerMutation],
+  );
+
   const status: AuthStatus = meQuery.isPending
     ? "loading"
     : meQuery.data
@@ -83,18 +117,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       status,
       isAuthenticated: status === "authenticated",
       isLoggingIn: loginMutation.isPending,
+      isRegistering: registerMutation.isPending,
       loginError: loginMutation.isError
         ? loginErrorMessage(loginMutation.error)
         : null,
+      registerError: registerMutation.isError
+        ? registerErrorMessage(registerMutation.error)
+        : null,
       login,
+      register,
     }),
     [
       meQuery.data,
       status,
       loginMutation.isPending,
+      registerMutation.isPending,
       loginMutation.isError,
       loginMutation.error,
+      registerMutation.isError,
+      registerMutation.error,
       login,
+      register,
     ],
   );
 

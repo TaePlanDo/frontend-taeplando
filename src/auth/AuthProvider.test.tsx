@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAuth } from "@/hooks/useAuth";
 
 import { AuthProvider } from "./AuthProvider";
-import { setAccessToken } from "./tokenRef";
+import { getAccessToken, setAccessToken } from "./tokenRef";
 
 function createWrapper() {
   const client = new QueryClient({
@@ -117,5 +117,112 @@ describe("AuthProvider", () => {
       expect(result.current.status).toBe("unauthenticated");
       expect(result.current.user).toBeNull();
     });
+  });
+
+  it("authenticates the user after successful registration", async () => {
+    const user = {
+      id: "1",
+      email: "trainer@example.com",
+      full_name: null,
+      auth_method: "LOCAL",
+    };
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse(401, {
+          detail: "Invalid or expired refresh token",
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse(200, {
+          access_token: "register-token",
+          token_type: "bearer",
+          expires_in: 900,
+        }),
+      )
+      .mockResolvedValueOnce(jsonResponse(200, user));
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("unauthenticated");
+    });
+
+    await result.current.register({
+      email: "trainer@example.com",
+      password: "Trening123!",
+    });
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("authenticated");
+      expect(result.current.isAuthenticated).toBe(true);
+      expect(result.current.user).toEqual(user);
+      expect(result.current.registerError).toBeNull();
+    });
+
+    expect(getAccessToken()).toBe("register-token");
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "/api/auth/me",
+      expect.objectContaining({
+        headers: expect.any(Headers),
+      }),
+    );
+
+    const meOptions = fetchMock.mock.calls[2][1] as RequestInit;
+
+    expect(new Headers(meOptions.headers).get("Authorization")).toBe(
+      "Bearer register-token",
+    );
+  });
+
+  it("sets Polish registerError when registration returns 409", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse(401, {
+          detail: "Invalid or expired refresh token",
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse(409, {
+          detail: "Email already registered",
+        }),
+      );
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("unauthenticated");
+    });
+
+    await expect(
+      result.current.register({
+        email: "trainer@example.com",
+        password: "Trening123!",
+      }),
+    ).rejects.toThrow();
+
+    await waitFor(() => {
+      expect(result.current.registerError).toBe(
+        "Użytkownik o podanym emailu już istnieje",
+      );
+      expect(result.current.status).toBe("unauthenticated");
+      expect(result.current.user).toBeNull();
+      expect(result.current.isRegistering).toBe(false);
+    });
+
+    expect(getAccessToken()).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });
