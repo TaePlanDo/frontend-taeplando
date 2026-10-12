@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { loginRequest, refreshRequest } from "./auth";
+import { loginRequest, refreshRequest, updateMeRequest } from "./auth";
 
 describe("auth API", () => {
   afterEach(() => {
@@ -55,6 +55,31 @@ describe("auth API", () => {
       expect.objectContaining({
         method: "POST",
         credentials: "include",
+      }),
+    );
+  });
+
+  it("updateMe sends PATCH with the new full_name", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        id: "1",
+        email: "trainer@example.com",
+        full_name: "Nowa Nazwa",
+        auth_method: "LOCAL",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await updateMeRequest("Nowa Nazwa");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/auth/me",
+      expect.objectContaining({
+        method: "PATCH",
+        credentials: "include",
+        body: JSON.stringify({ full_name: "Nowa Nazwa" }),
       }),
     );
   });
