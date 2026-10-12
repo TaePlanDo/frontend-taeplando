@@ -11,7 +11,7 @@ export function AccountPage() {
 
   return (
     <div className="flex min-h-dvh bg-[#181818] text-white justify-center items-center">
-      <div className="flex flex-col gap-4 p-6 border-2 border-[#E5E5E5] rounded-lg w-full max-w-2xl">
+      <div className="flex flex-col gap-4 p-6 border-2 border-[#E5E5E5] rounded-lg lg:w-full w-92 max-w-2xl">
         <h1 className="text-2xl font-semibold">Dane użytkownika</h1>
         <Separator className="w-full" />
         <PersonalDataItem title="Nazwa użytkownika" value="Jan Kowalski" />
