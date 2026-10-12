@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AuthorizedLayout } from "@/components/layout/AuthorizedLayout";
-import { HealthCheckPage } from "@/pages/HealthCheckPage";
 import { HomePage } from "@/pages/HomePage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RedirectIfAuth } from "@/routes/RedirectIfAuth";
@@ -26,7 +25,6 @@ export function App() {
         }
       >
         <Route path="/" element={<HomePage />} />
-        <Route path="/healthcheck" element={<HealthCheckPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

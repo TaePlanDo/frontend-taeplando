@@ -6,10 +6,7 @@ export type NavItem = {
   end?: boolean;
 };
 
-export const NAV_ITEMS: NavItem[] = [
-  { label: "Start", to: "/", end: true },
-  { label: "Status", to: "/healthcheck" },
-];
+export const NAV_ITEMS: NavItem[] = [{ label: "Start", to: "/", end: true }];
 
 export function navLinkClassName({ isActive }: { isActive: boolean }) {
   return cn(
