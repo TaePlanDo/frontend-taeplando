@@ -3,12 +3,14 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthorizedLayout } from "@/components/layout/AuthorizedLayout";
 import { HomePage } from "@/pages/HomePage";
 import { LoginPage } from "@/pages/LoginPage";
+import { RegisterPage } from "@/pages/RegisterPage";
 import { RedirectIfAuth } from "@/routes/RedirectIfAuth";
 import { RequireAuth } from "@/routes/RequireAuth";
 
 export function App() {
   return (
     <Routes>
+      <Route path="/register" element={<RegisterPage />} />
       <Route
         path="/login"
         element={
