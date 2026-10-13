@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ChangeUsernameForm } from "@/components/account/ChangeUsernameForm";
 import { ChangePasswordForm } from "@/components/account/ChangePasswordForm";
 import { PersonalDataItem } from "@/components/account/PersonalDataItem";
-import { ButtonOutlined } from "@/components/shared/ButtonOutlined";
+import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
 import { DialogCustomized } from "@/components/shared/DialogCustomized";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,7 +27,7 @@ export function AccountPage() {
         {isLocal ? (
           <div className="flex flex-row gap-4">
             <DialogCustomized
-              trigger={<ButtonOutlined>Zmień nazwę</ButtonOutlined>}
+              trigger={<ButtonCustomized>Zmień nazwę</ButtonCustomized>}
               title="Zmień nazwę użytkownika"
               description="Podaj nową nazwę użytkownika."
               open={isChangeUsernameOpen}
@@ -38,7 +38,7 @@ export function AccountPage() {
               />
             </DialogCustomized>
             <DialogCustomized
-              trigger={<ButtonOutlined>Zmień hasło</ButtonOutlined>}
+              trigger={<ButtonCustomized>Zmień hasło</ButtonCustomized>}
               title="Zmień hasło"
               description="Podaj nowe hasło."
               open={isChangePasswordOpen}
@@ -51,9 +51,9 @@ export function AccountPage() {
           </div>
         ) : null}
         <PersonalDataItem title="Email" value={user?.email ?? ""} />
-        <ButtonOutlined tone="danger" className="w-full max-w-64">
+        <ButtonCustomized variant="danger" className="w-full max-w-64">
           Wyloguj się
-        </ButtonOutlined>
+        </ButtonCustomized>
       </div>
     </div>
   );

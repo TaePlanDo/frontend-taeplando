@@ -1,7 +1,7 @@
 import { type SubmitEvent, useState } from "react";
 import { toast } from "sonner";
 
-import { ButtonOutlined } from "@/components/shared/ButtonOutlined";
+import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
 import { CustomizedInput } from "@/components/shared/CustomizedInput";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { useAuth } from "@/hooks/useAuth";
@@ -54,6 +54,7 @@ export function ChangePasswordForm({ onClose }: ChangePasswordFormProps) {
         value={oldPassword}
         onChange={(event) => setOldPassword(event.target.value)}
         disabled={isChangingPassword}
+        showPasswordButton
       />
       <CustomizedInput
         label="Nowe Hasło"
@@ -62,6 +63,7 @@ export function ChangePasswordForm({ onClose }: ChangePasswordFormProps) {
         value={newPassword}
         onChange={(event) => setNewPassword(event.target.value)}
         disabled={isChangingPassword}
+        showPasswordButton
       />
       <CustomizedInput
         label="Powtórz Hasło"
@@ -70,6 +72,7 @@ export function ChangePasswordForm({ onClose }: ChangePasswordFormProps) {
         value={confirmPassword}
         onChange={(event) => setConfirmPassword(event.target.value)}
         disabled={isChangingPassword}
+        showPasswordButton
       />
       {validationError ? (
         <InputErrorMessage message={validationError} className="mx-2" />
@@ -77,15 +80,14 @@ export function ChangePasswordForm({ onClose }: ChangePasswordFormProps) {
       {changePasswordError ? (
         <InputErrorMessage message={changePasswordError} className="mx-2" />
       ) : null}
-      <ButtonOutlined
+      <ButtonCustomized
         type="submit"
-        tone="default"
-        size="lg"
+        variant="outline"
         className="w-2/3 mx-auto mt-8"
         disabled={isChangingPassword}
       >
         Zmień hasło
-      </ButtonOutlined>
+      </ButtonCustomized>
     </form>
   );
 }
