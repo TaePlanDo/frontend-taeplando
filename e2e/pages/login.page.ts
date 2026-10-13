@@ -11,7 +11,7 @@ export class LoginPage {
   constructor(page: Page) {
     this.page = page;
     this.emailInput = page.getByLabel("Email");
-    this.passwordInput = page.getByLabel("Hasło");
+    this.passwordInput = page.getByLabel("Hasło", { exact: true });
     this.submitButton = page.getByRole("button", { name: "Zaloguj się" });
     this.errorAlert = page.getByRole("alert");
   }
