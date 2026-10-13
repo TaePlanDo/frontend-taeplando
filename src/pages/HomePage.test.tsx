@@ -1,27 +1,20 @@
 import { render, screen } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { HomePage } from "@/pages/HomePage";
 
-vi.mock("@/lib/api/health", () => ({
-  fetchHealth: vi.fn().mockResolvedValue({ status: "ok" }),
-}));
-
-function renderPage() {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  return render(
-    <QueryClientProvider client={client}>
-      <HomePage />
-    </QueryClientProvider>,
-  );
-}
-
 describe("HomePage", () => {
-  it("renders heading", () => {
-    renderPage();
-    expect(screen.getByRole("heading", { name: "Frontend" })).toBeTruthy();
+  it("renders the hero heading", () => {
+    render(<HomePage />);
+
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading.textContent).toContain("Zaplanuj sztuki walki");
+    expect(heading.textContent).toContain("TaePlanDo");
+  });
+
+  it("renders the call-to-action button", () => {
+    render(<HomePage />);
+
+    expect(screen.getByRole("button", { name: "Generuj plan" })).toBeTruthy();
   });
 });
