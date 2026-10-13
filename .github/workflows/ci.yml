@@ -30,3 +30,44 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout frontend
+        uses: actions/checkout@v4
+
+      - name: Checkout backend
+        uses: actions/checkout@v4
+        with:
+          repository: TaePlanDo/backend-taeplando
+          path: backend-taeplando
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-path: backend-taeplando/uv.lock
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install backend dependencies
+        working-directory: backend-taeplando
+        run: uv sync
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run e2e tests
+        run: npm run test:e2e -- --backend-dir=${{ github.workspace }}/backend-taeplando

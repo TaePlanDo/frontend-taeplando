@@ -6,6 +6,7 @@ import {
   loginRequest,
   meKey,
   refreshRequest,
+  registerRequest,
   updateMeRequest,
 } from "@/lib/api/auth";
 import { setOnAuthLost } from "@/lib/api/client";
@@ -20,6 +21,20 @@ function loginErrorMessage(error: unknown): string {
     return "Nieprawidłowy email lub hasło";
   }
   return "Nie udało się zalogować";
+}
+
+function registerErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    if (error.status === 409) {
+      return "Użytkownik o podanym emailu już istnieje";
+    }
+
+    if (error.status === 422) {
+      return "Sprawdź adres email i wymagania hasła: minimum 8 znaków, litera, cyfra, znak specjalny i maksymalnie 72 bajty.";
+    }
+  }
+
+  return "Nie udało się zarejestrować. Spróbuj ponownie.";
 }
 
 function updateNameErrorMessage(error: unknown): string {
@@ -68,6 +83,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
   });
 
+  const registerMutation = useMutation({
+    mutationFn: async (credentials: LoginCredentials) => {
+      const tokens = await registerRequest(credentials);
+      setAccessToken(tokens.access_token);
+      return fetchMe();
+    },
+    onSuccess: (user) => {
+      queryClient.setQueryData(meKey, user);
+    },
+    onError: () => {
+      setAccessToken(null);
+      queryClient.setQueryData(meKey, null);
+    },
+  });
+
   const updateNameMutation = useMutation({
     mutationFn: (fullName: string) => updateMeRequest(fullName),
     onSuccess: (user) => {
@@ -87,6 +117,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await loginMutation.mutateAsync(credentials);
     },
     [loginMutation],
+  );
+
+  const register = useCallback(
+    async (credentials: LoginCredentials) => {
+      await registerMutation.mutateAsync(credentials);
+    },
+    [registerMutation],
   );
 
   const updateName = useCallback(
@@ -111,7 +148,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loginError: loginMutation.isError
         ? loginErrorMessage(loginMutation.error)
         : null,
+      registerError: registerMutation.isError
+        ? registerErrorMessage(registerMutation.error)
+        : null,
+      isRegistering: registerMutation.isPending,
       login,
+      register,
       updateName,
       isUpdatingName: updateNameMutation.isPending,
       updateNameError: updateNameMutation.isError
@@ -124,7 +166,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loginMutation.isPending,
       loginMutation.isError,
       loginMutation.error,
+      registerMutation.isError,
+      registerMutation.error,
+      registerMutation.isPending,
       login,
+      register,
       updateName,
       updateNameMutation.isPending,
       updateNameMutation.isError,

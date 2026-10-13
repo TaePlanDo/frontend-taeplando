@@ -8,7 +8,10 @@ export type AuthContextValue = {
   isAuthenticated: boolean;
   isLoggingIn: boolean;
   loginError: string | null;
+  registerError: string | null;
+  isRegistering: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
+  register: (credentials: LoginCredentials) => Promise<void>;
   updateName: (fullName: string) => Promise<void>;
   isUpdatingName: boolean;
   updateNameError: string | null;

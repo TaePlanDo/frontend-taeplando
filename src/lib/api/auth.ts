@@ -15,6 +15,16 @@ export async function loginRequest(
   });
 }
 
+export async function registerRequest(
+  credentials: LoginCredentials,
+): Promise<TokenResponse> {
+  return apiJson<TokenResponse>(apiUrl("/auth/register"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(credentials),
+  });
+}
+
 export async function refreshRequest(): Promise<TokenResponse> {
   return apiJson<TokenResponse>(apiUrl("/auth/refresh"), {
     method: "POST",

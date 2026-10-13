@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { loginRequest, refreshRequest, updateMeRequest } from "./auth";
+import {
+  loginRequest,
+  refreshRequest,
+  registerRequest,
+  updateMeRequest,
+} from "./auth";
+
+import { ApiError } from "./errors";
 
 describe("auth API", () => {
   afterEach(() => {
@@ -57,6 +64,68 @@ describe("auth API", () => {
         credentials: "include",
       }),
     );
+  });
+
+  it("register sends credentials and returns token", async () => {
+    const tokens = {
+      access_token: "token",
+      token_type: "bearer",
+      expires_in: 900,
+    };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => tokens,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const credentials = {
+      email: "trainer@example.com",
+      password: "Trening123!",
+    };
+    const result = await registerRequest(credentials);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/auth/register",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify(credentials),
+      }),
+    );
+    const requestOptions = fetchMock.mock.calls[0][1] as RequestInit;
+
+    expect(new Headers(requestOptions.headers).get("Content-Type")).toBe(
+      "application/json",
+    );
+
+    expect(result).toEqual(tokens);
+  });
+
+  it("register rejects with ApiError when email is already registered", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 409,
+      json: async () => ({
+        detail: "Email already registered",
+      }),
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const request = registerRequest({
+      email: "trainer@example.com",
+      password: "Trening123!",
+    });
+
+    await expect(request).rejects.toBeInstanceOf(ApiError);
+
+    await expect(request).rejects.toMatchObject({
+      status: 409,
+      message: "Email already registered",
+    });
   });
 
   it("updateMe sends PATCH with the new full_name", async () => {

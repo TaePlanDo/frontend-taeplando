@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 
 import type { AuthContextValue } from "@/auth/authContext";
 
@@ -16,6 +17,9 @@ const authState: AuthContextValue = {
   isLoggingIn: false,
   loginError: null,
   login,
+  register: vi.fn(),
+  registerError: null,
+  isRegistering: false,
   updateName: vi.fn(),
   isUpdatingName: false,
   updateNameError: null,
@@ -53,6 +57,14 @@ function fillAndSubmit(email: string, password: string) {
   fireEvent.click(screen.getByRole("button", { name: "Zaloguj się" }));
 }
 
+function renderLoginPage() {
+  return render(
+    <MemoryRouter>
+      <LoginPage />
+    </MemoryRouter>,
+  );
+}
+
 describe("LoginPage", () => {
   beforeEach(() => {
     navigate.mockReset();
@@ -67,7 +79,7 @@ describe("LoginPage", () => {
 
   it("submits credentials and navigates home", async () => {
     login.mockResolvedValue(undefined);
-    render(<LoginPage />);
+    renderLoginPage();
 
     fillAndSubmit("trainer@example.com", "password123");
 
@@ -82,7 +94,7 @@ describe("LoginPage", () => {
 
   it("shows Polish loginError from auth context", () => {
     authState.loginError = "Nieprawidłowy email lub hasło";
-    render(<LoginPage />);
+    renderLoginPage();
 
     expect(screen.getByRole("alert").textContent).toBe(
       "Nieprawidłowy email lub hasło",
@@ -91,7 +103,7 @@ describe("LoginPage", () => {
 
   it("shows OAuth error from query when auth loginError is null", () => {
     searchParams.set("error", "oauth");
-    render(<LoginPage />);
+    renderLoginPage();
 
     expect(screen.getByRole("alert").textContent).toBe(
       "Logowanie przez Google nie powiodło się",
@@ -101,7 +113,7 @@ describe("LoginPage", () => {
   it("prefers auth loginError over OAuth query error", () => {
     searchParams.set("error", "oauth");
     authState.loginError = "Nieprawidłowy email lub hasło";
-    render(<LoginPage />);
+    renderLoginPage();
 
     expect(screen.getByRole("alert").textContent).toBe(
       "Nieprawidłowy email lub hasło",
@@ -110,7 +122,7 @@ describe("LoginPage", () => {
 
   it("does not navigate when login rejects", async () => {
     login.mockRejectedValue(new Error("fail"));
-    render(<LoginPage />);
+    renderLoginPage();
 
     fillAndSubmit("trainer@example.com", "password123");
 
@@ -122,7 +134,7 @@ describe("LoginPage", () => {
 
   it("disables buttons while logging in", () => {
     authState.isLoggingIn = true;
-    render(<LoginPage />);
+    renderLoginPage();
 
     expect(screen.getByRole("button", { name: "Zaloguj się" })).toBeDisabled();
     expect(
@@ -131,7 +143,7 @@ describe("LoginPage", () => {
   });
 
   it("starts Google login on button click", () => {
-    render(<LoginPage />);
+    renderLoginPage();
 
     fireEvent.click(screen.getByRole("button", { name: "Dołącz z Google" }));
 

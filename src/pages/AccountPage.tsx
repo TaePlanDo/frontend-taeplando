@@ -14,7 +14,7 @@ export function AccountPage() {
   const isLocal = user?.auth_method === "LOCAL";
 
   return (
-    <div className="flex min-h-dvh bg-[#181818] text-white justify-center items-center">
+    <div className="flex flex-1 items-center justify-center p-6">
       <div className="flex flex-col gap-4 p-6 border-2 border-[#E5E5E5] rounded-lg lg:w-full w-92 max-w-2xl">
         <h1 className="text-2xl font-semibold">Dane użytkownika</h1>
         <Separator className="w-full" />
