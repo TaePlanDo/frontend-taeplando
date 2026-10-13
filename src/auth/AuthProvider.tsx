@@ -1,7 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
 
-import { fetchMe, loginRequest, meKey, refreshRequest } from "@/lib/api/auth";
+import {
+  fetchMe,
+  loginRequest,
+  meKey,
+  refreshRequest,
+  updateMeRequest,
+} from "@/lib/api/auth";
 import { setOnAuthLost } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import type { AuthStatus, LoginCredentials, User } from "@/types/auth";
@@ -14,6 +20,13 @@ function loginErrorMessage(error: unknown): string {
     return "Nieprawidłowy email lub hasło";
   }
   return "Nie udało się zalogować";
+}
+
+function updateNameErrorMessage(error: unknown): string {
+  if (error instanceof ApiError && error.status !== 401 && error.status < 500) {
+    return "Niepoprawna nazwa użytkownika";
+  }
+  return "Spróbuj ponownie poźniej, wystąpił błąd.";
 }
 
 /** Restore access token from refresh cookie, then load the current user. */
@@ -55,6 +68,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
   });
 
+  const updateNameMutation = useMutation({
+    mutationFn: (fullName: string) => updateMeRequest(fullName),
+    onSuccess: (user) => {
+      queryClient.setQueryData(meKey, user);
+    },
+  });
+
   useEffect(() => {
     setOnAuthLost(() => {
       queryClient.setQueryData(meKey, null);
@@ -67,6 +87,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await loginMutation.mutateAsync(credentials);
     },
     [loginMutation],
+  );
+
+  const updateName = useCallback(
+    async (fullName: string) => {
+      await updateNameMutation.mutateAsync(fullName);
+    },
+    [updateNameMutation],
   );
 
   const status: AuthStatus = meQuery.isPending
@@ -85,6 +112,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ? loginErrorMessage(loginMutation.error)
         : null,
       login,
+      updateName,
+      isUpdatingName: updateNameMutation.isPending,
+      updateNameError: updateNameMutation.isError
+        ? updateNameErrorMessage(updateNameMutation.error)
+        : null,
     }),
     [
       meQuery.data,
@@ -93,6 +125,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loginMutation.isError,
       loginMutation.error,
       login,
+      updateName,
+      updateNameMutation.isPending,
+      updateNameMutation.isError,
+      updateNameMutation.error,
     ],
   );
 

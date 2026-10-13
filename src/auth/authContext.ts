@@ -9,6 +9,9 @@ export type AuthContextValue = {
   isLoggingIn: boolean;
   loginError: string | null;
   login: (credentials: LoginCredentials) => Promise<void>;
+  updateName: (fullName: string) => Promise<void>;
+  isUpdatingName: boolean;
+  updateNameError: string | null;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

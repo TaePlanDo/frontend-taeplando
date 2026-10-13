@@ -1,56 +1,34 @@
 import { type SubmitEvent, useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { ButtonOutlined } from "@/components/shared/ButtonOutlined";
 import { CustomizedInput } from "@/components/shared/CustomizedInput";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
-import { fetchMe, meKey, updateMeRequest } from "@/lib/api/auth";
-import { ApiError } from "@/lib/api/errors";
+import { useAuth } from "@/hooks/useAuth";
 
 type ChangeUsernameFormProps = {
   onClose: () => void;
 };
 
-const refreshMeKey = ["auth", "me", "change-username"] as const;
-
-function updateNameErrorMessage(error: unknown): string {
-  if (error instanceof ApiError && error.status !== 401 && error.status < 500) {
-    return "Niepoprawna nazwa użytkownika";
-  }
-  return "Spróbuj ponownie poźniej, wystąpił błąd.";
-}
-
 export function ChangeUsernameForm({ onClose }: ChangeUsernameFormProps) {
-  const queryClient = useQueryClient();
+  const { user, isUpdatingName, updateName, updateNameError } = useAuth();
   const [username, setUsername] = useState("");
 
-  const meQuery = useQuery({
-    queryKey: refreshMeKey,
-    queryFn: fetchMe,
-    staleTime: 0,
-    gcTime: 0,
-    retry: false,
-  });
-
   useEffect(() => {
-    if (meQuery.data) {
-      setUsername(meQuery.data.full_name ?? "");
+    if (user) {
+      setUsername(user.full_name ?? "");
     }
-  }, [meQuery.data]);
+  }, [user]);
 
-  const updateMutation = useMutation({
-    mutationFn: (fullName: string) => updateMeRequest(fullName),
-    onSuccess: (user) => {
-      queryClient.setQueryData(meKey, user);
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
+    try {
+      await updateName(username);
       toast.success("Dane zostały zaktualizowane");
       onClose();
-    },
-  });
-
-  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-    event.preventDefault();
-    updateMutation.mutate(username);
+    } catch {
+      // Error message comes from useAuth().updateNameError
+    }
   }
 
   return (
@@ -60,20 +38,17 @@ export function ChangeUsernameForm({ onClose }: ChangeUsernameFormProps) {
         name="username"
         value={username}
         onChange={(event) => setUsername(event.target.value)}
-        disabled={meQuery.isPending}
+        disabled={isUpdatingName}
       />
-      {updateMutation.isError ? (
-        <InputErrorMessage
-          message={updateNameErrorMessage(updateMutation.error)}
-          className="mx-2"
-        />
+      {updateNameError ? (
+        <InputErrorMessage message={updateNameError} className="mx-2" />
       ) : null}
       <ButtonOutlined
         type="submit"
         tone="default"
         size="lg"
         className="w-2/3 mx-auto mt-8"
-        disabled={meQuery.isPending || updateMutation.isPending}
+        disabled={isUpdatingName}
       >
         Zmień dane
       </ButtonOutlined>
