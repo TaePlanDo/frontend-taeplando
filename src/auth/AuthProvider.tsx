@@ -116,10 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     mutationFn: async (
       passwordChangeCredentials: PasswordChangeCredentials,
     ) => {
-      return await passwordChangeRequest(passwordChangeCredentials);
-    },
-    onSuccess: (user) => {
-      queryClient.setQueryData(meKey, user);
+      await passwordChangeRequest(passwordChangeCredentials);
     },
   });
 

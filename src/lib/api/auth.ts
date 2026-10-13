@@ -48,8 +48,8 @@ export async function updateMeRequest(fullName: string): Promise<User> {
 
 export async function passwordChangeRequest(
   passwordChangeCredentials: PasswordChangeCredentials,
-): Promise<User> {
-  return apiJson<User>(apiUrl("/auth/me/password"), {
+): Promise<void> {
+  await apiJson<void>(apiUrl("/auth/me/password"), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(passwordChangeCredentials),

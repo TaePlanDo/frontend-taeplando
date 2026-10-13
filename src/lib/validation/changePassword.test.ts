@@ -15,6 +15,12 @@ describe("validateChangePassword", () => {
     );
   });
 
+  it("rejects when the new password equals the old password", () => {
+    expect(
+      validateChangePassword("Trening123!", "Trening123!", "Trening123!"),
+    ).toBe("Nowe hasło musi być inne niż obecne");
+  });
+
   it("rejects a new password shorter than 8 characters", () => {
     expect(validateChangePassword("Stare123!", "Ab1!", "Ab1!")).toBe(
       "Hasło musi mieć co najmniej 8 znaków",
