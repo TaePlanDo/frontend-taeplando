@@ -24,10 +24,17 @@ function loginErrorMessage(error: unknown): string {
 }
 
 function registerErrorMessage(error: unknown): string {
-  if (error instanceof ApiError && error.status === 409) {
-    return "Użytkownik o podanym emailu już istnieje";
+  if (error instanceof ApiError) {
+    if (error.status === 409) {
+      return "Użytkownik o podanym emailu już istnieje";
+    }
+
+    if (error.status === 422) {
+      return "Sprawdź adres email i wymagania hasła: minimum 8 znaków, litera, cyfra, znak specjalny i maksymalnie 72 bajty.";
+    }
   }
-  return "Nie udało się zarejestrować";
+
+  return "Nie udało się zarejestrować. Spróbuj ponownie.";
 }
 
 /** Restore access token from refresh cookie, then load the current user. */

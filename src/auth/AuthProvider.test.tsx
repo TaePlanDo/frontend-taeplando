@@ -225,4 +225,48 @@ describe("AuthProvider", () => {
     expect(getAccessToken()).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  it("sets Polish registerError when registration returns 422", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse(401, {
+          detail: "Invalid or expired refresh token",
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse(422, {
+          detail: "Invalid email or password",
+        }),
+      );
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("unauthenticated");
+    });
+
+    await expect(
+      result.current.register({
+        email: "trainer@example.com",
+        password: "Trening123!",
+      }),
+    ).rejects.toThrow();
+
+    await waitFor(() => {
+      expect(result.current.registerError).toBe(
+        "Sprawdź adres email i wymagania hasła: minimum 8 znaków, litera, cyfra, znak specjalny i maksymalnie 72 bajty.",
+      );
+      expect(result.current.status).toBe("unauthenticated");
+      expect(result.current.user).toBeNull();
+      expect(result.current.isRegistering).toBe(false);
+    });
+
+    expect(getAccessToken()).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });

@@ -6,6 +6,7 @@ import { AuthButton } from "@/components/auth/AuthButton";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthGoogleButton } from "@/components/auth/AuthGoogleButton";
+import { validateRegistrationPassword } from "@/lib/validation/registration";
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -15,37 +16,14 @@ export function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  function validatePassword() {
-    if (password.length < 8) {
-      setPasswordError("Hasło musi mieć co najmniej 8 znaków");
-      return false;
-    }
-    if (password !== confirmPassword) {
-      setPasswordError("Hasła nie są zgodne");
-      return false;
-    }
-    if (!/[0-9]/.test(password)) {
-      setPasswordError("Hasło musi zawierać co najmniej jedną cyfrę");
-      return false;
-    }
-    if (!/[a-zA-Z]/.test(password)) {
-      setPasswordError("Hasło musi zawierać co najmniej jedną literę");
-      return false;
-    }
-    if (!/[^a-zA-Z0-9]/.test(password)) {
-      setPasswordError("Hasło musi zawierać co najmniej jeden znak specjalny");
-      return false;
-    }
-    setPasswordError("");
-    return true;
-  }
-
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const isPasswordValid = validatePassword();
+    const error = validateRegistrationPassword(password, confirmPassword);
 
-    if (!isPasswordValid) {
+    setPasswordError(error ?? "");
+
+    if (error !== null) {
       return;
     }
 
@@ -90,9 +68,17 @@ export function RegisterPage() {
                 placeholder="Podaj swoje hasło"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                aria-invalid={Boolean(passwordError)}
+                aria-describedby={
+                  passwordError ? "registration-password-error" : undefined
+                }
               />
               {passwordError && (
-                <p role="alert" className="text-sm text-red-400">
+                <p
+                  id="registration-password-error"
+                  role="alert"
+                  className="text-sm text-red-400"
+                >
                   {passwordError}
                 </p>
               )}
@@ -105,6 +91,10 @@ export function RegisterPage() {
               placeholder="Powtórz swoje hasło"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              aria-invalid={Boolean(passwordError)}
+              aria-describedby={
+                passwordError ? "registration-password-error" : undefined
+              }
             />
             <AuthButton type="submit" disabled={isRegistering}>
               {isRegistering ? "Rejestrowanie..." : "Zarejestruj się"}

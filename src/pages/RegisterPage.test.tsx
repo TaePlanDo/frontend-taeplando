@@ -129,4 +129,26 @@ describe("RegisterPage", () => {
 
     expect(startGoogleLogin).toHaveBeenCalledTimes(1);
   });
+
+  it("does not register when passwords differ", () => {
+    renderRegistration();
+
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "trainer@example.com" },
+    });
+
+    fireEvent.change(screen.getByLabelText("Hasło"), {
+      target: { value: "Trening123!" },
+    });
+
+    fireEvent.change(screen.getByLabelText("Powtórz hasło"), {
+      target: { value: "Inne123!" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Zarejestruj się" }));
+
+    expect(screen.getByRole("alert")).toHaveTextContent("Hasła nie są zgodne");
+    expect(register).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+  });
 });
