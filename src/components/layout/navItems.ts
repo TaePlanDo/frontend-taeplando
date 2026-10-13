@@ -6,7 +6,10 @@ export type NavItem = {
   end?: boolean;
 };
 
-export const NAV_ITEMS: NavItem[] = [{ label: "Start", to: "/", end: true }];
+export const NAV_ITEMS: NavItem[] = [
+  { label: "Start", to: "/", end: true },
+  { label: "Konto", to: "/account" },
+];
 
 export function navLinkClassName({ isActive }: { isActive: boolean }) {
   return cn(

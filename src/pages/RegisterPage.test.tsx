@@ -26,6 +26,9 @@ const authState: AuthContextValue = {
   register,
   registerError: null,
   isRegistering: false,
+  updateName: vi.fn(),
+  isUpdatingName: false,
+  updateNameError: null,
 };
 
 vi.mock("react-router-dom", async () => {

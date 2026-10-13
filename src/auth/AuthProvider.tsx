@@ -6,6 +6,7 @@ import {
   loginRequest,
   refreshRequest,
   registerRequest,
+  updateMeRequest,
 } from "@/lib/api/auth";
 import { setOnAuthLost } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
@@ -35,6 +36,13 @@ function registerErrorMessage(error: unknown): string {
   }
 
   return "Nie udało się zarejestrować. Spróbuj ponownie.";
+}
+
+function updateNameErrorMessage(error: unknown): string {
+  if (error instanceof ApiError && error.status !== 401 && error.status < 500) {
+    return "Niepoprawna nazwa użytkownika";
+  }
+  return "Spróbuj ponownie poźniej, wystąpił błąd.";
 }
 
 /** Restore access token from refresh cookie, then load the current user. */
@@ -91,6 +99,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
   });
 
+  const updateNameMutation = useMutation({
+    mutationFn: (fullName: string) => updateMeRequest(fullName),
+    onSuccess: (user) => {
+      queryClient.setQueryData(meKey, user);
+    },
+  });
+
   useEffect(() => {
     setOnAuthLost(() => {
       queryClient.setQueryData(meKey, null);
@@ -112,6 +127,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [registerMutation],
   );
 
+  const updateName = useCallback(
+    async (fullName: string) => {
+      await updateNameMutation.mutateAsync(fullName);
+    },
+    [updateNameMutation],
+  );
+
   const status: AuthStatus = meQuery.isPending
     ? "loading"
     : meQuery.data
@@ -124,27 +146,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       status,
       isAuthenticated: status === "authenticated",
       isLoggingIn: loginMutation.isPending,
-      isRegistering: registerMutation.isPending,
       loginError: loginMutation.isError
         ? loginErrorMessage(loginMutation.error)
         : null,
       registerError: registerMutation.isError
         ? registerErrorMessage(registerMutation.error)
         : null,
+      isRegistering: registerMutation.isPending,
       login,
       register,
+      updateName,
+      isUpdatingName: updateNameMutation.isPending,
+      updateNameError: updateNameMutation.isError
+        ? updateNameErrorMessage(updateNameMutation.error)
+        : null,
     }),
     [
       meQuery.data,
       status,
       loginMutation.isPending,
-      registerMutation.isPending,
       loginMutation.isError,
       loginMutation.error,
       registerMutation.isError,
       registerMutation.error,
+      registerMutation.isPending,
       login,
       register,
+      updateName,
+      updateNameMutation.isPending,
+      updateNameMutation.isError,
+      updateNameMutation.error,
     ],
   );
 

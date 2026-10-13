@@ -20,6 +20,9 @@ const authState: AuthContextValue = {
   register: vi.fn(),
   registerError: null,
   isRegistering: false,
+  updateName: vi.fn(),
+  isUpdatingName: false,
+  updateNameError: null,
 };
 
 const searchParams = new URLSearchParams();
