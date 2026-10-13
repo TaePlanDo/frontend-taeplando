@@ -3,8 +3,6 @@ import type { LoginCredentials, TokenResponse, User } from "@/types/auth";
 
 import { apiJson } from "./client";
 
-export const meKey = ["auth", "me"] as const;
-
 export async function loginRequest(
   credentials: LoginCredentials,
 ): Promise<TokenResponse> {

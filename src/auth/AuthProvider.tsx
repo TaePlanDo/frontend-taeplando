@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo } from "react";
 import {
   fetchMe,
   loginRequest,
-  meKey,
   refreshRequest,
   registerRequest,
   updateMeRequest,
@@ -15,6 +14,8 @@ import type { AuthStatus, LoginCredentials, User } from "@/types/auth";
 
 import { AuthContext } from "./authContext";
 import { getAccessToken, setAccessToken } from "./tokenRef";
+
+const meKey = ["auth", "me"] as const;
 
 function loginErrorMessage(error: unknown): string {
   if (error instanceof ApiError && error.status === 401) {
