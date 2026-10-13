@@ -33,6 +33,9 @@ const authState: AuthContextValue = {
   updateName,
   isUpdatingName: false,
   updateNameError: null,
+  changePassword: vi.fn(),
+  isChangingPassword: false,
+  changePasswordError: null,
 };
 
 vi.mock("@/hooks/useAuth", () => ({

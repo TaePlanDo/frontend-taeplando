@@ -12,6 +12,11 @@ export type LoginCredentials = {
   password: string;
 };
 
+export type PasswordChangeCredentials = {
+  old_password: string;
+  new_password: string;
+};
+
 export type TokenResponse = {
   access_token: string;
   token_type: string;

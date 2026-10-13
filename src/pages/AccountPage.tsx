@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { ChangeUsernameForm } from "@/components/account/ChangeUsernameForm";
+import { ChangePasswordForm } from "@/components/account/ChangePasswordForm";
 import { PersonalDataItem } from "@/components/account/PersonalDataItem";
 import { ButtonOutlined } from "@/components/shared/ButtonOutlined";
 import { DialogCustomized } from "@/components/shared/DialogCustomized";
@@ -10,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 export function AccountPage() {
   const { user } = useAuth();
   const [isChangeUsernameOpen, setChangeUsernameOpen] = useState(false);
+  const [isChangePasswordOpen, setChangePasswordOpen] = useState(false);
 
   const isLocal = user?.auth_method === "LOCAL";
 
@@ -35,7 +37,17 @@ export function AccountPage() {
                 onClose={() => setChangeUsernameOpen(false)}
               />
             </DialogCustomized>
-            <ButtonOutlined>Zmień hasło</ButtonOutlined>
+            <DialogCustomized
+              trigger={<ButtonOutlined>Zmień hasło</ButtonOutlined>}
+              title="Zmień hasło"
+              description="Podaj nowe hasło."
+              open={isChangePasswordOpen}
+              onOpenChange={setChangePasswordOpen}
+            >
+              <ChangePasswordForm
+                onClose={() => setChangePasswordOpen(false)}
+              />
+            </DialogCustomized>
           </div>
         ) : null}
         <PersonalDataItem title="Email" value={user?.email ?? ""} />
