@@ -68,10 +68,6 @@ export function RegisterPage() {
                 placeholder="Podaj swoje hasło"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                aria-invalid={Boolean(passwordError)}
-                aria-describedby={
-                  passwordError ? "registration-password-error" : undefined
-                }
               />
               {passwordError && (
                 <p
@@ -91,10 +87,6 @@ export function RegisterPage() {
               placeholder="Powtórz swoje hasło"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              aria-invalid={Boolean(passwordError)}
-              aria-describedby={
-                passwordError ? "registration-password-error" : undefined
-              }
             />
             <AuthButton type="submit" disabled={isRegistering}>
               {isRegistering ? "Rejestrowanie..." : "Zarejestruj się"}
