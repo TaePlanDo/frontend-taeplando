@@ -165,6 +165,45 @@ describe("AuthProvider", () => {
     );
   });
 
+  it("clears local auth state when the logout request fails", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse(200, {
+          access_token: "access-token",
+          token_type: "bearer",
+          expires_in: 900,
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse(200, {
+          id: "1",
+          email: "trainer@example.com",
+          full_name: "Trainer",
+          auth_method: "LOCAL",
+        }),
+      )
+      .mockRejectedValueOnce(new Error("Network unavailable"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("authenticated");
+    });
+
+    await expect(result.current.logout()).resolves.toBeUndefined();
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("unauthenticated");
+      expect(result.current.user).toBeNull();
+    });
+
+    expect(getAccessToken()).toBeNull();
+  });
+
   it("authenticates the user after successful registration", async () => {
     const user = {
       id: "1",

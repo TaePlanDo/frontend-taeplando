@@ -101,12 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await logoutRequest();
+    mutationFn: logoutRequest,
+    onSettled: () => {
       setAccessToken(null);
-      return null;
-    },
-    onSuccess: () => {
       queryClient.setQueryData(meKey, null);
     },
   });
@@ -140,7 +137,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const logout = useCallback(async () => {
-    await logoutMutation.mutateAsync();
+    try {
+      await logoutMutation.mutateAsync();
+    } catch {
+      // Local logout must succeed even when the server cannot revoke the refresh session.
+    }
   }, [logoutMutation]);
 
   const updateName = useCallback(
