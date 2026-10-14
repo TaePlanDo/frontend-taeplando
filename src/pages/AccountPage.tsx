@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 
 export function AccountPage() {
-  const { user } = useAuth();
+  const { user, logout, isLoggingOut } = useAuth();
   const [isChangeUsernameOpen, setChangeUsernameOpen] = useState(false);
   const [isChangePasswordOpen, setChangePasswordOpen] = useState(false);
 
@@ -51,7 +51,12 @@ export function AccountPage() {
           </div>
         ) : null}
         <PersonalDataItem title="Email" value={user?.email ?? ""} />
-        <ButtonCustomized variant="danger" className="w-full max-w-64">
+        <ButtonCustomized
+          variant="danger"
+          className="w-full max-w-64"
+          onClick={() => void logout()}
+          disabled={isLoggingOut}
+        >
           Wyloguj się
         </ButtonCustomized>
       </div>

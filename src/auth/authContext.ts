@@ -12,11 +12,13 @@ export type AuthContextValue = {
   status: AuthStatus;
   isAuthenticated: boolean;
   isLoggingIn: boolean;
+  isLoggingOut: boolean;
   loginError: string | null;
   registerError: string | null;
   isRegistering: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (credentials: LoginCredentials) => Promise<void>;
+  logout: () => Promise<void>;
   updateName: (fullName: string) => Promise<void>;
   isUpdatingName: boolean;
   updateNameError: string | null;

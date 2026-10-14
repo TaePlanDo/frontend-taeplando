@@ -1,18 +1,22 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { AuthContextValue } from "@/auth/authContext";
 
 import { AccountPage } from "./AccountPage";
 
+const logout = vi.fn();
+
 const authState: AuthContextValue = {
   user: null,
   status: "authenticated",
   isAuthenticated: true,
   isLoggingIn: false,
+  isLoggingOut: false,
   loginError: null,
   login: vi.fn(),
   register: vi.fn(),
+  logout,
   registerError: null,
   isRegistering: false,
   updateName: vi.fn(),
@@ -29,6 +33,8 @@ vi.mock("@/hooks/useAuth", () => ({
 
 describe("AccountPage", () => {
   beforeEach(() => {
+    logout.mockReset();
+    authState.isLoggingOut = false;
     authState.user = {
       id: "1",
       email: "jankowalski@gmail.com",
@@ -59,5 +65,20 @@ describe("AccountPage", () => {
     expect(screen.getByText("google@example.com")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Zmień nazwę" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Zmień hasło" })).toBeNull();
+  });
+
+  it("calls logout after clicking the logout button", () => {
+    render(<AccountPage />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Wyloguj/ }));
+
+    expect(logout).toHaveBeenCalledOnce();
+  });
+
+  it("disables the logout button while logging out", () => {
+    authState.isLoggingOut = true;
+    render(<AccountPage />);
+
+    expect(screen.getByRole("button", { name: /Wyloguj/ })).toBeDisabled();
   });
 });

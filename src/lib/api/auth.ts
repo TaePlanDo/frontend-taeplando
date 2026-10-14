@@ -28,6 +28,12 @@ export async function registerRequest(
   });
 }
 
+export async function logoutRequest(): Promise<void> {
+  return apiJson<void>(apiUrl("/auth/logout"), {
+    method: "POST",
+  });
+}
+
 export async function refreshRequest(): Promise<TokenResponse> {
   return apiJson<TokenResponse>(apiUrl("/auth/refresh"), {
     method: "POST",
