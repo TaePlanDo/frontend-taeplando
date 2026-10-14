@@ -18,6 +18,8 @@ export function ChangePasswordForm({ onClose }: ChangePasswordFormProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [validationError, setValidationError] = useState("");
 
+  const passwordError = validationError || changePasswordError;
+
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -74,11 +76,8 @@ export function ChangePasswordForm({ onClose }: ChangePasswordFormProps) {
         disabled={isChangingPassword}
         showPasswordButton
       />
-      {validationError ? (
-        <InputErrorMessage message={validationError} className="mx-2" />
-      ) : null}
-      {changePasswordError ? (
-        <InputErrorMessage message={changePasswordError} className="mx-2" />
+      {passwordError ? (
+        <InputErrorMessage message={passwordError} className="mx-2" />
       ) : null}
       <ButtonCustomized
         type="submit"
