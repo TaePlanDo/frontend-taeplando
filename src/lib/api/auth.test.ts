@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   loginRequest,
+  logoutRequest,
   refreshRequest,
   registerRequest,
   updateMeRequest,
@@ -59,6 +60,24 @@ describe("auth API", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/auth/refresh",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+      }),
+    );
+  });
+
+  it("logout sends POST with refresh-cookie credentials", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 204,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await logoutRequest();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/auth/logout",
       expect.objectContaining({
         method: "POST",
         credentials: "include",

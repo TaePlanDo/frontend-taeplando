@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import {
   fetchMe,
   loginRequest,
+  logoutRequest,
   refreshRequest,
   registerRequest,
   updateMeRequest,
@@ -99,6 +100,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
   });
 
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await logoutRequest();
+      setAccessToken(null);
+      return null;
+    },
+    onSuccess: () => {
+      queryClient.setQueryData(meKey, null);
+    },
+  });
+
   const updateNameMutation = useMutation({
     mutationFn: (fullName: string) => updateMeRequest(fullName),
     onSuccess: (user) => {
@@ -127,6 +139,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [registerMutation],
   );
 
+  const logout = useCallback(async () => {
+    await logoutMutation.mutateAsync();
+  }, [logoutMutation]);
+
   const updateName = useCallback(
     async (fullName: string) => {
       await updateNameMutation.mutateAsync(fullName);
@@ -146,6 +162,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       status,
       isAuthenticated: status === "authenticated",
       isLoggingIn: loginMutation.isPending,
+      isLoggingOut: logoutMutation.isPending,
       loginError: loginMutation.isError
         ? loginErrorMessage(loginMutation.error)
         : null,
@@ -155,6 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isRegistering: registerMutation.isPending,
       login,
       register,
+      logout,
       updateName,
       isUpdatingName: updateNameMutation.isPending,
       updateNameError: updateNameMutation.isError
@@ -170,8 +188,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       registerMutation.isError,
       registerMutation.error,
       registerMutation.isPending,
+      logoutMutation.isPending,
       login,
       register,
+      logout,
       updateName,
       updateNameMutation.isPending,
       updateNameMutation.isError,

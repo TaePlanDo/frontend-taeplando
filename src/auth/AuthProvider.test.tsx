@@ -119,6 +119,52 @@ describe("AuthProvider", () => {
     });
   });
 
+  it("logs out by revoking the refresh session and clearing local auth state", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse(200, {
+          access_token: "access-token",
+          token_type: "bearer",
+          expires_in: 900,
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse(200, {
+          id: "1",
+          email: "trainer@example.com",
+          full_name: "Trainer",
+          auth_method: "LOCAL",
+        }),
+      )
+      .mockResolvedValueOnce({ ok: true, status: 204 });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("authenticated");
+    });
+
+    await result.current.logout();
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("unauthenticated");
+      expect(result.current.user).toBeNull();
+    });
+
+    expect(getAccessToken()).toBeNull();
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "/api/auth/logout",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+      }),
+    );
+  });
+
   it("authenticates the user after successful registration", async () => {
     const user = {
       id: "1",
