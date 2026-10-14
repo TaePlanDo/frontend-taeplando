@@ -1,10 +1,11 @@
 import { type FormEvent, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-import { AuthButton } from "@/components/auth/AuthButton";
 import { AuthGoogleButton } from "@/components/auth/AuthGoogleButton";
 import { AuthHeader } from "@/components/auth/AuthHeader";
-import { AuthInput } from "@/components/auth/AuthInput";
+import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
+import { CustomizedInput } from "@/components/shared/CustomizedInput";
+import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -45,7 +46,7 @@ export function LoginPage() {
             className="flex flex-col gap-4"
             onSubmit={(event) => void handleSubmit(event)}
           >
-            <AuthInput
+            <CustomizedInput
               label="Email"
               name="email"
               type="email"
@@ -56,7 +57,7 @@ export function LoginPage() {
               required
             />
 
-            <AuthInput
+            <CustomizedInput
               label="Hasło"
               name="password"
               type="password"
@@ -65,17 +66,19 @@ export function LoginPage() {
               onChange={(event) => setPassword(event.target.value)}
               required
               minLength={8}
+              showPasswordButton
             />
 
-            {loginError ? (
-              <p role="alert" className="text-sm text-red-300">
-                {loginError}
-              </p>
-            ) : null}
+            {loginError ? <InputErrorMessage message={loginError} /> : null}
 
-            <AuthButton type="submit" disabled={isLoggingIn} className="mt-2">
+            <ButtonCustomized
+              type="submit"
+              variant="primary"
+              disabled={isLoggingIn}
+              className="mt-2"
+            >
               Zaloguj się
-            </AuthButton>
+            </ButtonCustomized>
           </form>
 
           <AuthGoogleButton disabled={isLoggingIn} className="mt-3" />

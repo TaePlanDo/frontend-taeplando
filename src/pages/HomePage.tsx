@@ -16,7 +16,7 @@ export function HomePage() {
             własnych kryteriów.
           </p>
 
-          <ButtonCustomized className="lg:mt-8 w-2/3 mt-16">
+          <ButtonCustomized variant="hero" className="lg:mt-8 w-2/3 mt-16">
             Generuj plan
           </ButtonCustomized>
         </div>

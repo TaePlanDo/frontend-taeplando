@@ -1,5 +1,10 @@
 import { apiUrl } from "@/config/env";
-import type { LoginCredentials, TokenResponse, User } from "@/types/auth";
+import type {
+  LoginCredentials,
+  TokenResponse,
+  User,
+  PasswordChangeCredentials,
+} from "@/types/auth";
 
 import { apiJson } from "./client";
 
@@ -44,6 +49,16 @@ export async function updateMeRequest(fullName: string): Promise<User> {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ full_name: fullName }),
+  });
+}
+
+export async function passwordChangeRequest(
+  passwordChangeCredentials: PasswordChangeCredentials,
+): Promise<void> {
+  await apiJson<void>(apiUrl("/auth/me/password"), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(passwordChangeCredentials),
   });
 }
 

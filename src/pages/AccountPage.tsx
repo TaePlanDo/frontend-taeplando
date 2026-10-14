@@ -1,8 +1,9 @@
 import { useState } from "react";
 
 import { ChangeUsernameForm } from "@/components/account/ChangeUsernameForm";
+import { ChangePasswordForm } from "@/components/account/ChangePasswordForm";
 import { PersonalDataItem } from "@/components/account/PersonalDataItem";
-import { ButtonOutlined } from "@/components/shared/ButtonOutlined";
+import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
 import { DialogCustomized } from "@/components/shared/DialogCustomized";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 export function AccountPage() {
   const { user, logout, isLoggingOut } = useAuth();
   const [isChangeUsernameOpen, setChangeUsernameOpen] = useState(false);
+  const [isChangePasswordOpen, setChangePasswordOpen] = useState(false);
 
   const isLocal = user?.auth_method === "LOCAL";
 
@@ -25,7 +27,7 @@ export function AccountPage() {
         {isLocal ? (
           <div className="flex flex-row gap-4">
             <DialogCustomized
-              trigger={<ButtonOutlined>Zmień nazwę</ButtonOutlined>}
+              trigger={<ButtonCustomized>Zmień nazwę</ButtonCustomized>}
               title="Zmień nazwę użytkownika"
               description="Podaj nową nazwę użytkownika."
               open={isChangeUsernameOpen}
@@ -35,18 +37,28 @@ export function AccountPage() {
                 onClose={() => setChangeUsernameOpen(false)}
               />
             </DialogCustomized>
-            <ButtonOutlined>Zmień hasło</ButtonOutlined>
+            <DialogCustomized
+              trigger={<ButtonCustomized>Zmień hasło</ButtonCustomized>}
+              title="Zmień hasło"
+              description="Podaj nowe hasło."
+              open={isChangePasswordOpen}
+              onOpenChange={setChangePasswordOpen}
+            >
+              <ChangePasswordForm
+                onClose={() => setChangePasswordOpen(false)}
+              />
+            </DialogCustomized>
           </div>
         ) : null}
         <PersonalDataItem title="Email" value={user?.email ?? ""} />
-        <ButtonOutlined
-          tone="danger"
+        <ButtonCustomized
+          variant="danger"
           className="w-full max-w-64"
           onClick={() => void logout()}
           disabled={isLoggingOut}
         >
           Wyloguj się
-        </ButtonOutlined>
+        </ButtonCustomized>
       </div>
     </div>
   );
