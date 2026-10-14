@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 
-import { LoadingScreen } from "@/components/ui/loading-screen";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { useAuth } from "@/hooks/useAuth";
 
 /** Private routes — send guests to /login. */
@@ -18,7 +18,7 @@ export function RequireAuth({
   }
 
   if (status === "loading") {
-    return <LoadingScreen />;
+    return <LoadingSpinner className="min-h-dvh bg-[#181818]" />;
   }
 
   if (!isAuthenticated) {
