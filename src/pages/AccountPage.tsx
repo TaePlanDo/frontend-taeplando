@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 
 export function AccountPage() {
-  const { user } = useAuth();
+  const { user, logout, isLoggingOut } = useAuth();
   const [isChangeUsernameOpen, setChangeUsernameOpen] = useState(false);
 
   const isLocal = user?.auth_method === "LOCAL";
@@ -39,7 +39,12 @@ export function AccountPage() {
           </div>
         ) : null}
         <PersonalDataItem title="Email" value={user?.email ?? ""} />
-        <ButtonOutlined tone="danger" className="w-full max-w-64">
+        <ButtonOutlined
+          tone="danger"
+          className="w-full max-w-64"
+          onClick={() => void logout()}
+          disabled={isLoggingOut}
+        >
           Wyloguj się
         </ButtonOutlined>
       </div>
