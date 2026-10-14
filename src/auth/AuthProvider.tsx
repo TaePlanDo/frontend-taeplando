@@ -8,11 +8,17 @@ import {
   refreshRequest,
   registerRequest,
   updateMeRequest,
+  passwordChangeRequest,
 } from "@/lib/api/auth";
 import { setOnAuthLost } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { queryKeys } from "@/lib/queryKeys";
-import type { AuthStatus, LoginCredentials, User } from "@/types/auth";
+import type {
+  AuthStatus,
+  LoginCredentials,
+  PasswordChangeCredentials,
+  User,
+} from "@/types/auth";
 
 import { AuthContext } from "./authContext";
 import { getAccessToken, setAccessToken } from "./tokenRef";
@@ -38,6 +44,13 @@ function registerErrorMessage(error: unknown): string {
   }
 
   return "Nie udało się zarejestrować. Spróbuj ponownie.";
+}
+
+function changePasswordErrorMessage(error: unknown): string {
+  if (error instanceof ApiError && error.status < 500) {
+    return "Niepoprawne hasło";
+  }
+  return "Spróbuj ponownie poźniej, wystąpił błąd.";
 }
 
 function updateNameErrorMessage(error: unknown): string {
@@ -101,6 +114,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
   });
 
+  const changePasswordMutation = useMutation({
+    mutationFn: async (passwordChangeCredentials: PasswordChangeCredentials) =>
+      await passwordChangeRequest(passwordChangeCredentials),
+  });
+
   const logoutMutation = useMutation({
     mutationFn: logoutRequest,
     onSettled: () => {
@@ -135,6 +153,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await registerMutation.mutateAsync(credentials);
     },
     [registerMutation],
+  );
+
+  const changePassword = useCallback(
+    async (passwordChangeCredentials: PasswordChangeCredentials) => {
+      await changePasswordMutation.mutateAsync(passwordChangeCredentials);
+    },
+    [changePasswordMutation],
   );
 
   const logout = useCallback(async () => {
@@ -180,6 +205,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       updateNameError: updateNameMutation.isError
         ? updateNameErrorMessage(updateNameMutation.error)
         : null,
+      changePassword,
+      isChangingPassword: changePasswordMutation.isPending,
+      changePasswordError: changePasswordMutation.isError
+        ? changePasswordErrorMessage(changePasswordMutation.error)
+        : null,
     }),
     [
       meQuery.data,
@@ -198,6 +228,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       updateNameMutation.isPending,
       updateNameMutation.isError,
       updateNameMutation.error,
+      changePassword,
+      changePasswordMutation.isPending,
+      changePasswordMutation.isError,
+      changePasswordMutation.error,
     ],
   );
 

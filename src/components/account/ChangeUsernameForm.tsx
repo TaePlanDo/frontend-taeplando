@@ -1,7 +1,7 @@
 import { type SubmitEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { ButtonOutlined } from "@/components/shared/ButtonOutlined";
+import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
 import { CustomizedInput } from "@/components/shared/CustomizedInput";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { useAuth } from "@/hooks/useAuth";
@@ -43,15 +43,14 @@ export function ChangeUsernameForm({ onClose }: ChangeUsernameFormProps) {
       {updateNameError ? (
         <InputErrorMessage message={updateNameError} className="mx-2" />
       ) : null}
-      <ButtonOutlined
+      <ButtonCustomized
         type="submit"
-        tone="default"
-        size="lg"
+        variant="outline"
         className="w-2/3 mx-auto mt-8"
         disabled={isUpdatingName}
       >
         Zmień dane
-      </ButtonOutlined>
+      </ButtonCustomized>
     </form>
   );
 }

@@ -1,11 +1,13 @@
-import { AuthHeader } from "@/components/auth/AuthHeader";
-import { Logo } from "@/components/ui/logo";
-import { AuthInput } from "@/components/auth/AuthInput";
 import { type SubmitEvent, useState } from "react";
-import { AuthButton } from "@/components/auth/AuthButton";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+
 import { AuthGoogleButton } from "@/components/auth/AuthGoogleButton";
+import { AuthHeader } from "@/components/auth/AuthHeader";
+import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
+import { CustomizedInput } from "@/components/shared/CustomizedInput";
+import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
+import { Logo } from "@/components/ui/logo";
+import { useAuth } from "@/hooks/useAuth";
 import { validateRegistrationPassword } from "@/lib/validation/registration";
 
 export function RegisterPage() {
@@ -48,7 +50,7 @@ export function RegisterPage() {
             className="flex flex-col gap-4"
             onSubmit={(event) => void handleSubmit(event)}
           >
-            <AuthInput
+            <CustomizedInput
               label="Email"
               name="email"
               type="email"
@@ -60,7 +62,7 @@ export function RegisterPage() {
             />
 
             <div className="flex flex-col gap-1">
-              <AuthInput
+              <CustomizedInput
                 label="Hasło"
                 name="password"
                 type="password"
@@ -68,18 +70,11 @@ export function RegisterPage() {
                 placeholder="Podaj swoje hasło"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                showPasswordButton
               />
-              {passwordError && (
-                <p
-                  id="registration-password-error"
-                  role="alert"
-                  className="text-sm text-red-400"
-                >
-                  {passwordError}
-                </p>
-              )}
+              {passwordError && <InputErrorMessage message={passwordError} />}
             </div>
-            <AuthInput
+            <CustomizedInput
               label="Powtórz hasło"
               name="confirmPassword"
               type="password"
@@ -87,15 +82,16 @@ export function RegisterPage() {
               placeholder="Powtórz swoje hasło"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              showPasswordButton
             />
-            <AuthButton type="submit" disabled={isRegistering}>
+            <ButtonCustomized
+              type="submit"
+              variant="primary"
+              disabled={isRegistering}
+            >
               {isRegistering ? "Rejestrowanie..." : "Zarejestruj się"}
-            </AuthButton>
-            {registerError && (
-              <p role="alert" className="text-sm text-red-400">
-                {registerError}
-              </p>
-            )}
+            </ButtonCustomized>
+            {registerError && <InputErrorMessage message={registerError} />}
           </form>
           <AuthGoogleButton disabled={isRegistering} className="mt-3" />
 

@@ -25,6 +25,9 @@ const authState: AuthContextValue = {
   updateName: vi.fn(),
   isUpdatingName: false,
   updateNameError: null,
+  changePassword: vi.fn(),
+  isChangingPassword: false,
+  changePasswordError: null,
 };
 
 const searchParams = new URLSearchParams();
