@@ -42,16 +42,12 @@ export function usePaginatedList<TItem>({
   );
 
   const nextPage = useCallback(() => {
-    if (data?.has_next) {
-      setPage((current) => current + 1);
-    }
-  }, [data?.has_next]);
+    setPage((current) => Math.min(current + 1, totalPages));
+  }, [totalPages]);
 
   const previousPage = useCallback(() => {
-    if (data?.has_previous) {
-      setPage((current) => current - 1);
-    }
-  }, [data?.has_previous]);
+    setPage((current) => Math.max(current - 1, 1));
+  }, []);
 
   return {
     items: data?.items ?? [],
@@ -59,8 +55,6 @@ export function usePaginatedList<TItem>({
     pageSize,
     total: data?.total ?? 0,
     totalPages,
-    hasNext: data?.has_next ?? false,
-    hasPrevious: data?.has_previous ?? false,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     isError: query.isError,
