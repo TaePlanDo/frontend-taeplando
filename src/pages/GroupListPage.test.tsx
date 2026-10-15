@@ -54,6 +54,14 @@ vi.mock("@/hooks/groups/useUpdateGroup", () => ({
   useUpdateGroup: () => ({ updateGroup, isUpdating: false, error: null }),
 }));
 
+vi.mock("@/hooks/groups/useDeleteGroup", () => ({
+  useDeleteGroup: () => ({
+    deleteGroup: vi.fn(),
+    isDeleting: false,
+    error: null,
+  }),
+}));
+
 function input(label: string) {
   return screen.getByLabelText(label) as HTMLInputElement;
 }

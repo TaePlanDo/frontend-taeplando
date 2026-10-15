@@ -43,3 +43,9 @@ export async function updateGroupRequest(
     body: JSON.stringify(payload),
   });
 }
+
+export async function deleteGroupRequest(id: string): Promise<void> {
+  return apiJson<void>(apiUrl(`/training-groups/${id}`), {
+    method: "DELETE",
+  });
+}

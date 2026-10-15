@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   createGroupRequest,
+  deleteGroupRequest,
   getGroupsRequest,
   updateGroupRequest,
 } from "./group";
@@ -76,6 +77,22 @@ describe("group API", () => {
         method: "PUT",
         body: JSON.stringify(payload),
       }),
+    );
+  });
+
+  it("deletes a group with DELETE on its id", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 204,
+      json: async () => undefined,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await deleteGroupRequest("abc");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/training-groups/abc",
+      expect.objectContaining({ method: "DELETE" }),
     );
   });
 

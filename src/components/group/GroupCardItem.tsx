@@ -1,4 +1,6 @@
 import { Clock, Pencil, Trash2, User } from "lucide-react";
+import { toast } from "sonner";
+
 import {
   Card,
   CardAction,
@@ -9,15 +11,30 @@ import {
 } from "@/components/ui/card";
 import { CardItemActionButton } from "@/components/shared/CardItemActionButton";
 import { CardItemBadge } from "@/components/shared/CardItemBadge";
+import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
 import { Separator } from "@/components/ui/separator";
+import { useDeleteGroup } from "@/hooks/groups/useDeleteGroup";
 import { Group } from "@/types/group";
 
 interface GroupCardItemProps {
   group: Group;
   onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export function GroupCardItem({ group, onEdit }: GroupCardItemProps) {
+export function GroupCardItem({ group, onEdit, onDelete }: GroupCardItemProps) {
+  const { deleteGroup } = useDeleteGroup();
+
+  async function handleDelete() {
+    try {
+      await deleteGroup(group.id);
+      toast.success("Grupa została usunięta");
+      onDelete?.();
+    } catch {
+      toast.error("Nie udało się usunąć grupy. Spróbuj ponownie.");
+    }
+  }
+
   return (
     <Card className="gap-3 rounded-xl border-[#2A2433] bg-transparent py-4 text-white shadow-none">
       <CardHeader className="items-start px-6">
@@ -44,12 +61,19 @@ export function GroupCardItem({ group, onEdit }: GroupCardItemProps) {
         >
           Edytuj
         </CardItemActionButton>
-        <CardItemActionButton
-          icon={<Trash2 className="h-4 w-4" />}
-          className="text-[#F27229] hover:bg-[#F27229]/10"
-        >
-          Usuń
-        </CardItemActionButton>
+        <CustomizedAlertDialog
+          trigger={
+            <CardItemActionButton
+              icon={<Trash2 className="h-4 w-4" />}
+              className="text-[#F27229] hover:bg-[#F27229]/10"
+            >
+              Usuń
+            </CardItemActionButton>
+          }
+          title="Usuwanie"
+          message={`Czy na pewno chcesz usunąć "${group.name}"? Nie da się cofnąć tej operacji`}
+          onSubmit={handleDelete}
+        />
       </CardFooter>
     </Card>
   );

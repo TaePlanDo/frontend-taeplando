@@ -33,13 +33,13 @@ export function GroupListPage() {
 
   return (
     <div className="flex flex-1 justify-center">
-      <div className="flex flex-col gap-4 h-full lg:max-w-220 max-w-96">
+      <div className="flex flex-col gap-4 h-full lg:max-w-220 max-w-96 mb-12">
         <div className="flex flex-row gap-4 h-full mt-12">
           <div className="flex flex-col gap-2 w-2/3">
             <h1 className="text-2xl text-[#F27229] font-bold">
               Wszystkie grupy treningowe
             </h1>
-            <p className="text-lg text-white">
+            <p className="text-lg text-white lg:flex hidden">
               Organizuj grupy w jednym miejscu. Dodawaj nowe, aktualizuj
               szczegóły i miej wszystko pod ręką.
             </p>
