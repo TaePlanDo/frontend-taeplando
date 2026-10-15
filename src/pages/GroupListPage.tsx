@@ -10,6 +10,7 @@ import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useGroups } from "@/hooks/groups/useGroups";
+import { formatGroupCount } from "@/lib/format/plural";
 import { PlusIcon } from "lucide-react";
 import type { Group } from "@/types/group";
 
@@ -76,7 +77,7 @@ export function GroupListPage() {
             variant="ghost"
             className="rounded-full border border-[#45355A] bg-transparent text-[#D8D3EA] px-6 py-2"
           >
-            {total} grupy
+            {formatGroupCount(total)}
           </Badge>
         </div>
         <Separator className="bg-[#2A2433] my-4" />

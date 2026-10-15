@@ -14,6 +14,8 @@ import { CardItemBadge } from "@/components/shared/CardItemBadge";
 import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
 import { Separator } from "@/components/ui/separator";
 import { useDeleteGroup } from "@/hooks/groups/useDeleteGroup";
+import { formatGroupActivity } from "@/lib/format/date-to-text";
+import { formatDuration } from "@/lib/format/time";
 import { Group } from "@/types/group";
 
 interface GroupCardItemProps {
@@ -42,13 +44,13 @@ export function GroupCardItem({ group, onEdit, onDelete }: GroupCardItemProps) {
           <h3 className="text-lg font-semibold">{group.name}</h3>
         </CardTitle>
         <CardAction className="text-xs text-white/80">
-          Utworzono 3 dni temu
+          {formatGroupActivity(group.created_at, group.updated_at)}
         </CardAction>
       </CardHeader>
       <Separator className="bg-[#2A2433]" />
       <CardContent className="flex flex-wrap gap-2 px-6">
         <CardItemBadge icon={<Clock className="h-3.5 w-3.5" />}>
-          {group.duration_minutes} min
+          {formatDuration(group.duration_minutes)}
         </CardItemBadge>
         <CardItemBadge icon={<User className="h-3.5 w-3.5" />}>
           {group.min_age}-{group.max_age} lat
