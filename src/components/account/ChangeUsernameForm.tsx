@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
 import { CustomizedInput } from "@/components/shared/CustomizedInput";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth/useAuth";
 
 type ChangeUsernameFormProps = {
   onClose: () => void;

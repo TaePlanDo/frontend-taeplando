@@ -1,12 +1,17 @@
+import { useState } from "react";
+
 import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
-import { PlusIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { GroupCardItem } from "@/components/groups/GroupCardItem";
+import { GroupCardItem } from "@/components/group/GroupCardItem";
+import { GroupDetailsForm } from "@/components/group/GroupDetailsForm";
 import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
+import { DialogCustomized } from "@/components/shared/DialogCustomized";
 import { EmptyListView } from "@/components/shared/EmptyListView";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
-import { useGroups } from "@/hooks/useGroups";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { useGroups } from "@/hooks/groups/useGroups";
+import { PlusIcon } from "lucide-react";
+import type { Group } from "@/types/group";
 
 export function GroupListPage() {
   const {
@@ -17,6 +22,14 @@ export function GroupListPage() {
     isLoading,
     goToPage,
   } = useGroups();
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+
+  function openEdit(group: Group) {
+    setEditingGroup(group);
+    setDialogOpen(true);
+  }
 
   return (
     <div className="flex flex-1 justify-center">
@@ -32,10 +45,29 @@ export function GroupListPage() {
             </p>
           </div>
           <div className="flex flex-col gap-2 w-1/3 items-end justify-end">
-            <ButtonCustomized className="max-w-40 text-sm pt-2 pb-2.5">
-              <PlusIcon className="w-5 h-5 mt-0.5" />
-              Dodaj grupę
-            </ButtonCustomized>
+            <DialogCustomized
+              trigger={
+                <ButtonCustomized
+                  className="max-w-40 text-sm pt-2 pb-2.5"
+                  onClick={() => setEditingGroup(null)}
+                >
+                  <PlusIcon className="w-5 h-5 mt-0.5" />
+                  Dodaj grupę
+                </ButtonCustomized>
+              }
+              title={
+                editingGroup
+                  ? "Edytuj Grupę treningową"
+                  : "Stwórz Grupę treningową"
+              }
+              open={dialogOpen}
+              onOpenChange={setDialogOpen}
+            >
+              <GroupDetailsForm
+                group={editingGroup}
+                onClose={() => setDialogOpen(false)}
+              />
+            </DialogCustomized>
           </div>
         </div>
         <div className="flex flex-row justify-between items-end mt-4">
@@ -59,7 +91,11 @@ export function GroupListPage() {
           <div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {groups.map((group) => (
-                <GroupCardItem key={group.id} group={group} />
+                <GroupCardItem
+                  key={group.id}
+                  group={group}
+                  onEdit={() => openEdit(group)}
+                />
               ))}
             </div>
             <CustomizedPagination

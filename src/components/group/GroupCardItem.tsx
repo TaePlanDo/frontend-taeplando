@@ -14,9 +14,10 @@ import { Group } from "@/types/group";
 
 interface GroupCardItemProps {
   group: Group;
+  onEdit?: () => void;
 }
 
-export function GroupCardItem({ group }: GroupCardItemProps) {
+export function GroupCardItem({ group, onEdit }: GroupCardItemProps) {
   return (
     <Card className="gap-3 rounded-xl border-[#2A2433] bg-transparent py-4 text-white shadow-none">
       <CardHeader className="items-start px-6">
@@ -37,7 +38,10 @@ export function GroupCardItem({ group }: GroupCardItemProps) {
         </CardItemBadge>
       </CardContent>
       <CardFooter className="justify-end gap-2 px-6">
-        <CardItemActionButton icon={<Pencil className="h-4 w-4" />}>
+        <CardItemActionButton
+          icon={<Pencil className="h-4 w-4" />}
+          onClick={onEdit}
+        >
           Edytuj
         </CardItemActionButton>
         <CardItemActionButton

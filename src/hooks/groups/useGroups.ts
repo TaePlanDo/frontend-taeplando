@@ -1,4 +1,4 @@
-import { usePaginatedList } from "@/hooks/usePaginatedList";
+import { usePaginatedList } from "@/hooks/pagination/usePaginatedList";
 import { getGroupsRequest } from "@/lib/api/group";
 import { queryKeys } from "@/lib/queryKeys";
 

@@ -1,12 +1,9 @@
 import { apiUrl } from "@/config/env";
+import { GROUP_LIMITS } from "@/lib/constants/group";
 import type { PaginatedResponse } from "@/types/pagination";
-import type { Group } from "@/types/group";
+import type { Group, GroupWrite } from "@/types/group";
 
 import { apiJson } from "./client";
-
-// TODO: This is temporary, backend always returns all groups in declared range (I need to pass it in request)
-const MIN_AGE = 0;
-const MAX_AGE = 200;
 
 export async function getGroupsRequest(
   page: number,
@@ -15,8 +12,8 @@ export async function getGroupsRequest(
   const params = new URLSearchParams({
     page: String(page),
     page_size: String(pageSize),
-    min_age: String(MIN_AGE),
-    max_age: String(MAX_AGE),
+    min_age: String(GROUP_LIMITS.MIN_AGE),
+    max_age: String(GROUP_LIMITS.MAX_AGE),
   });
 
   return apiJson<PaginatedResponse<Group>>(
@@ -26,4 +23,23 @@ export async function getGroupsRequest(
       headers: { "Content-Type": "application/json" },
     },
   );
+}
+
+export async function createGroupRequest(payload: GroupWrite): Promise<Group> {
+  return apiJson<Group>(apiUrl("/training-groups"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateGroupRequest(
+  id: string,
+  payload: GroupWrite,
+): Promise<Group> {
+  return apiJson<Group>(apiUrl(`/training-groups/${id}`), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
 }

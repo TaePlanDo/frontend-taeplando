@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth/useAuth";
 
 /** /login — already signed in -> go to /. */
 export function RedirectIfAuth({ children }: { children: React.ReactNode }) {

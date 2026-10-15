@@ -7,7 +7,7 @@ import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
 import { CustomizedInput } from "@/components/shared/CustomizedInput";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { Logo } from "@/components/ui/logo";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth/useAuth";
 import { validateRegistrationPassword } from "@/lib/validation/registration";
 
 export function RegisterPage() {
