@@ -22,9 +22,12 @@ export class AccountPage {
     await this.logoutButton.click();
   }
 
-  /** Guest: on login, and protected routes stay blocked. */
+  /** Guest: on login, back/history and protected routes stay blocked. */
   async expectLoggedOut(): Promise<void> {
     await expect(this.page).toHaveURL(/\/login/);
+    await this.page.goBack();
+    await expect(this.page).toHaveURL(/\/login/);
+
     await expect(
       this.page.getByRole("button", { name: "Zaloguj się" }),
     ).toBeVisible();
