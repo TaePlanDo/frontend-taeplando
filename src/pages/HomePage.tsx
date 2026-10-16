@@ -1,6 +1,6 @@
 import { HeroHeading } from "@/components/home/HeroHeading";
 import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
-import { Logo } from "@/components/ui/logo";
+import { Logo } from "@/components/shared/Logo";
 
 export function HomePage() {
   return (

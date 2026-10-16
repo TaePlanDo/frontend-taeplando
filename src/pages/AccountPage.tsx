@@ -6,7 +6,7 @@ import { PersonalDataItem } from "@/components/account/PersonalDataItem";
 import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
 import { DialogCustomized } from "@/components/shared/DialogCustomized";
 import { Separator } from "@/components/ui/separator";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth/useAuth";
 
 export function AccountPage() {
   const { user, logout, isLoggingOut } = useAuth();

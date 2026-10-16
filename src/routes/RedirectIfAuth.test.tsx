@@ -14,7 +14,7 @@ const authState: {
   status: "unauthenticated",
 };
 
-vi.mock("@/hooks/useAuth", () => ({
+vi.mock("@/hooks/auth/useAuth", () => ({
   useAuth: () => authState,
 }));
 

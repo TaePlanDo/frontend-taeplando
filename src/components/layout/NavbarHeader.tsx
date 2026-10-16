@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 
-import { Logo } from "@/components/ui/logo";
+import { Logo } from "@/components/shared/Logo";
 
 export function NavbarHeader() {
   return (

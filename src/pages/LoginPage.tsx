@@ -6,8 +6,8 @@ import { AuthHeader } from "@/components/auth/AuthHeader";
 import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
 import { CustomizedInput } from "@/components/shared/CustomizedInput";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
-import { Logo } from "@/components/ui/logo";
-import { useAuth } from "@/hooks/useAuth";
+import { Logo } from "@/components/shared/Logo";
+import { useAuth } from "@/hooks/auth/useAuth";
 
 export function LoginPage() {
   const navigate = useNavigate();

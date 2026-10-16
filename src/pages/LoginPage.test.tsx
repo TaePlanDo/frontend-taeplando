@@ -44,7 +44,7 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-vi.mock("@/hooks/useAuth", () => ({
+vi.mock("@/hooks/auth/useAuth", () => ({
   useAuth: () => authState,
 }));
 

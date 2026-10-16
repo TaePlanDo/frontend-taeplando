@@ -12,17 +12,18 @@ import {
 } from "@/lib/api/auth";
 import { setOnAuthLost } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
+import { queryKeys } from "@/lib/queryKeys";
 import type {
   AuthStatus,
   LoginCredentials,
-  User,
   PasswordChangeCredentials,
+  User,
 } from "@/types/auth";
 
 import { AuthContext } from "./authContext";
 import { getAccessToken, setAccessToken } from "./tokenRef";
 
-const meKey = ["auth", "me"] as const;
+const meKey = queryKeys.auth.me();
 
 function loginErrorMessage(error: unknown): string {
   if (error instanceof ApiError && error.status === 401) {

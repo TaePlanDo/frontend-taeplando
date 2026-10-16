@@ -27,7 +27,7 @@ const authState: AuthContextValue = {
   changePasswordError: null,
 };
 
-vi.mock("@/hooks/useAuth", () => ({
+vi.mock("@/hooks/auth/useAuth", () => ({
   useAuth: () => authState,
 }));
 
