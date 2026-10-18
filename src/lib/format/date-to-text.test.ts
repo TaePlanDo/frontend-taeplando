@@ -41,7 +41,7 @@ describe("formatRelativeTime", () => {
 
 describe("formatGroupActivity", () => {
   it("uses Utworzono when created equals updated", () => {
-    const created = new Date("2026-10-15T10:00:00Z");
+    const created = "2026-10-15T10:00:00Z";
 
     expect(formatGroupActivity(created, created, now)).toBe(
       "Utworzono 2 godziny temu",
@@ -49,8 +49,8 @@ describe("formatGroupActivity", () => {
   });
 
   it("uses Edytowano when updated differs from created", () => {
-    const created = new Date("2026-10-15T08:00:00Z");
-    const updated = new Date("2026-10-15T11:59:30Z");
+    const created = "2026-10-15T08:00:00Z";
+    const updated = "2026-10-15T11:59:30Z";
 
     expect(formatGroupActivity(created, updated, now)).toBe(
       "Edytowano mniej niż minutę temu",

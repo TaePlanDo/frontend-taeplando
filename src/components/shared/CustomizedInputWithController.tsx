@@ -11,7 +11,7 @@ import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 
 export type ControlledInputProps<TFieldValues extends FieldValues> = Omit<
   ComponentProps<typeof CustomizedInput>,
-  "name" | "value" | "onChange" | "onBlur" | "ref"
+  "name" | "value" | "onChange" | "onValueChange" | "onBlur" | "ref"
 > & {
   name: FieldPath<TFieldValues>;
 };
@@ -45,6 +45,7 @@ export function CustomizedInputWithController<
             name={field.name}
             value={String(field.value ?? "")}
             onChange={field.onChange}
+            onValueChange={field.onChange}
             onBlur={field.onBlur}
           />
           {showError && fieldState.error?.message ? (

@@ -16,8 +16,8 @@ const groups: Group[] = [
     min_age: 7,
     max_age: 14,
     duration_minutes: 90,
-    created_at: new Date("2026-10-11T12:00:00Z"),
-    updated_at: new Date("2026-10-11T12:00:00Z"),
+    created_at: "2026-10-11T12:00:00Z",
+    updated_at: "2026-10-11T12:00:00Z",
   },
   {
     id: "2",
@@ -25,8 +25,8 @@ const groups: Group[] = [
     min_age: 60,
     max_age: 80,
     duration_minutes: 45,
-    created_at: new Date("2026-10-11T12:00:00Z"),
-    updated_at: new Date("2026-10-11T12:00:00Z"),
+    created_at: "2026-10-11T12:00:00Z",
+    updated_at: "2026-10-11T12:00:00Z",
   },
 ];
 

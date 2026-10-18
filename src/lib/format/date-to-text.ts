@@ -46,8 +46,8 @@ export function formatRelativeTime(
 }
 
 export function formatGroupActivity(
-  createdAt: Date | string,
-  updatedAt: Date | string,
+  createdAt: string,
+  updatedAt: string,
   now: Date = new Date(),
 ): string {
   const created = toDate(createdAt);

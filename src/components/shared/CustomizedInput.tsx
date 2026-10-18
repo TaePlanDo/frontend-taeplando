@@ -1,4 +1,4 @@
-import { useRef, useState, type ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 import { CustomizedInputArrow } from "@/components/shared/CustomizedInputArrow";
@@ -9,6 +9,7 @@ type CustomizedInputProps = ComponentProps<typeof Input> & {
   label: string;
   showPasswordButton?: boolean;
   classNameLabel?: string;
+  onValueChange?: (value: string) => void;
 };
 
 export function CustomizedInput({
@@ -19,28 +20,30 @@ export function CustomizedInput({
   type,
   showPasswordButton = false,
   disabled,
+  onValueChange,
   ...props
 }: CustomizedInputProps) {
   const inputId = id ?? props.name;
   const [isVisible, setIsVisible] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const isPasswordField = showPasswordButton && type === "password";
   const isNumberField = type === "number";
   const resolvedType = isPasswordField && isVisible ? "text" : type;
 
   function changeNumber(direction: "up" | "down") {
-    const input = wrapperRef.current?.querySelector("input");
-    if (!input) {
+    if (!onValueChange) {
       return;
     }
 
-    if (direction === "up") {
-      input.stepUp();
-    } else {
-      input.stepDown();
-    }
-    input.dispatchEvent(new Event("input", { bubbles: true }));
+    const step = props.step != null ? Number(props.step) : 1;
+    const parsed = Number(props.value ?? 0);
+    const current = Number.isNaN(parsed) ? 0 : parsed;
+
+    const min = props.min != null ? Number(props.min) : -Infinity;
+    const max = props.max != null ? Number(props.max) : Infinity;
+
+    const next = direction === "up" ? current + step : current - step;
+    onValueChange(String(Math.min(Math.max(next, min), max)));
   }
 
   return (
@@ -48,7 +51,7 @@ export function CustomizedInput({
       <label htmlFor={inputId} className={classNameLabel}>
         {label}
       </label>
-      <div ref={wrapperRef} className="relative">
+      <div className="relative">
         <Input
           id={inputId}
           type={resolvedType}

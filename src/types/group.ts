@@ -4,8 +4,8 @@ export type Group = {
   min_age: number;
   max_age: number;
   duration_minutes: number;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
 };
 
 export type GroupWrite = {

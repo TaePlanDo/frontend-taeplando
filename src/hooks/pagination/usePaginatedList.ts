@@ -41,26 +41,12 @@ export function usePaginatedList<TItem>({
     [totalPages],
   );
 
-  const nextPage = useCallback(() => {
-    setPage((current) => Math.min(current + 1, totalPages));
-  }, [totalPages]);
-
-  const previousPage = useCallback(() => {
-    setPage((current) => Math.max(current - 1, 1));
-  }, []);
-
   return {
     items: data?.items ?? [],
     page,
-    pageSize,
     total: data?.total ?? 0,
     totalPages,
     isLoading: query.isLoading,
-    isFetching: query.isFetching,
-    isError: query.isError,
-    error: query.error,
     goToPage,
-    nextPage,
-    previousPage,
   };
 }
