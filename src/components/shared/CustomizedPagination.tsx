@@ -1,5 +1,12 @@
-import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 
 type PageItem = number | "ellipsis";
@@ -29,11 +36,11 @@ function getPageItems(pagesNumber: number, currentPage: number): PageItem[] {
   return items;
 }
 
-const navButtonClass =
-  "inline-flex size-9 items-center justify-center gap-1 rounded-md text-sm font-medium text-white/80 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:pointer-events-none disabled:opacity-40 lg:size-auto lg:px-3";
+const navLinkClass =
+  "gap-1 text-white/80 hover:bg-transparent hover:text-white lg:size-auto lg:px-3";
 
-const pageButtonClass =
-  "inline-flex size-9 items-center justify-center rounded-full text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
+const pageLinkClass =
+  "rounded-full text-white/80 hover:bg-white/10 hover:text-white";
 
 export function CustomizedPagination({
   pagesNumber,
@@ -44,61 +51,76 @@ export function CustomizedPagination({
   if (pagesNumber <= 1) return null;
 
   const items = getPageItems(pagesNumber, currentPage);
+  const isFirstPage = currentPage <= 1;
+  const isLastPage = currentPage >= pagesNumber;
 
   return (
-    <nav
-      className={cn("flex items-center justify-center gap-2", className)}
-      aria-label="Paginacja"
-    >
-      <button
-        type="button"
-        className={navButtonClass}
-        onClick={() => goToPage(currentPage - 1)}
-        disabled={currentPage <= 1}
-        aria-label="Poprzednia strona"
-      >
-        <ChevronLeft className="size-4 lg:hidden" aria-hidden />
-        <span className="hidden lg:inline">Poprzedni</span>
-      </button>
+    <Pagination className={className} aria-label="Paginacja">
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationLink
+            href="#"
+            aria-label="Poprzednia strona"
+            aria-disabled={isFirstPage}
+            className={cn(
+              navLinkClass,
+              isFirstPage && "pointer-events-none opacity-40",
+            )}
+            onClick={(event) => {
+              event.preventDefault();
+              goToPage(currentPage - 1);
+            }}
+          >
+            <ChevronLeft className="size-4 lg:hidden" aria-hidden />
+            <span className="hidden lg:inline">Poprzedni</span>
+          </PaginationLink>
+        </PaginationItem>
 
-      <div className="flex items-center gap-1">
         {items.map((item, index) =>
           item === "ellipsis" ? (
-            <span
-              key={`ellipsis-${index}`}
-              className="flex size-9 items-center justify-center text-white/60"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </span>
+            <PaginationItem key={`ellipsis-${index}`}>
+              <PaginationEllipsis className="text-white/60" />
+            </PaginationItem>
           ) : (
-            <button
-              key={item}
-              type="button"
-              className={cn(
-                pageButtonClass,
-                item === currentPage
-                  ? "bg-[#EC6212] text-[#181818] hover:text-[#181818]"
-                  : "text-white/80 hover:bg-white/10 hover:text-white",
-              )}
-              onClick={() => goToPage(item)}
-              aria-current={item === currentPage ? "page" : undefined}
-            >
-              {item}
-            </button>
+            <PaginationItem key={item}>
+              <PaginationLink
+                href="#"
+                isActive={item === currentPage}
+                className={cn(
+                  pageLinkClass,
+                  item === currentPage &&
+                    "border-transparent bg-[#EC6212] text-[#181818] hover:bg-[#EC6212] hover:text-[#181818]",
+                )}
+                onClick={(event) => {
+                  event.preventDefault();
+                  goToPage(item);
+                }}
+              >
+                {item}
+              </PaginationLink>
+            </PaginationItem>
           ),
         )}
-      </div>
 
-      <button
-        type="button"
-        className={navButtonClass}
-        onClick={() => goToPage(currentPage + 1)}
-        disabled={currentPage >= pagesNumber}
-        aria-label="Następna strona"
-      >
-        <span className="hidden lg:inline">Następny</span>
-        <ChevronRight className="size-4 lg:hidden" aria-hidden />
-      </button>
-    </nav>
+        <PaginationItem>
+          <PaginationLink
+            href="#"
+            aria-label="Następna strona"
+            aria-disabled={isLastPage}
+            className={cn(
+              navLinkClass,
+              isLastPage && "pointer-events-none opacity-40",
+            )}
+            onClick={(event) => {
+              event.preventDefault();
+              goToPage(currentPage + 1);
+            }}
+          >
+            <span className="hidden lg:inline">Następny</span>
+            <ChevronRight className="size-4 lg:hidden" aria-hidden />
+          </PaginationLink>
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
   );
 }
