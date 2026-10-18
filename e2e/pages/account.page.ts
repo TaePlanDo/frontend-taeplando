@@ -6,6 +6,7 @@ export class AccountPage {
   readonly heading: Locator;
   readonly logoutButton: Locator;
   readonly changePasswordButton: Locator;
+  readonly passwordDialog: Locator;
   readonly oldPasswordInput: Locator;
   readonly newPasswordInput: Locator;
   readonly confirmPasswordInput: Locator;
@@ -18,10 +19,12 @@ export class AccountPage {
     this.changePasswordButton = page.getByRole("button", {
       name: "Zmień hasło",
     });
-    this.oldPasswordInput = page.getByLabel("Stare Hasło");
-    this.newPasswordInput = page.getByLabel("Nowe Hasło");
-    this.confirmPasswordInput = page.getByLabel("Powtórz Hasło");
-    this.passwordError = page.getByRole("alert");
+    this.passwordDialog = page.getByRole("dialog", { name: "Zmień hasło" });
+    this.oldPasswordInput = this.passwordDialog.getByLabel("Stare Hasło");
+    this.newPasswordInput = this.passwordDialog.getByLabel("Nowe Hasło");
+    this.confirmPasswordInput =
+      this.passwordDialog.getByLabel("Powtórz Hasło");
+    this.passwordError = this.passwordDialog.getByRole("alert");
   }
 
   async goto(): Promise<void> {
@@ -43,14 +46,13 @@ export class AccountPage {
     await this.oldPasswordInput.fill(oldPassword);
     await this.newPasswordInput.fill(newPassword);
     await this.confirmPasswordInput.fill(newPassword);
-    await this.page
-      .getByRole("dialog")
+    await this.passwordDialog
       .getByRole("button", { name: "Zmień hasło" })
       .click();
   }
 
   async expectPasswordChanged(): Promise<void> {
-    await expect(this.page.getByRole("dialog")).toHaveCount(0);
+    await expect(this.passwordDialog).toHaveCount(0);
   }
 
   async expectIncorrectOldPassword(): Promise<void> {
