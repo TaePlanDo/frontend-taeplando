@@ -3,7 +3,7 @@ import {
   useQuery,
   type QueryKey,
 } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import type { PaginatedResponse } from "@/types/pagination";
 
@@ -34,6 +34,14 @@ export function usePaginatedList<TItem>({
   const data = query.data;
   const totalPages = data?.total_pages ?? 1;
 
+  const isPastLastPage = data != null && page > totalPages;
+
+  useEffect(() => {
+    if (isPastLastPage) {
+      setPage(totalPages);
+    }
+  }, [isPastLastPage, totalPages]);
+
   const goToPage = useCallback(
     (target: number) => {
       setPage(Math.min(Math.max(target, 1), totalPages));
@@ -46,7 +54,7 @@ export function usePaginatedList<TItem>({
     page,
     total: data?.total ?? 0,
     totalPages,
-    isLoading: query.isLoading,
+    isLoading: query.isLoading || isPastLastPage,
     goToPage,
   };
 }

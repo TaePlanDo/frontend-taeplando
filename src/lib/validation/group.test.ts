@@ -72,9 +72,9 @@ describe("groupDetailsSchema", () => {
   });
 
   it("rejects ages outside of the allowed range", () => {
-    expect(errorsFor({ minAge: "0", maxAge: "121" })).toEqual({
+    expect(errorsFor({ minAge: "0", maxAge: "100" })).toEqual({
       minAge: "Minimalny wiek nie może być mniejszy niż 1",
-      maxAge: "Maksymalny wiek nie może być większy niż 120",
+      maxAge: "Maksymalny wiek nie może być większy niż 99",
     });
   });
 

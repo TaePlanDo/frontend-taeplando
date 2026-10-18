@@ -1,6 +1,4 @@
 import { Clock, Pencil, Trash2, User } from "lucide-react";
-import { toast } from "sonner";
-
 import {
   Card,
   CardAction,
@@ -13,30 +11,17 @@ import { CardItemActionButton } from "@/components/shared/CardItemActionButton";
 import { CardItemBadge } from "@/components/shared/CardItemBadge";
 import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
 import { Separator } from "@/components/ui/separator";
-import { useDeleteGroup } from "@/hooks/groups/useDeleteGroup";
 import { formatGroupActivity } from "@/lib/format/date-to-text";
 import { formatDuration } from "@/lib/format/time";
-import { Group } from "@/types/group";
+import type { Group } from "@/types/group";
 
 interface GroupCardItemProps {
   group: Group;
-  onEdit?: () => void;
-  onDelete?: () => void;
+  onEdit: () => void;
+  onDelete: () => void | Promise<void>;
 }
 
 export function GroupCardItem({ group, onEdit, onDelete }: GroupCardItemProps) {
-  const { deleteGroup } = useDeleteGroup();
-
-  async function handleDelete() {
-    try {
-      await deleteGroup(group.id);
-      toast.success("Grupa została usunięta");
-      onDelete?.();
-    } catch {
-      toast.error("Nie udało się usunąć grupy. Spróbuj ponownie.");
-    }
-  }
-
   return (
     <Card className="gap-3 rounded-xl border-[#2A2433] bg-transparent py-4 text-white shadow-none">
       <CardHeader className="items-start px-6">
@@ -74,7 +59,7 @@ export function GroupCardItem({ group, onEdit, onDelete }: GroupCardItemProps) {
           }
           title="Usuwanie"
           message={`Czy na pewno chcesz usunąć "${group.name}"? Nie da się cofnąć tej operacji`}
-          onSubmit={handleDelete}
+          onSubmit={onDelete}
         />
       </CardFooter>
     </Card>

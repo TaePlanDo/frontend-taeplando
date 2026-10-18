@@ -40,7 +40,7 @@ describe("group API", () => {
     await getGroupsRequest(2, 10);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/training-groups?page=2&page_size=10&min_age=1&max_age=120",
+      "/api/training-groups?page=2&page_size=10",
       expect.objectContaining({ method: "GET" }),
     );
   });

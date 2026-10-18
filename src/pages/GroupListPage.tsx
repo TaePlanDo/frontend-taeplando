@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
 import { GroupCardItem } from "@/components/group/GroupCardItem";
@@ -9,6 +10,7 @@ import { EmptyListView } from "@/components/shared/EmptyListView";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useDeleteGroup } from "@/hooks/groups/useDeleteGroup";
 import { useGroups } from "@/hooks/groups/useGroups";
 import { formatGroupCount } from "@/lib/format/plural";
 import { PlusIcon } from "lucide-react";
@@ -24,12 +26,23 @@ export function GroupListPage() {
     goToPage,
   } = useGroups();
 
+  const { deleteGroup } = useDeleteGroup();
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
 
   function openEdit(group: Group) {
     setEditingGroup(group);
     setDialogOpen(true);
+  }
+
+  async function handleDelete(group: Group) {
+    try {
+      await deleteGroup(group.id);
+      toast.success("Grupa została usunięta");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error));
+    }
   }
 
   return (
@@ -96,6 +109,7 @@ export function GroupListPage() {
                   key={group.id}
                   group={group}
                   onEdit={() => openEdit(group)}
+                  onDelete={() => handleDelete(group)}
                 />
               ))}
             </div>

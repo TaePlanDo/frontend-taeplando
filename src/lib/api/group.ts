@@ -1,5 +1,4 @@
 import { apiUrl } from "@/config/env";
-import { GROUP_LIMITS } from "@/lib/constants/group";
 import type { PaginatedResponse } from "@/types/pagination";
 import type { Group, GroupWrite } from "@/types/group";
 
@@ -12,8 +11,6 @@ export async function getGroupsRequest(
   const params = new URLSearchParams({
     page: String(page),
     page_size: String(pageSize),
-    min_age: String(GROUP_LIMITS.MIN_AGE),
-    max_age: String(GROUP_LIMITS.MAX_AGE),
   });
 
   return apiJson<PaginatedResponse<Group>>(
