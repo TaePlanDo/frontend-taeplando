@@ -5,11 +5,23 @@ export class AccountPage {
   readonly page: Page;
   readonly heading: Locator;
   readonly logoutButton: Locator;
+  readonly changePasswordButton: Locator;
+  readonly oldPasswordInput: Locator;
+  readonly newPasswordInput: Locator;
+  readonly confirmPasswordInput: Locator;
+  readonly passwordError: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.heading = page.getByRole("heading", { name: "Dane użytkownika" });
     this.logoutButton = page.getByRole("button", { name: "Wyloguj się" });
+    this.changePasswordButton = page.getByRole("button", {
+      name: "Zmień hasło",
+    });
+    this.oldPasswordInput = page.getByLabel("Stare Hasło");
+    this.newPasswordInput = page.getByLabel("Nowe Hasło");
+    this.confirmPasswordInput = page.getByLabel("Powtórz Hasło");
+    this.passwordError = page.getByRole("alert");
   }
 
   async goto(): Promise<void> {
@@ -20,6 +32,31 @@ export class AccountPage {
 
   async logout(): Promise<void> {
     await this.logoutButton.click();
+  }
+
+  async changePassword(
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    await this.changePasswordButton.click();
+    await expect(this.oldPasswordInput).toBeVisible();
+    await this.oldPasswordInput.fill(oldPassword);
+    await this.newPasswordInput.fill(newPassword);
+    await this.confirmPasswordInput.fill(newPassword);
+    await this.page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Zmień hasło" })
+      .click();
+  }
+
+  async expectPasswordChanged(): Promise<void> {
+    await expect(this.page.getByRole("dialog")).toHaveCount(0);
+  }
+
+  async expectIncorrectOldPassword(): Promise<void> {
+    await expect(this.passwordError).toBeVisible();
+    await expect(this.passwordError).toContainText("Niepoprawne hasło");
+    await expect(this.oldPasswordInput).toBeVisible();
   }
 
   /** Guest: on login, back/history and protected routes stay blocked. */
