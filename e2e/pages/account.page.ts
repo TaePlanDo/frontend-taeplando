@@ -22,8 +22,7 @@ export class AccountPage {
     this.passwordDialog = page.getByRole("dialog", { name: "Zmień hasło" });
     this.oldPasswordInput = this.passwordDialog.getByLabel("Stare Hasło");
     this.newPasswordInput = this.passwordDialog.getByLabel("Nowe Hasło");
-    this.confirmPasswordInput =
-      this.passwordDialog.getByLabel("Powtórz Hasło");
+    this.confirmPasswordInput = this.passwordDialog.getByLabel("Powtórz Hasło");
     this.passwordError = this.passwordDialog.getByRole("alert");
   }
 
