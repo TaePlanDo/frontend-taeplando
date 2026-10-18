@@ -6,6 +6,7 @@ export class AccountPage {
   readonly heading: Locator;
   readonly logoutButton: Locator;
   readonly changeUsernameButton: Locator;
+  readonly changePasswordButton: Locator;
   readonly usernameInput: Locator;
   readonly changeSubmitButton: Locator;
   readonly usernameError: Locator;
@@ -16,6 +17,9 @@ export class AccountPage {
     this.logoutButton = page.getByRole("button", { name: "Wyloguj się" });
     this.changeUsernameButton = page.getByRole("button", {
       name: "Zmień nazwę",
+    });
+    this.changePasswordButton = page.getByRole("button", {
+      name: "Zmień hasło",
     });
     this.usernameInput = page.getByLabel("Nazwa użytkownika");
     this.changeSubmitButton = page.getByRole("button", { name: "Zmień dane" });
@@ -49,6 +53,7 @@ export class AccountPage {
 
   async expectNotChangedButton(): Promise<void> {
     await expect(this.changeUsernameButton).toHaveCount(0);
+    await expect(this.changePasswordButton).toHaveCount(0);
   }
 
   async expectInvalidUsernameChanged(): Promise<void> {

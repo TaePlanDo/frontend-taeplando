@@ -1,8 +1,8 @@
-import { Page } from "@playwright/test";
-import { apiOrigin } from "../env";
+import type { Page } from "@playwright/test";
+import { frontendOrigin } from "../env";
 
 export async function mockGoogleAccount(page: Page): Promise<void> {
-  await page.route(`${apiOrigin}/auth/refresh`, (route) =>
+  await page.route(`${frontendOrigin}/api/auth/refresh`, (route) =>
     route.fulfill({
       json: {
         access_token: "e2e-mocked-access-token",
@@ -12,7 +12,7 @@ export async function mockGoogleAccount(page: Page): Promise<void> {
     }),
   );
 
-  await page.route(`${apiOrigin}/auth/me`, (route) =>
+  await page.route(`${frontendOrigin}/api/auth/me`, (route) =>
     route.fulfill({
       json: {
         id: "00000000-0000-0000-0000-000000000001",
