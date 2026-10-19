@@ -3,7 +3,7 @@ import { Eye, EyeOff } from "lucide-react";
 
 import { CustomizedInputArrow } from "@/components/shared/CustomizedInputArrow";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
 
 type CustomizedInputProps = ComponentProps<typeof Input> & {
   label: string;

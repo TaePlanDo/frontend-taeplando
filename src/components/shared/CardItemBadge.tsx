@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
 
 type CardItemBadgeProps = ComponentProps<typeof Badge> & {
   icon?: ReactNode;

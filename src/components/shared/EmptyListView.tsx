@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { Frown } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
 
 type EmptyListViewProps = {
   title: string;

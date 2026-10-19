@@ -7,7 +7,7 @@ import {
   PaginationItem,
   PaginationLink,
 } from "@/components/ui/pagination";
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
 
 type PageItem = number | "ellipsis";
 
