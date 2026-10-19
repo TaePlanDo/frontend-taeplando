@@ -1,7 +1,6 @@
 import { createLocalTrainerAndLogin } from "./helpers/createLocalTrainer";
 import { test } from "./playwright";
 import { AccountPage } from "./pages/account.page";
-import { LoginPage } from "./pages/login.page";
 
 test.describe("change password", () => {
   test("changes the password and permits a new login", async ({ page }) => {
@@ -22,7 +21,7 @@ test.describe("change password", () => {
   });
 
   test("shows an error for an incorrect old password", async ({ page }) => {
-    const trainer = await createLocalTrainerAndLogin(page);
+    await createLocalTrainerAndLogin(page);
 
     const account = new AccountPage(page);
     await account.goto();
