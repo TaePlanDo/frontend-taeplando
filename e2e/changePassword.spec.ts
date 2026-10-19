@@ -4,7 +4,9 @@ import { AccountPage } from "./pages/account.page";
 import { LoginPage } from "./pages/login.page";
 
 test.describe("change password", () => {
-  test("replaces the old password and permits a new login", async ({ page }) => {
+  test("replaces the old password and permits a new login", async ({
+    page,
+  }) => {
     const trainer = await createLocalTrainerAndLogin(page);
     const newPassword = "E2eChanged1!";
 
