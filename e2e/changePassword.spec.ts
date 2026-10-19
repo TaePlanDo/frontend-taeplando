@@ -1,6 +1,7 @@
 import { createLocalTrainerAndLogin } from "./helpers/createLocalTrainer";
 import { test } from "./playwright";
 import { AccountPage } from "./pages/account.page";
+import { LoginPage } from "./pages/login.page";
 
 test.describe("change password", () => {
   test("changes the password and permits a new login", async ({ page }) => {
