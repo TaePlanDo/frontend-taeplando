@@ -8,6 +8,7 @@ type EmptyListViewProps = {
   title: string;
   message: string;
   icon?: ReactNode;
+  children?: ReactNode;
   className?: string;
 };
 
@@ -15,6 +16,7 @@ export function EmptyListView({
   title,
   message,
   icon,
+  children,
   className,
 }: EmptyListViewProps) {
   return (
@@ -27,6 +29,7 @@ export function EmptyListView({
       {icon ?? <Frown className="h-12 w-12 text-white/40" />}
       <h3 className="text-white/80">{title}</h3>
       <p className="text-white/60">{message}</p>
+      {children}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { GroupDetailsForm } from "@/components/group/GroupDetailsForm";
 import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
 import { DialogCustomized } from "@/components/shared/DialogCustomized";
 import { EmptyListView } from "@/components/shared/EmptyListView";
+import { ErrorListView } from "@/components/shared/ErrorListView";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -23,6 +24,9 @@ export function GroupListPage() {
     totalPages,
     total,
     isLoading,
+    isFetching,
+    isError,
+    refetch,
     goToPage,
   } = useGroups();
 
@@ -43,6 +47,45 @@ export function GroupListPage() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error));
     }
+  }
+
+  function renderList() {
+    if (isError) {
+      return (
+        <ErrorListView
+          title="Nie udało się pobrać grup"
+          message="Sprawdź połączenie i spróbuj ponownie"
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      );
+    }
+
+    if (isLoading) {
+      return <LoadingSpinner className="h-92" />;
+    }
+
+    if (groups.length === 0) {
+      return (
+        <EmptyListView
+          title="Jeszcze nie masz żadnych grup"
+          message="Kliknij dodaj grupę, aby utworzyć swoją pierwszą grupę"
+        />
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {groups.map((group) => (
+          <GroupCardItem
+            key={group.id}
+            group={group}
+            onEdit={() => openEdit(group)}
+            onDelete={() => handleDelete(group)}
+          />
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -94,31 +137,13 @@ export function GroupListPage() {
           </Badge>
         </div>
         <Separator className="bg-[#2A2433] my-4" />
-        {isLoading ? (
-          <LoadingSpinner className="h-92" />
-        ) : groups.length === 0 ? (
-          <EmptyListView
-            title="Jeszcze nie masz żadnych grup"
-            message="Kliknij dodaj grupę, aby utworzyć swoją pierwszą grupę"
+        {renderList()}
+        {isError ? null : (
+          <CustomizedPagination
+            pagesNumber={totalPages}
+            currentPage={page}
+            goToPage={goToPage}
           />
-        ) : (
-          <div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {groups.map((group) => (
-                <GroupCardItem
-                  key={group.id}
-                  group={group}
-                  onEdit={() => openEdit(group)}
-                  onDelete={() => handleDelete(group)}
-                />
-              ))}
-            </div>
-            <CustomizedPagination
-              pagesNumber={totalPages}
-              currentPage={page}
-              goToPage={goToPage}
-            />
-          </div>
         )}
       </div>
     </div>

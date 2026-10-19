@@ -30,12 +30,17 @@ const groups: Group[] = [
   },
 ];
 
+const refetch = vi.fn();
+
 const groupsState = {
   items: groups,
   page: 1,
   totalPages: 1,
   total: groups.length,
   isLoading: false,
+  isFetching: false,
+  isError: false,
+  refetch,
   goToPage: vi.fn(),
 };
 
@@ -70,8 +75,12 @@ describe("GroupListPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     groupsState.items = groups;
+    groupsState.page = 1;
+    groupsState.totalPages = 1;
     groupsState.total = groups.length;
     groupsState.isLoading = false;
+    groupsState.isFetching = false;
+    groupsState.isError = false;
   });
 
   it("shows the empty view when there are no groups", () => {
@@ -80,6 +89,78 @@ describe("GroupListPage", () => {
     render(<GroupListPage />);
 
     expect(screen.getByText("Jeszcze nie masz żadnych grup")).toBeTruthy();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("shows an error with retry instead of the empty view when loading failed", () => {
+    groupsState.items = [];
+    groupsState.total = 0;
+    groupsState.isError = true;
+    render(<GroupListPage />);
+
+    expect(screen.getByRole("alert")).toBeTruthy();
+    expect(screen.getByText("Nie udało się pobrać grup")).toBeTruthy();
+    expect(screen.queryByText("Jeszcze nie masz żadnych grup")).toBeNull();
+    expect(screen.queryByText("Młodzież")).toBeNull();
+  });
+
+  it("retries loading from the error view and disables the button while retrying", () => {
+    groupsState.items = [];
+    groupsState.isError = true;
+    const { rerender } = render(<GroupListPage />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Spróbuj ponownie" }));
+    expect(refetch).toHaveBeenCalledTimes(1);
+
+    groupsState.isFetching = true;
+    rerender(<GroupListPage />);
+
+    const retrying = screen.getByRole("button", {
+      name: "Ponawianie…",
+    }) as HTMLButtonElement;
+    expect(retrying.disabled).toBe(true);
+  });
+
+  it("does not show the pager or the group count as a valid list on error", () => {
+    groupsState.items = [];
+    groupsState.isError = true;
+    groupsState.totalPages = 3;
+    render(<GroupListPage />);
+
+    expect(screen.queryByRole("navigation", { name: "Paginacja" })).toBeNull();
+  });
+
+  it("does not show the previous page's cards as the selected page while loading", () => {
+    groupsState.page = 2;
+    groupsState.totalPages = 3;
+    groupsState.isLoading = true;
+    groupsState.isFetching = true;
+    render(<GroupListPage />);
+
+    expect(screen.getByRole("status")).toBeTruthy();
+    expect(screen.queryByText("Młodzież")).toBeNull();
+    expect(screen.queryByText("Seniorzy")).toBeNull();
+    expect(screen.queryByText("Jeszcze nie masz żadnych grup")).toBeNull();
+  });
+
+  it("keeps the pager visible with the selected page while the page loads", () => {
+    groupsState.page = 2;
+    groupsState.totalPages = 3;
+    groupsState.isLoading = true;
+    render(<GroupListPage />);
+
+    const current = screen.getByRole("link", { current: "page" });
+    expect(current.textContent).toBe("2");
+  });
+
+  it("shows the cards and the pager once the selected page is loaded", () => {
+    groupsState.page = 2;
+    groupsState.totalPages = 3;
+    render(<GroupListPage />);
+
+    expect(screen.getByText("Młodzież")).toBeTruthy();
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.getByRole("link", { current: "page" }).textContent).toBe("2");
   });
 
   it("opens an empty create dialog after clicking Dodaj grupę", () => {

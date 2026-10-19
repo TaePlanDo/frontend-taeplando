@@ -18,6 +18,35 @@ npx shadcn@latest add button
 They will be installed in src/components/ui
 Dont change their implementation
 
+## Imports (cn and Radix)
+
+Two imports look a bit unusual, but this is how shadcn generates them now, so please keep it like
+this.
+
+### cn
+
+```ts
+import { cn } from "cn";
+```
+
+- shadcn moved the old `cn` helper (`twMerge(clsx(...))`) into its own package
+  [cn](https://github.com/shadcn-ui/cn), see the
+  [changelog](https://ui.shadcn.com/docs/changelog/2026-09-cn)
+- because of that we don't have `src/lib/utils.ts` anymore and we don't use `clsx` or
+  `tailwind-merge` directly
+- don't import from `@/lib/utils`, it doesn't exist
+
+### Radix
+
+```ts
+import { Dialog as DialogPrimitive } from "radix-ui";
+```
+
+- the `new-york` style uses one package `radix-ui` instead of many `@radix-ui/react-...` packages,
+  see the [changelog](https://ui.shadcn.com/docs/changelog/2026-02-radix-ui)
+- so we use only `radix-ui` everywhere (in `src/components/ui` and in our own components) and don't
+  mix it with the scoped packages like `@radix-ui/react-dialog`
+
 ## Scripts
 
 | Command               | Description                   |
