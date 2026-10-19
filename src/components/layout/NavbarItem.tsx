@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
 
 import { type NavItem, navLinkClassName } from "./navItems";
 

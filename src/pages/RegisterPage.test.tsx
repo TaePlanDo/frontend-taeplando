@@ -1,4 +1,4 @@
-﻿import {
+import {
   act,
   fireEvent,
   render,
@@ -44,7 +44,7 @@ vi.mock("react-router-dom", async () => {
   return { ...actual, useNavigate: () => navigate };
 });
 
-vi.mock("@/hooks/useAuth", () => ({
+vi.mock("@/hooks/auth/useAuth", () => ({
   useAuth: () => authState,
 }));
 

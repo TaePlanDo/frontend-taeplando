@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
 
 export type NavItem = {
   label: string;
@@ -8,6 +8,7 @@ export type NavItem = {
 
 export const NAV_ITEMS: NavItem[] = [
   { label: "Start", to: "/", end: true },
+  { label: "Grupy", to: "/groups" },
   { label: "Konto", to: "/account" },
 ];
 
