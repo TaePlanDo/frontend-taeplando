@@ -39,6 +39,8 @@ test.describe("change password", () => {
     const account = new AccountPage(page);
     await account.goto();
     await account.changePassword(trainer.password, "E2eChanged1");
-    await account.expectPasswordError("Niepoprawne hasło");
+    await account.expectPasswordError(
+      "Hasło musi zawierać co najmniej jeden znak specjalny",
+    );
   });
 });
