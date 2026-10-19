@@ -1,4 +1,7 @@
+import { expect } from "@playwright/test";
 import { apiOrigin } from "../env";
+import { LoginPage } from "../pages/login.page";
+import { Page } from "@playwright/test";
 
 export type LocalTrainer = {
   email: string;
@@ -34,6 +37,19 @@ export async function createLocalTrainer(
       `Failed to create e2e trainer (${response.status}): ${await response.text()}`,
     );
   }
+
+  return trainer;
+}
+
+export async function createLocalTrainerAndLogin(
+  page: Page,
+  overrides: Partial<LocalTrainer> = {},
+): Promise<LocalTrainer> {
+  const trainer = await createLocalTrainer(overrides);
+  const login = new LoginPage(page);
+  await login.goto();
+  await login.loginAs(trainer.email, trainer.password);
+  await expect(page).toHaveURL("/");
 
   return trainer;
 }

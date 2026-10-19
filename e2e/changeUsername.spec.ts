@@ -1,19 +1,13 @@
-import { createLocalTrainer } from "./helpers/createLocalTrainer";
+import { createLocalTrainerAndLogin } from "./helpers/createLocalTrainer";
 import { mockGoogleAccount } from "./helpers/mockGoogleAccount";
 import { expect, test } from "./playwright";
 import { AccountPage } from "./pages/account.page";
-import { LoginPage } from "./pages/login.page";
 
 test.describe("change username", () => {
   test("reads account data and updates the username through the modal", async ({
     page,
   }) => {
-    const trainer = await createLocalTrainer();
-
-    const login = new LoginPage(page);
-    await login.goto();
-    await login.loginAs(trainer.email, trainer.password);
-    await expect(page).toHaveURL("/");
+    const trainer = await createLocalTrainerAndLogin(page);
 
     const account = new AccountPage(page);
     await account.goto();
@@ -51,12 +45,7 @@ test.describe("change username", () => {
   });
 
   test("rejects an empty or too-long username", async ({ page }) => {
-    const trainer = await createLocalTrainer();
-
-    const login = new LoginPage(page);
-    await login.goto();
-    await login.loginAs(trainer.email, trainer.password);
-    await expect(page).toHaveURL("/");
+    await createLocalTrainerAndLogin(page);
 
     const account = new AccountPage(page);
     await account.goto();
