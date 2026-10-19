@@ -16,6 +16,7 @@ test.describe("change password", () => {
     await account.logout();
     await account.expectLoggedOut();
 
+    const login = new LoginPage(page);
     await login.goto();
     await login.loginAs(trainer.email, newPassword);
     await login.expectLoggedIn();
