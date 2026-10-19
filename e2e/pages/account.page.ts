@@ -5,8 +5,13 @@ export class AccountPage {
   readonly page: Page;
   readonly heading: Locator;
   readonly logoutButton: Locator;
-  readonly changeUsernameButton: Locator;
   readonly changePasswordButton: Locator;
+  readonly passwordDialog: Locator;
+  readonly oldPasswordInput: Locator;
+  readonly newPasswordInput: Locator;
+  readonly confirmPasswordInput: Locator;
+  readonly passwordError: Locator;
+  readonly changeUsernameButton: Locator;
   readonly usernameInput: Locator;
   readonly changeSubmitButton: Locator;
   readonly usernameError: Locator;
@@ -15,11 +20,16 @@ export class AccountPage {
     this.page = page;
     this.heading = page.getByRole("heading", { name: "Dane użytkownika" });
     this.logoutButton = page.getByRole("button", { name: "Wyloguj się" });
-    this.changeUsernameButton = page.getByRole("button", {
-      name: "Zmień nazwę",
-    });
     this.changePasswordButton = page.getByRole("button", {
       name: "Zmień hasło",
+    });
+    this.passwordDialog = page.getByRole("dialog", { name: "Zmień hasło" });
+    this.oldPasswordInput = this.passwordDialog.getByLabel("Stare Hasło");
+    this.newPasswordInput = this.passwordDialog.getByLabel("Nowe Hasło");
+    this.confirmPasswordInput = this.passwordDialog.getByLabel("Powtórz Hasło");
+    this.passwordError = this.passwordDialog.getByRole("alert");
+    this.changeUsernameButton = page.getByRole("button", {
+      name: "Zmień nazwę",
     });
     this.usernameInput = page.getByLabel("Nazwa użytkownika");
     this.changeSubmitButton = page.getByRole("button", { name: "Zmień dane" });
@@ -34,6 +44,30 @@ export class AccountPage {
 
   async logout(): Promise<void> {
     await this.logoutButton.click();
+  }
+
+  async changePassword(
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    await this.changePasswordButton.click();
+    await expect(this.oldPasswordInput).toBeVisible();
+    await this.oldPasswordInput.fill(oldPassword);
+    await this.newPasswordInput.fill(newPassword);
+    await this.confirmPasswordInput.fill(newPassword);
+    await this.passwordDialog
+      .getByRole("button", { name: "Zmień hasło" })
+      .click();
+  }
+
+  async expectPasswordChanged(): Promise<void> {
+    await expect(this.passwordDialog).toHaveCount(0);
+  }
+
+  async expectPasswordError(message: string): Promise<void> {
+    await expect(this.passwordError).toBeVisible();
+    await expect(this.passwordError).toContainText(message);
+    await expect(this.oldPasswordInput).toBeVisible();
   }
 
   async expectUsernameAndEmailShown(
@@ -75,6 +109,7 @@ export class AccountPage {
     );
   }
 
+  /** Guest: on login, back/history and protected routes stay blocked. */
   async expectLoggedOut(): Promise<void> {
     await expect(this.page).toHaveURL(/\/login/);
     await this.page.goBack();
