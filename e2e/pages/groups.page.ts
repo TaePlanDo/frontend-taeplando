@@ -105,7 +105,9 @@ export class GroupsPage {
   }
 
   async expectValidationError(message: string): Promise<void> {
-    const error = this.groupDialog.getByRole("alert").filter({ hasText: message });
+    const error = this.groupDialog
+      .getByRole("alert")
+      .filter({ hasText: message });
     await expect(error).toContainText(message);
     await expect(this.groupDialog).toBeVisible();
   }
