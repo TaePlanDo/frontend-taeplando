@@ -13,13 +13,25 @@ export async function getGroupsRequest(
     page_size: String(pageSize),
   });
 
-  return apiJson<PaginatedResponse<Group>>(
+  const response = await apiJson<PaginatedResponse<Group> | Group[]>(
     apiUrl(`/training-groups?${params.toString()}`),
     {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     },
   );
+
+  if (Array.isArray(response)) {
+    return {
+      items: response,
+      total: response.length,
+      page,
+      page_size: pageSize,
+      total_pages: 1,
+    };
+  }
+
+  return response;
 }
 
 export async function createGroupRequest(payload: GroupWrite): Promise<Group> {

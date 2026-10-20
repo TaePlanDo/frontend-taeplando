@@ -37,12 +37,31 @@ describe("group API", () => {
     );
     vi.stubGlobal("fetch", fetchMock);
 
-    await getGroupsRequest(2, 10);
+    await expect(getGroupsRequest(2, 10)).resolves.toEqual({
+      items: [],
+      total: 0,
+      page: 2,
+      page_size: 10,
+      total_pages: 1,
+    });
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/training-groups?page=2&page_size=10",
       expect.objectContaining({ method: "GET" }),
     );
+  });
+
+  it("normalizes the legacy array response into one page", async () => {
+    const group = { id: "1", ...payload };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(okResponse(200, [group])));
+
+    await expect(getGroupsRequest(1, 20)).resolves.toEqual({
+      items: [group],
+      total: 1,
+      page: 1,
+      page_size: 20,
+      total_pages: 1,
+    });
   });
 
   it("creates a group with POST", async () => {
