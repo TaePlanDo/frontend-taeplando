@@ -16,7 +16,7 @@ test.describe("training groups", () => {
       hours: 1,
       minutes: 30,
     });
-    await groups.expectGroup("Grupa początkująca", 7, 12);
+    await groups.expectGroup("Grupa początkująca", 7, 12, "1 h 30 min");
 
     await groups.editGroup("Grupa początkująca", {
       name: "Grupa zaawansowana",
@@ -25,7 +25,7 @@ test.describe("training groups", () => {
       hours: 2,
       minutes: 0,
     });
-    await groups.expectGroup("Grupa zaawansowana", 13, 18);
+    await groups.expectGroup("Grupa zaawansowana", 13, 18, "2 h");
 
     await groups.deleteGroup("Grupa zaawansowana");
     await groups.expectNoGroups();

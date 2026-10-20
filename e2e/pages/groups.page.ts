@@ -92,10 +92,12 @@ export class GroupsPage {
     name: string,
     minAge: number,
     maxAge: number,
+    duration: string,
   ): Promise<void> {
     const card = this.groupCard(name);
     await expect(card).toBeVisible();
     await expect(card).toContainText(`${minAge}-${maxAge} lat`);
+    await expect(card).toContainText(duration);
   }
 
   async expectNoGroups(): Promise<void> {
