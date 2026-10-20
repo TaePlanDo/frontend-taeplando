@@ -28,11 +28,21 @@ export class GroupsPage {
     });
     this.addGroupButton = page.getByRole("button", { name: "Dodaj grupę" });
     this.groupDialog = page.getByRole("dialog");
-    this.groupNameInput = this.groupDialog.getByLabel("Nazwa Grupy");
-    this.minAgeInput = this.groupDialog.getByLabel("Minimalny");
-    this.maxAgeInput = this.groupDialog.getByLabel("Maksymalny");
-    this.hoursInput = this.groupDialog.getByLabel("Godziny");
-    this.minutesInput = this.groupDialog.getByLabel("Minuty");
+    this.groupNameInput = this.groupDialog.getByRole("textbox", {
+      name: "Nazwa Grupy",
+    });
+    this.minAgeInput = this.groupDialog.getByRole("spinbutton", {
+      name: "Minimalny",
+    });
+    this.maxAgeInput = this.groupDialog.getByRole("spinbutton", {
+      name: "Maksymalny",
+    });
+    this.hoursInput = this.groupDialog.getByRole("spinbutton", {
+      name: "Godziny",
+    });
+    this.minutesInput = this.groupDialog.getByRole("spinbutton", {
+      name: "Minuty",
+    });
     this.emptyListMessage = page.getByText("Jeszcze nie masz żadnych grup");
   }
 
