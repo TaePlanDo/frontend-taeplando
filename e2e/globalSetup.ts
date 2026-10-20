@@ -1,7 +1,7 @@
 import { migrateDatabase, seedSystemData } from "./helpers/backend";
 import { startE2ePostgres } from "./helpers/compose";
 
-async function globalSetup(): Promise<void> {
+function globalSetup(): void {
   startE2ePostgres();
   migrateDatabase();
   seedSystemData();

@@ -5,7 +5,7 @@ import { psql } from "./compose";
  * Re-create users and domain data via API helpers (e.g. createLocalTrainer).
  * Safe only against the taeplando-e2e Compose project.
  */
-export async function resetDb(): Promise<void> {
+export function resetDb(): void {
   psql(`
 DO $$
 DECLARE
