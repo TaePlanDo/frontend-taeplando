@@ -1,6 +1,6 @@
 import { stopE2ePostgres } from "./helpers/compose";
 
-async function globalTeardown(): Promise<void> {
+function globalTeardown(): void {
   stopE2ePostgres(true);
 }
 

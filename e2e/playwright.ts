@@ -18,7 +18,7 @@ export const test = base.extend<AutoFixtures>({
     // Playwright requires object destructuring for the first fixture arg.
     // eslint-disable-next-line no-empty-pattern -- no fixture deps
     async ({}, use) => {
-      await resetDb();
+      resetDb();
       await use();
     },
     { auto: true },

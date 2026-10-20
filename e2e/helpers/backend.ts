@@ -14,3 +14,7 @@ function uv(args: string[]): void {
 export function migrateDatabase(): void {
   uv(["alembic", "upgrade", "head"]);
 }
+
+export function seedSystemData(): void {
+  uv(["seed-system-data"]);
+}
