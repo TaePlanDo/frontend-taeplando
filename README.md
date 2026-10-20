@@ -67,7 +67,7 @@ npm run test:e2e
 What it does:
 
 1. Starts Postgres via the **backend** `docker-compose.yml` under project `taeplando-e2e` (port `5439`, separate volume)
-2. Runs Alembic migrate (no `seed-system-data` — tests create data via API)
+2. Runs Alembic migrate and `seed-system-data` for required system catalogs; tests create their own users and feature data via API
 3. Starts the API on `8001` and Vite on `5174`
 4. Runs Playwright (Chromium)
 5. Tears down the e2e Postgres container and volume
@@ -77,6 +77,9 @@ What it does:
 - Docker Desktop running
 - Backend checkout as a sibling directory: `../backend-taeplando`  
   Or pass a path: `npm run test:e2e -- --backend-dir=D:\path\to\backend-taeplando`
+- The backend checkout must be on current `main` (the groups suite requires the paginated
+  `GET /training-groups` API contract). Keep feature work on its branch and use a separate
+  `main` worktree when needed.
 - `uv` on `PATH` (backend dependency manager)
 - Browsers once: `npx playwright install chromium`
 
@@ -90,10 +93,10 @@ What it does:
 
 ### Test data (API only)
 
-E2E does **not** call backend `seed-system-data`. Create what you need through public APIs
-(e.g. `createLocalTrainer()` → `POST /auth/register`). Later features (groups/plans) will
-need more helpers — and may still require system catalogs (`training_segments`) that today
-only come from seed/migrations, until an API exists for them.
+E2E seeds only immutable system catalogs (such as `training_segments`). It creates
+test-owned users and feature data through public APIs (for example,
+`createLocalTrainer()` → `POST /auth/register`) and clears that test-owned data between
+tests.
 
 ### DB reset from tests
 
