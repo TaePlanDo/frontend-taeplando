@@ -1,8 +1,8 @@
 import { psql } from "./compose";
 
 /**
- * Clear all app tables (keep alembic_version).
- * Re-create needed data via API helpers (e.g. createLocalTrainer), not backend seed.
+ * Clear test-created app data while preserving globally seeded training segments.
+ * Re-create users and domain data via API helpers (e.g. createLocalTrainer).
  * Safe only against the taeplando-e2e Compose project.
  */
 export async function resetDb(): Promise<void> {
@@ -16,7 +16,7 @@ BEGIN
   INTO stmt
   FROM pg_tables
   WHERE schemaname = 'public'
-    AND tablename <> 'alembic_version';
+    AND tablename NOT IN ('alembic_version', 'training_segments');
 
   IF stmt IS NOT NULL THEN
     EXECUTE stmt;
