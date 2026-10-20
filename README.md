@@ -77,6 +77,8 @@ What it does:
 - Docker Desktop running
 - Backend checkout as a sibling directory: `../backend-taeplando`  
   Or pass a path: `npm run test:e2e -- --backend-dir=D:\path\to\backend-taeplando`
+- The backend checkout must be on current `main`: groups use the paginated
+  `GET /training-groups` API contract.
 - `uv` on `PATH` (backend dependency manager)
 - Browsers once: `npx playwright install chromium`
 
