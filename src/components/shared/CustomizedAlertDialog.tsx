@@ -9,7 +9,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
+import { CustomizedButton } from "@/components/shared/CustomizedButton";
 
 type CustomizedAlertDialogProps = {
   trigger: ReactNode;
@@ -56,23 +56,23 @@ export function CustomizedAlertDialog({
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-      <AlertDialogContent className="border-white/10 bg-[#181818] text-white">
+      <AlertDialogContent className="border-foreground/10 bg-background text-foreground">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-2xl">{title}</AlertDialogTitle>
-          <AlertDialogDescription className="text-white/70 text-lg py-4">
+          <AlertDialogDescription className="text-foreground/70 text-lg py-4">
             {message}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <ButtonCustomized
+        <AlertDialogFooter className="flex flex-row justify-center">
+          <CustomizedButton
             type="button"
             variant="outline"
             onClick={handleCancel}
             className="w-32 px-6"
           >
             {cancelText}
-          </ButtonCustomized>
-          <ButtonCustomized
+          </CustomizedButton>
+          <CustomizedButton
             type="button"
             variant="primary"
             onClick={handleSubmit}
@@ -80,7 +80,7 @@ export function CustomizedAlertDialog({
             className="w-32 rounded-4xl px-6"
           >
             {submitText}
-          </ButtonCustomized>
+          </CustomizedButton>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -20,7 +20,7 @@ export function LoadingSpinner({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-4 text-white",
+        "flex flex-col items-center justify-center gap-4 text-foreground",
         className,
       )}
       role="status"
@@ -29,7 +29,7 @@ export function LoadingSpinner({
     >
       <div
         className={cn(
-          "animate-spin rounded-full border-[#FFC7B3]/30 border-t-[#EC6212] [animation-duration:0.5s]",
+          "animate-spin rounded-full border-primary/30 border-t-primary [animation-duration:0.5s]",
           spinnerSizes[size],
         )}
         aria-hidden

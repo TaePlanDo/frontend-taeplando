@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { AuthGoogleButton } from "@/components/auth/AuthGoogleButton";
 import { AuthHeader } from "@/components/auth/AuthHeader";
-import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
+import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInput } from "@/components/shared/CustomizedInput";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { Logo } from "@/components/shared/Logo";
@@ -33,7 +33,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-dvh bg-[#181818] text-white">
+    <div className="flex min-h-dvh bg-background text-foreground">
       <div className="flex flex-1 items-center justify-center p-6">
         <div className="flex w-full max-w-88 flex-col">
           <Logo
@@ -71,21 +71,21 @@ export function LoginPage() {
 
             {loginError ? <InputErrorMessage message={loginError} /> : null}
 
-            <ButtonCustomized
+            <CustomizedButton
               type="submit"
               variant="primary"
               disabled={isLoggingIn}
               className="mt-2"
             >
               Zaloguj się
-            </ButtonCustomized>
+            </CustomizedButton>
           </form>
 
           <AuthGoogleButton disabled={isLoggingIn} className="mt-3" />
 
           <p className="mt-4 w-full text-center text-base leading-snug">
             Nie posiadasz konta?{" "}
-            <Link to="/register" className="font-medium text-[#EC6212]">
+            <Link to="/register" className="font-medium text-primary">
               Zarejestruj się już teraz
             </Link>
           </p>
@@ -96,6 +96,7 @@ export function LoginPage() {
         <Logo
           className="h-auto max-h-[min(420px,70vh)] w-[420px]"
           aria-hidden
+          shadow
         />
       </div>
     </div>

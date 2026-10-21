@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
+import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { GroupCardItem } from "@/components/group/GroupCardItem";
 import { GroupDetailsForm } from "@/components/group/GroupDetailsForm";
 import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
-import { DialogCustomized } from "@/components/shared/DialogCustomized";
+import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
 import { EmptyListView } from "@/components/shared/EmptyListView";
 import { ErrorListView } from "@/components/shared/ErrorListView";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
@@ -93,24 +93,24 @@ export function GroupListPage() {
       <div className="flex flex-col gap-4 h-full lg:max-w-220 max-w-96 mb-12">
         <div className="flex flex-row gap-4 h-full mt-12">
           <div className="flex flex-col gap-2 w-2/3">
-            <h1 className="text-2xl text-[#F27229] font-bold">
+            <h1 className="text-2xl text-primary font-bold">
               Wszystkie grupy treningowe
             </h1>
-            <p className="text-lg text-white lg:flex hidden">
+            <p className="text-lg text-foreground lg:flex hidden">
               Organizuj grupy w jednym miejscu. Dodawaj nowe, aktualizuj
               szczegóły i miej wszystko pod ręką.
             </p>
           </div>
           <div className="flex flex-col gap-2 w-1/3 items-end justify-end">
-            <DialogCustomized
+            <CustomizedDialog
               trigger={
-                <ButtonCustomized
+                <CustomizedButton
                   className="max-w-40 text-sm pt-2 pb-2.5"
                   onClick={() => setEditingGroup(null)}
                 >
                   <PlusIcon className="w-5 h-5 mt-0.5" />
                   Dodaj grupę
-                </ButtonCustomized>
+                </CustomizedButton>
               }
               title={
                 editingGroup
@@ -124,19 +124,19 @@ export function GroupListPage() {
                 group={editingGroup}
                 onClose={() => setDialogOpen(false)}
               />
-            </DialogCustomized>
+            </CustomizedDialog>
           </div>
         </div>
         <div className="flex flex-row justify-between items-end mt-4">
-          <h2 className="text-xl text-white font-semibold">Lista grup</h2>
+          <h2 className="text-xl text-foreground font-semibold">Lista grup</h2>
           <Badge
             variant="ghost"
-            className="rounded-full border border-[#45355A] bg-transparent text-[#D8D3EA] px-6 py-2"
+            className="rounded-full bg-transparent text-secondary px-6 py-2"
           >
             {formatGroupCount(total)}
           </Badge>
         </div>
-        <Separator className="bg-[#2A2433] my-4" />
+        <Separator className="my-4" />
         {renderList()}
         {isError ? null : (
           <CustomizedPagination

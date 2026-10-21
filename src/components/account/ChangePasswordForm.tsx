@@ -1,7 +1,7 @@
 import { type SubmitEvent, useState } from "react";
 import { toast } from "sonner";
 
-import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
+import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInput } from "@/components/shared/CustomizedInput";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { useAuth } from "@/hooks/auth/useAuth";
@@ -79,14 +79,14 @@ export function ChangePasswordForm({ onClose }: ChangePasswordFormProps) {
       {passwordError ? (
         <InputErrorMessage message={passwordError} className="mx-2" />
       ) : null}
-      <ButtonCustomized
+      <CustomizedButton
         type="submit"
         variant="outline"
         className="w-2/3 mx-auto mt-8"
         disabled={isChangingPassword}
       >
         Zmień hasło
-      </ButtonCustomized>
+      </CustomizedButton>
     </form>
   );
 }

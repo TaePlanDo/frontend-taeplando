@@ -15,7 +15,7 @@ export function NavbarMobileNav() {
     <DropdownMenu>
       <DropdownMenuTrigger
         asChild
-        className="inline-flex size-9 items-center justify-center rounded-md text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white lg:hidden"
+        className="inline-flex size-9 items-center justify-center rounded-md text-foreground transition-colors hover:bg-foreground/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground lg:hidden"
         aria-label="Otwórz menu nawigacji"
       >
         <button type="button">
@@ -24,13 +24,13 @@ export function NavbarMobileNav() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-44 border-white/10 bg-[#181818] text-white"
+        className="w-44 border-foreground/10 bg-background text-foreground"
       >
         {NAV_ITEMS.map((item) => (
           <DropdownMenuItem
             key={item.to}
             asChild
-            className="cursor-pointer focus:bg-white/10 focus:text-white"
+            className="cursor-pointer focus:bg-foreground/10 focus:text-foreground"
           >
             <NavLink
               to={item.to}

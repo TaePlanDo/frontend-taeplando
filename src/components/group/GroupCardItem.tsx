@@ -23,21 +23,21 @@ interface GroupCardItemProps {
 
 export function GroupCardItem({ group, onEdit, onDelete }: GroupCardItemProps) {
   return (
-    <Card className="gap-3 rounded-xl border-[#2A2433] bg-transparent py-4 text-white shadow-none">
+    <Card className="gap-3 rounded-xl bg-transparent py-4 text-foreground shadow-none">
       <CardHeader className="items-start px-6">
         <CardTitle>
           <h3 className="text-lg font-semibold">{group.name}</h3>
         </CardTitle>
-        <CardAction className="text-xs text-white/80">
+        <CardAction className="text-xs text-foreground/80">
           {formatGroupActivity(group.created_at, group.updated_at)}
         </CardAction>
       </CardHeader>
-      <Separator className="bg-[#2A2433]" />
+      <Separator />
       <CardContent className="flex flex-wrap gap-2 px-6">
-        <CardItemBadge icon={<Clock className="h-3.5 w-3.5" />}>
+        <CardItemBadge icon={<Clock className="h-5 w-5" />}>
           {formatDuration(group.duration_minutes)}
         </CardItemBadge>
-        <CardItemBadge icon={<User className="h-3.5 w-3.5" />}>
+        <CardItemBadge icon={<User className="h-5 w-5" />}>
           {group.min_age}-{group.max_age} lat
         </CardItemBadge>
       </CardContent>
@@ -52,7 +52,7 @@ export function GroupCardItem({ group, onEdit, onDelete }: GroupCardItemProps) {
           trigger={
             <CardItemActionButton
               icon={<Trash2 className="h-4 w-4" />}
-              className="text-[#F27229] hover:bg-[#F27229]/10"
+              className="text-primary hover:bg-primary/10"
             >
               Usuń
             </CardItemActionButton>

@@ -17,12 +17,12 @@ export function CardItemBadge({
     <Badge
       variant="ghost"
       className={cn(
-        "gap-1.5 rounded-full border border-[#45355A] bg-transparent px-3 py-1 text-[#D8D3EA]",
+        "gap-1.5 rounded-full bg-transparent px-3 py-1 text-secondary",
         className,
       )}
       {...props}
     >
-      {icon}
+      {icon ? <span className="flex items-center">{icon}</span> : null}
       {children}
     </Badge>
   );

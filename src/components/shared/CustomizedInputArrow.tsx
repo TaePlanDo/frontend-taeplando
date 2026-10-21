@@ -7,7 +7,7 @@ type CustomizedInputArrowProps = {
 };
 
 const arrowButtonClassName =
-  "flex h-4.5 w-6 cursor-pointer items-center justify-center rounded-md text-[#1a1a1a]/60 transition-colors hover:bg-[#EC6212]/15 hover:text-[#EC6212] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-[#1a1a1a]/60";
+  "flex h-4.5 w-6 cursor-pointer items-center justify-center rounded-md text-foreground/60 transition-colors hover:bg-primary/15 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-foreground/60";
 
 export function CustomizedInputArrow({
   label,
