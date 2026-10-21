@@ -14,7 +14,7 @@ export const NAV_ITEMS: NavItem[] = [
 
 export function navLinkClassName({ isActive }: { isActive: boolean }) {
   return cn(
-    "text-white/70 transition-colors hover:text-white",
-    isActive && "text-[#EC6212] hover:text-[#EC6212]",
+    "text-foreground hover:text-secondary",
+    isActive && "border-2 border-primary/70 hover:text-primary",
   );
 }

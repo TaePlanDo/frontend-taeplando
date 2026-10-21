@@ -21,7 +21,7 @@ export function usePaginatedList<TItem>({
   queryKey,
   fetchPage,
   initialPage = 1,
-  pageSize = 20,
+  pageSize = 6,
 }: UsePaginatedListOptions<TItem>) {
   const [page, setPage] = useState(initialPage);
 
@@ -54,12 +54,8 @@ export function usePaginatedList<TItem>({
     page,
     total: data?.total ?? 0,
     totalPages,
-    // True while the requested page has no data of its own: the first load,
-    // a page transition (`data` is the previous page kept as placeholder, so
-    // `items` must not be shown as the selected page) or a page correction.
     isLoading: query.isLoading || query.isPlaceholderData || isPastLastPage,
     isFetching: query.isFetching,
-    // A failed request must not look like an empty list: `items` is `[]` here.
     isError: query.isError,
     refetch: query.refetch,
     goToPage,

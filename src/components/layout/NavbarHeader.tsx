@@ -10,8 +10,10 @@ export function NavbarHeader() {
       className="flex items-center gap-2"
       aria-label="TaePlanDo - strona główna"
     >
-      <Logo className="h-9 w-auto" aria-hidden />
-      <span className="text-lg font-semibold text-white">TaePlanDo</span>
+      <Logo className="h-12 w-auto" aria-hidden />
+      <span className="text-2xl font-semibold text-foreground">
+        TaePlan<span className="text-primary">Do</span>
+      </span>
     </NavLink>
   );
 }

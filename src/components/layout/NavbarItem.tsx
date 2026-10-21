@@ -12,7 +12,7 @@ export function NavbarItem({ item }: { item: NavItem }) {
         end={item.end}
         className={({ isActive }) =>
           cn(
-            "rounded-md px-3 py-2 text-sm font-medium",
+            "rounded-md px-3 py-2 text-md font-medium",
             navLinkClassName({ isActive }),
           )
         }
