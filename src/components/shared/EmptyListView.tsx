@@ -22,13 +22,13 @@ export function EmptyListView({
   return (
     <div
       className={cn(
-        "flex h-92 flex-col items-center justify-center gap-2 rounded-2xl border border-[#45355A] p-4 text-center",
+        "flex h-92 flex-col items-center justify-center gap-2 rounded-2xl border p-4 text-center",
         className,
       )}
     >
-      {icon ?? <Frown className="h-12 w-12 text-white/40" />}
-      <h3 className="text-white/80">{title}</h3>
-      <p className="text-white/60">{message}</p>
+      {icon ?? <Frown className="h-12 w-12 text-foreground/40" />}
+      <h3 className="text-foreground/80">{title}</h3>
+      <p className="text-foreground/60">{message}</p>
       {children}
     </div>
   );

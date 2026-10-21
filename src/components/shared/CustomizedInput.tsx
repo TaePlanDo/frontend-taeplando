@@ -56,7 +56,7 @@ export function CustomizedInput({
           id={inputId}
           type={resolvedType}
           className={cn(
-            "h-11 rounded-xl border-0 bg-[#FFC7B3] px-4 text-base text-[#1a1a1a] shadow-none placeholder:text-[#1a1a1a]/55 focus-visible:outline-[#EC6212]",
+            "h-11 rounded-xl px-4 text-base text-foreground shadow-none placeholder:text-muted-foreground focus-visible:outline-primary selection:text-background",
             isPasswordField && "pr-11",
             isNumberField &&
               "pr-11 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
@@ -71,7 +71,7 @@ export function CustomizedInput({
             onClick={() => setIsVisible((visible) => !visible)}
             disabled={disabled}
             aria-label={isVisible ? "Ukryj hasło" : "Pokaż hasło"}
-            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-[#1a1a1a]/60 transition-colors hover:text-[#1a1a1a] focus-visible:outline-[#EC6212]"
+            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-foreground/60 transition-colors hover:text-foreground focus-visible:outline-primary"
           >
             {isVisible ? (
               <EyeOff className="size-5" aria-hidden />

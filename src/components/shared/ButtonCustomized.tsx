@@ -12,14 +12,13 @@ const variantClasses: Record<
   string
 > = {
   primary:
-    "w-full bg-gradient-to-r from-[#D35400] to-[#F0B429] text-white hover:opacity-90",
-  hero: "pt-6 pb-7 border-2 border-primary w-full rounded-md bg-gradient-to-r from-primary to-primary-foreground text-xl font-semibold text-white shadow-md shadow-primary-foreground/70 transition-all hover:opacity-85",
+    "w-full bg-gradient-to-r from-primary to-primary-foreground text-foreground hover:opacity-90",
+  hero: "pt-6 pb-7 border-2 border-primary w-full rounded-md bg-gradient-to-r from-primary to-primary-foreground text-xl font-semibold text-foreground shadow-sm shadow-primary-foreground/70 transition-all hover:opacity-85",
   outline:
-    "rounded-full border-2 border-[#E4662C] bg-transparent text-white transition-colors hover:border-white/70 hover:text-[#E4662C]",
+    "rounded-full border-2 border-primary bg-transparent text-foreground transition-colors hover:bg-transparent hover:border-foreground/70",
   danger:
-    "rounded-full border-2 border-[#C22108] bg-transparent text-white transition-colors hover:border-white/70 hover:text-[#C22108]",
-  google:
-    "w-full border border-[#6B4A38] bg-[#2A201C] text-white hover:bg-[#3A2A24]",
+    "rounded-full border-2 border-destructive bg-transparent text-foreground transition-colors hover:bg-transparent hover:border-foreground/70",
+  google: "w-full border bg-accent text-accent-foreground hover:bg-accent/90",
 };
 
 export function ButtonCustomized({

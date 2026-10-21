@@ -21,7 +21,7 @@ export function ErrorListView({
       <EmptyListView
         title={title}
         message={message}
-        icon={<TriangleAlert className="h-12 w-12 text-[#F27229]/80" />}
+        icon={<TriangleAlert className="h-12 w-12 text-primary/80" />}
       >
         <ButtonCustomized
           type="button"

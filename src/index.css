@@ -50,6 +50,13 @@
   --radius: 0.5rem;
 }
 
+@utility text-glow-primary {
+  text-shadow:
+    0 0 28px color-mix(in srgb, var(--primary) 35%, transparent),
+    0 0 64px color-mix(in srgb, var(--primary) 25%, transparent),
+    0 0 110px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
 @layer base {
   * {
     @apply border-border;

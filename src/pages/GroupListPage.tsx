@@ -93,10 +93,10 @@ export function GroupListPage() {
       <div className="flex flex-col gap-4 h-full lg:max-w-220 max-w-96 mb-12">
         <div className="flex flex-row gap-4 h-full mt-12">
           <div className="flex flex-col gap-2 w-2/3">
-            <h1 className="text-2xl text-[#F27229] font-bold">
+            <h1 className="text-2xl text-primary font-bold">
               Wszystkie grupy treningowe
             </h1>
-            <p className="text-lg text-white lg:flex hidden">
+            <p className="text-lg text-foreground lg:flex hidden">
               Organizuj grupy w jednym miejscu. Dodawaj nowe, aktualizuj
               szczegóły i miej wszystko pod ręką.
             </p>
@@ -128,15 +128,15 @@ export function GroupListPage() {
           </div>
         </div>
         <div className="flex flex-row justify-between items-end mt-4">
-          <h2 className="text-xl text-white font-semibold">Lista grup</h2>
+          <h2 className="text-xl text-foreground font-semibold">Lista grup</h2>
           <Badge
             variant="ghost"
-            className="rounded-full border border-[#45355A] bg-transparent text-[#D8D3EA] px-6 py-2"
+            className="rounded-full bg-transparent text-secondary px-6 py-2"
           >
             {formatGroupCount(total)}
           </Badge>
         </div>
-        <Separator className="bg-[#2A2433] my-4" />
+        <Separator className="my-4" />
         {renderList()}
         {isError ? null : (
           <CustomizedPagination

@@ -18,7 +18,7 @@ export function RequireAuth({
   }
 
   if (status === "loading") {
-    return <LoadingSpinner className="min-h-dvh bg-[#181818]" />;
+    return <LoadingSpinner className="min-h-dvh bg-background" />;
   }
 
   if (!isAuthenticated) {

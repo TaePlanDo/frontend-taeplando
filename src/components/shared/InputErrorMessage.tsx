@@ -10,7 +10,7 @@ export function InputErrorMessage({
   className,
 }: InputErrorMessageProps) {
   return (
-    <p className={cn("text-sm text-red-500", className)} role="alert">
+    <p className={cn("text-sm text-destructive", className)} role="alert">
       {message}
     </p>
   );

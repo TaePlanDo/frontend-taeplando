@@ -56,10 +56,10 @@ export function CustomizedAlertDialog({
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-      <AlertDialogContent className="border-white/10 bg-[#181818] text-white">
+      <AlertDialogContent className="border-foreground/10 bg-background text-foreground">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-2xl">{title}</AlertDialogTitle>
-          <AlertDialogDescription className="text-white/70 text-lg py-4">
+          <AlertDialogDescription className="text-foreground/70 text-lg py-4">
             {message}
           </AlertDialogDescription>
         </AlertDialogHeader>

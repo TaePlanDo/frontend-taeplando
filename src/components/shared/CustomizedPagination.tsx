@@ -37,10 +37,10 @@ function getPageItems(pagesNumber: number, currentPage: number): PageItem[] {
 }
 
 const navLinkClass =
-  "gap-1 text-white/80 hover:bg-transparent hover:text-white lg:size-auto lg:px-3";
+  "gap-1 text-foreground/80 hover:bg-transparent hover:text-foreground lg:size-auto lg:px-3";
 
 const pageLinkClass =
-  "rounded-full text-white/80 hover:bg-white/10 hover:text-white";
+  "rounded-full text-foreground/80 hover:bg-foreground/10 hover:text-foreground";
 
 export function CustomizedPagination({
   pagesNumber,
@@ -79,7 +79,7 @@ export function CustomizedPagination({
         {items.map((item, index) =>
           item === "ellipsis" ? (
             <PaginationItem key={`ellipsis-${index}`}>
-              <PaginationEllipsis className="text-white/60" />
+              <PaginationEllipsis className="text-foreground/60" />
             </PaginationItem>
           ) : (
             <PaginationItem key={item}>
@@ -89,7 +89,7 @@ export function CustomizedPagination({
                 className={cn(
                   pageLinkClass,
                   item === currentPage &&
-                    "border-transparent bg-[#EC6212] text-[#181818] hover:bg-[#EC6212] hover:text-[#181818]",
+                    "border-transparent bg-primary text-background hover:bg-primary hover:text-background",
                 )}
                 onClick={(event) => {
                   event.preventDefault();

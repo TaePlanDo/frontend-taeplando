@@ -13,8 +13,8 @@ export function PersonalDataItem({
 }: PersonalDataItemProps) {
   return (
     <>
-      <h3 className="text-xl font-semibold text-[#E4662C]">{title}</h3>
-      <p className="text-lg text-[#FFFFFF]">{value}</p>
+      <h3 className="text-xl font-semibold text-primary">{title}</h3>
+      <p className="text-lg text-foreground">{value}</p>
       {separator && <Separator />}
     </>
   );
