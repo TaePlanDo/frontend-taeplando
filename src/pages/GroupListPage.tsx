@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
+import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { GroupCardItem } from "@/components/group/GroupCardItem";
 import { GroupDetailsForm } from "@/components/group/GroupDetailsForm";
 import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
-import { DialogCustomized } from "@/components/shared/DialogCustomized";
+import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
 import { EmptyListView } from "@/components/shared/EmptyListView";
 import { ErrorListView } from "@/components/shared/ErrorListView";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
@@ -102,15 +102,15 @@ export function GroupListPage() {
             </p>
           </div>
           <div className="flex flex-col gap-2 w-1/3 items-end justify-end">
-            <DialogCustomized
+            <CustomizedDialog
               trigger={
-                <ButtonCustomized
+                <CustomizedButton
                   className="max-w-40 text-sm pt-2 pb-2.5"
                   onClick={() => setEditingGroup(null)}
                 >
                   <PlusIcon className="w-5 h-5 mt-0.5" />
                   Dodaj grupę
-                </ButtonCustomized>
+                </CustomizedButton>
               }
               title={
                 editingGroup
@@ -124,7 +124,7 @@ export function GroupListPage() {
                 group={editingGroup}
                 onClose={() => setDialogOpen(false)}
               />
-            </DialogCustomized>
+            </CustomizedDialog>
           </div>
         </div>
         <div className="flex flex-row justify-between items-end mt-4">

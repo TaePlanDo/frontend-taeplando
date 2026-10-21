@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-type DialogCustomizedProps = {
+type CustomizedDialogProps = {
   trigger: ReactNode;
   title: string;
   description?: string;
@@ -18,14 +18,14 @@ type DialogCustomizedProps = {
   children: ReactNode;
 };
 
-export function DialogCustomized({
+export function CustomizedDialog({
   trigger,
   title,
   description,
   open,
   onOpenChange,
   children,
-}: DialogCustomizedProps) {
+}: CustomizedDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>

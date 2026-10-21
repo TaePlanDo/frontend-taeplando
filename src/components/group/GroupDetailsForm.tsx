@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 
-import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
+import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInputWithController } from "@/components/shared/CustomizedInputWithController";
 import { CustomizedPairInputWithControllers } from "@/components/shared/CustomizedPairInputWithControllers";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
@@ -115,14 +115,14 @@ export function GroupDetailsForm({ group, onClose }: GroupDetailsFormProps) {
         <InputErrorMessage message={submitError} className="mx-2" />
       ) : null}
 
-      <ButtonCustomized
+      <CustomizedButton
         type="submit"
         variant="primary"
         className="mx-auto mt-4 w-2/3"
         disabled={isSubmitting}
       >
         {isEdit ? "Zapisz zmiany" : "Utwórz"}
-      </ButtonCustomized>
+      </CustomizedButton>
     </form>
   );
 }

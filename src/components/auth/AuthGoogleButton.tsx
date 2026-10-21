@@ -1,11 +1,11 @@
 import type { ComponentProps } from "react";
 import { FcGoogle } from "react-icons/fc";
 
-import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
+import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { startGoogleLogin } from "@/lib/api/auth";
 
 type AuthGoogleButtonProps = Omit<
-  ComponentProps<typeof ButtonCustomized>,
+  ComponentProps<typeof CustomizedButton>,
   "children" | "onClick" | "type" | "variant"
 > & {
   children?: string;
@@ -17,7 +17,7 @@ export function AuthGoogleButton({
   ...props
 }: AuthGoogleButtonProps) {
   return (
-    <ButtonCustomized
+    <CustomizedButton
       type="button"
       variant="google"
       onClick={startGoogleLogin}
@@ -26,6 +26,6 @@ export function AuthGoogleButton({
     >
       <FcGoogle className="size-5" aria-hidden />
       {children}
-    </ButtonCustomized>
+    </CustomizedButton>
   );
 }

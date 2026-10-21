@@ -3,12 +3,12 @@ import type { ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "cn";
 
-type ButtonCustomizedProps = Omit<ComponentProps<typeof Button>, "variant"> & {
+type CustomizedButtonProps = Omit<ComponentProps<typeof Button>, "variant"> & {
   variant?: "primary" | "hero" | "outline" | "danger" | "google";
 };
 
 const variantClasses: Record<
-  NonNullable<ButtonCustomizedProps["variant"]>,
+  NonNullable<CustomizedButtonProps["variant"]>,
   string
 > = {
   primary:
@@ -21,12 +21,12 @@ const variantClasses: Record<
   google: "w-full border bg-accent text-accent-foreground hover:bg-accent/90",
 };
 
-export function ButtonCustomized({
+export function CustomizedButton({
   className,
   variant = "outline",
   children,
   ...props
-}: ButtonCustomizedProps) {
+}: CustomizedButtonProps) {
   return (
     <Button
       size="lg"

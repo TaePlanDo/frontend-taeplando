@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { AuthGoogleButton } from "@/components/auth/AuthGoogleButton";
 import { AuthHeader } from "@/components/auth/AuthHeader";
-import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
+import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInput } from "@/components/shared/CustomizedInput";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { Logo } from "@/components/shared/Logo";
@@ -84,13 +84,13 @@ export function RegisterPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               showPasswordButton
             />
-            <ButtonCustomized
+            <CustomizedButton
               type="submit"
               variant="primary"
               disabled={isRegistering}
             >
               {isRegistering ? "Rejestrowanie..." : "Zarejestruj się"}
-            </ButtonCustomized>
+            </CustomizedButton>
             {registerError && <InputErrorMessage message={registerError} />}
           </form>
           <AuthGoogleButton disabled={isRegistering} className="mt-3" />

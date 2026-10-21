@@ -1,7 +1,7 @@
 import { HeroDescription } from "@/components/home/HeroDescription";
 import { HeroHeading } from "@/components/home/HeroHeading";
 import { BackgroundDots } from "@/components/shared/BackgroundDots";
-import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
+import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { Logo } from "@/components/shared/Logo";
 
 export function HomePage() {
@@ -15,9 +15,9 @@ export function HomePage() {
 
           <HeroDescription description="Stwórz grupę treningową i wygeneruj dla niej plan treningowy według własnych kryteriów." />
 
-          <ButtonCustomized variant="hero" className="lg:mt-8 w-2/3 mt-16">
+          <CustomizedButton variant="hero" className="lg:mt-8 w-2/3 mt-16">
             Generuj plan
-          </ButtonCustomized>
+          </CustomizedButton>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import { TriangleAlert } from "lucide-react";
 
-import { ButtonCustomized } from "@/components/shared/ButtonCustomized";
+import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { EmptyListView } from "@/components/shared/EmptyListView";
 
 type ErrorListViewProps = {
@@ -23,14 +23,14 @@ export function ErrorListView({
         message={message}
         icon={<TriangleAlert className="h-12 w-12 text-primary/80" />}
       >
-        <ButtonCustomized
+        <CustomizedButton
           type="button"
           className="mt-2 max-w-48 text-sm"
           onClick={onRetry}
           disabled={isRetrying}
         >
           {isRetrying ? "Ponawianie…" : "Spróbuj ponownie"}
-        </ButtonCustomized>
+        </CustomizedButton>
       </EmptyListView>
     </div>
   );
