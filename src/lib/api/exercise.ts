@@ -1,5 +1,5 @@
 import { apiUrl } from "@/config/env";
-import type { Exercise } from "@/types/exercise";
+import type { Exercise, ExerciseWrite } from "@/types/exercise";
 import type { PaginatedResponse } from "@/types/pagination";
 
 import { apiJson } from "./client";
@@ -25,5 +25,26 @@ export async function getExercisesRequest(
 export async function deleteExerciseRequest(id: string): Promise<void> {
   return apiJson<void>(apiUrl(`/exercises/${id}`), {
     method: "DELETE",
+  });
+}
+
+export async function createExerciseRequest(
+  payload: ExerciseWrite,
+): Promise<Exercise> {
+  return apiJson<Exercise>(apiUrl("/exercises"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateExerciseRequest(
+  id: string,
+  payload: ExerciseWrite,
+): Promise<Exercise> {
+  return apiJson<Exercise>(apiUrl(`/exercises/${id}`), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   });
 }

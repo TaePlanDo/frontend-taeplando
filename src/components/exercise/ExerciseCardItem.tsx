@@ -8,15 +8,17 @@ import type { Exercise } from "@/types/exercise";
 
 type ExerciseCardItemProps = {
   exercise: Exercise;
+  onEdit: () => void;
   onDelete: () => void | Promise<void>;
 };
 
 export function ExerciseCardItem({
   exercise,
+  onEdit,
   onDelete,
 }: ExerciseCardItemProps) {
-  const scopeLabel = exercise.scope === "GLOBAL" ? "Globalne" : "Prywatne";
-  const statusLabel = exercise.status === "ACTIVE" ? "Aktywne" : "Nieaktywne";
+  const typeLabel = exercise.training_types.map(({ name }) => name).join(", ");
+  const segmentLabel = exercise.segments.map(({ name }) => name).join(", ");
 
   return (
     <Card className="flex-row gap-4 rounded-2xl bg-transparent p-4 shadow-none">
@@ -41,13 +43,18 @@ export function ExerciseCardItem({
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
-          <CardItemBadge>{scopeLabel}</CardItemBadge>
-          <CardItemBadge>{statusLabel}</CardItemBadge>
+          <CardItemBadge>{typeLabel || "Brak typu"}</CardItemBadge>
+          <CardItemBadge>{segmentLabel || "Brak segmentu"}</CardItemBadge>
         </div>
         <div className="mt-auto flex justify-end gap-1">
-          <CardItemActionButton disabled icon={<Pencil className="size-4" />}>
-            Edytuj
-          </CardItemActionButton>
+          {exercise.scope === "PRIVATE" ? (
+            <CardItemActionButton
+              icon={<Pencil className="size-4" />}
+              onClick={onEdit}
+            >
+              Edytuj
+            </CardItemActionButton>
+          ) : null}
           {exercise.scope === "PRIVATE" ? (
             <CustomizedAlertDialog
               trigger={
