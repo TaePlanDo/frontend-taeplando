@@ -41,19 +41,21 @@ export function CustomizedPairInputWithControllers<
     get(errors, first.name)?.message ?? get(errors, second.name)?.message;
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="py-2 text-2xl">{title}</span>
-      <div className="grid grid-cols-2 gap-4">
+    <div className="flex flex-col gap-1.5 text-sm">
+      <span>{title}</span>
+      <div className="grid grid-cols-2 gap-2">
         <CustomizedInputWithController
           control={control}
           disabled={disabled}
           showError={false}
+          classNameLabel="text-xs text-foreground/60"
           {...first}
         />
         <CustomizedInputWithController
           control={control}
           disabled={disabled}
           showError={false}
+          classNameLabel="text-xs text-foreground/60"
           {...second}
         />
       </div>

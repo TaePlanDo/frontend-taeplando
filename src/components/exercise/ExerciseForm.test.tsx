@@ -87,11 +87,11 @@ describe("ExerciseForm", () => {
       { target: { value: "Opis" } },
     );
     [
-      ["min_age", "7"],
-      ["max_age", "14"],
-      ["min_participants", "1"],
-      ["max_participants", "20"],
-      ["duration_minutes", "10"],
+      ["minAge", "7"],
+      ["maxAge", "14"],
+      ["minParticipants", "1"],
+      ["maxParticipants", "20"],
+      ["durationMinutes", "10"],
     ].forEach(([id, value]) => {
       fireEvent.change(document.getElementById(id) as HTMLInputElement, {
         target: { value },

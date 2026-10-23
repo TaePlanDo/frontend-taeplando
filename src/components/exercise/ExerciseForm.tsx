@@ -1,92 +1,51 @@
-import { useState, type FormEvent } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 
-import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { ExerciseAttributesSelector } from "@/components/exercise/ExerciseAttributesSelector";
-import { CustomizedInput } from "@/components/shared/CustomizedInput";
+import { CustomizedButton } from "@/components/shared/CustomizedButton";
+import { CustomizedInputWithController } from "@/components/shared/CustomizedInputWithController";
+import { CustomizedPairInputWithControllers } from "@/components/shared/CustomizedPairInputWithControllers";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
-import { Input } from "@/components/ui/input";
 import { useCreateExercise } from "@/hooks/exercises/useCreateExercise";
 import { useUpdateExercise } from "@/hooks/exercises/useUpdateExercise";
-import { toExerciseFormValues } from "@/lib/mappers/exercise";
+import { toExerciseFormValues, toExerciseWrite } from "@/lib/mappers/exercise";
 import {
-  validateExerciseSubmission,
-  type ExerciseFieldErrors,
-} from "@/lib/validation/exerciseSubmission";
+  exerciseFormSchema,
+  type ExerciseFormOutput,
+  type ExerciseFormValues,
+} from "@/lib/validation/exercise";
 import type { Exercise } from "@/types/exercise";
 
 type Props = { exercise?: Exercise | null; onClose: () => void };
 
-type NumberInputProps = {
-  name: string;
-  label: string;
-  initialValue: number | null;
-  placeholder?: string;
-  min?: string;
-};
-
-function NumberInput({
-  name,
-  label,
-  initialValue,
-  placeholder,
-  min = "1",
-}: NumberInputProps) {
-  const [value, setValue] = useState(
-    initialValue === null ? "" : String(initialValue),
-  );
-
-  return (
-    <CustomizedInput
-      required
-      min={min}
-      name={name}
-      label={label}
-      type="number"
-      placeholder={placeholder}
-      value={value}
-      onChange={(event) => setValue(event.target.value)}
-      onValueChange={setValue}
-      className="h-10 rounded-md text-sm"
-      classNameLabel="hidden"
-    />
-  );
-}
-
 export function ExerciseForm({ exercise, onClose }: Props) {
-  const initialValues = toExerciseFormValues(exercise);
-  const { createExercise, isCreating, error } = useCreateExercise();
+  const {
+    createExercise,
+    isCreating,
+    error: createError,
+  } = useCreateExercise();
   const {
     updateExercise,
     isUpdating,
     error: updateError,
   } = useUpdateExercise();
-  const isEdit = exercise != null;
-  const [equipmentIds, setEquipmentIds] = useState<string[]>(
-    initialValues.equipmentIds,
-  );
-  const [typeIds, setTypeIds] = useState<string[]>(
-    initialValues.trainingTypeIds,
-  );
-  const [segmentIds, setSegmentIds] = useState<number[]>(() =>
-    initialValues.segmentIds.map(Number),
-  );
-  const [fieldErrors, setFieldErrors] = useState<ExerciseFieldErrors>({});
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ExerciseFormValues, unknown, ExerciseFormOutput>({
+    resolver: zodResolver(exerciseFormSchema),
+    defaultValues: toExerciseFormValues(exercise),
+  });
+  const values = watch();
+  const isSubmitting = isCreating || isUpdating;
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const { payload, errors } = validateExerciseSubmission(
-      data,
-      equipmentIds,
-      typeIds,
-      segmentIds,
-    );
-    if (!payload) {
-      setFieldErrors(errors);
-      return;
-    }
+  const submit: SubmitHandler<ExerciseFormOutput> = async (formValues) => {
     try {
+      const payload = toExerciseWrite(formValues);
       if (exercise) {
         await updateExercise({ id: exercise.id, payload });
         toast.success("Ćwiczenie zostało zaktualizowane");
@@ -96,145 +55,105 @@ export function ExerciseForm({ exercise, onClose }: Props) {
       }
       onClose();
     } catch {
-      /* error from hook */
+      // Mutation hook exposes the user-facing error.
     }
-  }
+  };
 
   return (
-    <form className="flex flex-col gap-5" onSubmit={submit} noValidate>
-      <div className="grid gap-x-3 gap-y-4 sm:grid-cols-2">
-        <label className="flex flex-col gap-1.5 text-sm">
-          Nazwa ćwiczenia
-          <Input
-            required
-            name="name"
-            placeholder="np. Borek"
-            defaultValue={initialValues.name}
-            disabled={isCreating || isUpdating}
-            onChange={() =>
-              setFieldErrors((errors) => ({ ...errors, name: undefined }))
-            }
-          />
-          {fieldErrors.name ? (
-            <InputErrorMessage message={fieldErrors.name} />
-          ) : null}
-        </label>
-        <div className="flex flex-col gap-1.5 text-sm">
-          Wiek (lata)
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <span className="mb-1 block text-xs text-foreground/60">
-                Minimalny wiek
-              </span>
-              <NumberInput
-                name="min_age"
-                label=""
-                initialValue={
-                  initialValues.minAge ? Number(initialValues.minAge) : null
-                }
+    <form
+      className="flex flex-col gap-4"
+      onSubmit={handleSubmit(submit)}
+      noValidate
+    >
+      <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
+        <CustomizedInputWithController
+          control={control}
+          name="name"
+          label="Nazwa ćwiczenia"
+          placeholder="np. Borek"
+          disabled={isSubmitting}
+        />
+        <CustomizedPairInputWithControllers
+          control={control}
+          title="Wiek (lata)"
+          first={{
+            name: "minAge",
+            label: "Minimalny wiek",
+            type: "number",
+            min: 1,
+          }}
+          second={{
+            name: "maxAge",
+            label: "Maksymalny wiek",
+            type: "number",
+            min: 1,
+          }}
+          disabled={isSubmitting}
+        />
+        <Controller
+          control={control}
+          name="description"
+          render={({ field, fieldState }) => (
+            <label className="flex flex-col gap-1.5 text-sm">
+              Opis
+              <textarea
+                {...field}
+                disabled={isSubmitting}
+                placeholder="Opisz ćwiczenie, zasady, wariant..."
+                className="h-24 resize-none rounded-md border border-input bg-input/30 p-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
               />
-            </div>
-            <div>
-              <span className="mb-1 block text-xs text-foreground/60">
-                Maksymalny wiek
-              </span>
-              <NumberInput
-                name="max_age"
-                label=""
-                initialValue={
-                  initialValues.maxAge ? Number(initialValues.maxAge) : null
-                }
-              />
-            </div>
-          </div>
-          {fieldErrors.age ? (
-            <InputErrorMessage message={fieldErrors.age} />
-          ) : null}
-        </div>
-        <label className="flex flex-col gap-1.5 text-sm">
-          Opis
-          <textarea
-            required
-            name="description"
-            placeholder="Opisz ćwiczenie, zasady, wariant..."
-            defaultValue={initialValues.description}
-            onChange={() =>
-              setFieldErrors((errors) => ({
-                ...errors,
-                description: undefined,
-              }))
-            }
-            className="h-29 resize-none rounded-md border border-input bg-input/30 p-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+              {fieldState.error?.message ? (
+                <InputErrorMessage message={fieldState.error.message} />
+              ) : null}
+            </label>
+          )}
+        />
+        <div className="flex flex-col gap-3">
+          <CustomizedPairInputWithControllers
+            control={control}
+            title="Liczba uczestników"
+            first={{
+              name: "minParticipants",
+              label: "Minimalna liczba uczestników",
+              type: "number",
+              min: 1,
+            }}
+            second={{
+              name: "maxParticipants",
+              label: "Maksymalna liczba uczestników",
+              type: "number",
+              min: 1,
+            }}
+            disabled={isSubmitting}
           />
-          {fieldErrors.description ? (
-            <InputErrorMessage message={fieldErrors.description} />
-          ) : null}
-        </label>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5 text-sm">
-            Liczba uczestników
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <span className="mb-1 block text-xs text-foreground/60">
-                  Minimalna liczba uczestników
-                </span>
-                <NumberInput
-                  name="min_participants"
-                  label=""
-                  initialValue={
-                    initialValues.minParticipants
-                      ? Number(initialValues.minParticipants)
-                      : null
-                  }
-                />
-              </div>
-              <div>
-                <span className="mb-1 block text-xs text-foreground/60">
-                  Maksymalna liczba uczestników
-                </span>
-                <NumberInput
-                  name="max_participants"
-                  label=""
-                  initialValue={
-                    initialValues.maxParticipants
-                      ? Number(initialValues.maxParticipants)
-                      : null
-                  }
-                />
-              </div>
-            </div>
-            {fieldErrors.participants ? (
-              <InputErrorMessage message={fieldErrors.participants} />
-            ) : null}
-          </div>
-          <label className="flex flex-col gap-1.5 text-sm">
-            Czas trwania w minutach
-            <NumberInput
-              name="duration_minutes"
-              label=""
-              initialValue={Number(initialValues.durationMinutes)}
-              min="0"
-            />
-            {fieldErrors.duration ? (
-              <InputErrorMessage message={fieldErrors.duration} />
-            ) : null}
-          </label>
+          <CustomizedInputWithController
+            control={control}
+            name="durationMinutes"
+            label="Czas trwania w minutach"
+            type="number"
+            min="0"
+            disabled={isSubmitting}
+          />
         </div>
       </div>
       <ExerciseAttributesSelector
-        equipmentIds={equipmentIds}
-        typeIds={typeIds}
-        segmentIds={segmentIds}
-        onEquipmentIdsChange={setEquipmentIds}
-        onTypeIdsChange={setTypeIds}
-        onSegmentIdsChange={setSegmentIds}
-        errors={{ type: fieldErrors.type, segment: fieldErrors.segment }}
-        onClearError={(field) =>
-          setFieldErrors((errors) => ({ ...errors, [field]: undefined }))
+        equipmentIds={values.equipmentIds}
+        typeIds={values.trainingTypeIds}
+        segmentIds={values.segmentIds.map(Number)}
+        onEquipmentIdsChange={(ids) => setValue("equipmentIds", ids)}
+        onTypeIdsChange={(ids) =>
+          setValue("trainingTypeIds", ids, { shouldValidate: true })
         }
+        onSegmentIdsChange={(ids) =>
+          setValue("segmentIds", ids.map(String), { shouldValidate: true })
+        }
+        errors={{
+          type: errors.trainingTypeIds?.message,
+          segment: errors.segmentIds?.message,
+        }}
       />
-      {error || updateError ? (
-        <p className="text-sm text-destructive">{error ?? updateError}</p>
+      {createError || updateError ? (
+        <InputErrorMessage message={createError ?? updateError ?? ""} />
       ) : null}
       <div className="-mx-6 -mb-6 flex justify-end gap-3 border-t px-6 py-4">
         <CustomizedButton
@@ -249,9 +168,9 @@ export function ExerciseForm({ exercise, onClose }: Props) {
           type="submit"
           variant="primary"
           className="w-54"
-          disabled={isCreating || isUpdating}
+          disabled={isSubmitting}
         >
-          {isEdit ? "Edytuj ćwiczenie" : "Stwórz ćwiczenie"}
+          {exercise ? "Edytuj ćwiczenie" : "Stwórz ćwiczenie"}
         </CustomizedButton>
       </div>
     </form>

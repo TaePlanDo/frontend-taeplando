@@ -3,7 +3,6 @@ import { TriangleAlert, X } from "lucide-react";
 
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { useExerciseCatalogs } from "@/hooks/exercises/useExerciseCatalogs";
-import type { ExerciseFieldErrors } from "@/lib/validation/exerciseSubmission";
 
 type Tab = "equipment" | "type" | "segment";
 type Props = {
@@ -13,8 +12,7 @@ type Props = {
   onEquipmentIdsChange: (ids: string[]) => void;
   onTypeIdsChange: (ids: string[]) => void;
   onSegmentIdsChange: (ids: number[]) => void;
-  errors: Pick<ExerciseFieldErrors, "type" | "segment">;
-  onClearError: (field: "type" | "segment") => void;
+  errors: Partial<Record<"type" | "segment", string>>;
 };
 
 const tabs: { id: Tab; label: string }[] = [
@@ -32,7 +30,6 @@ export function ExerciseAttributesSelector({
   onTypeIdsChange,
   onSegmentIdsChange,
   errors,
-  onClearError,
 }: Props) {
   const [tab, setTab] = useState<Tab>("equipment");
   const { data, isLoading, isError, refetch } = useExerciseCatalogs();
@@ -78,7 +75,6 @@ export function ExerciseAttributesSelector({
         : segmentIds.length;
   const add = (id: string) => {
     if (!active.ids.includes(id)) active.setIds([...active.ids, id]);
-    if (tab === "type" || tab === "segment") onClearError(tab);
   };
 
   return (

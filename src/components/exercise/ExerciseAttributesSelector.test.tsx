@@ -17,9 +17,8 @@ vi.mock("@/hooks/exercises/useExerciseCatalogs", () => ({
 }));
 
 describe("ExerciseAttributesSelector", () => {
-  it("adds a selected training type and clears its validation error", () => {
+  it("adds a selected training type", () => {
     const onTypeIdsChange = vi.fn();
-    const onClearError = vi.fn();
     render(
       <ExerciseAttributesSelector
         equipmentIds={[]}
@@ -28,8 +27,7 @@ describe("ExerciseAttributesSelector", () => {
         onEquipmentIdsChange={vi.fn()}
         onTypeIdsChange={onTypeIdsChange}
         onSegmentIdsChange={vi.fn()}
-        errors={{ type: "Wybierz Typ" }}
-        onClearError={onClearError}
+        errors={{}}
       />,
     );
 
@@ -39,6 +37,5 @@ describe("ExerciseAttributesSelector", () => {
     });
 
     expect(onTypeIdsChange).toHaveBeenCalledWith(["t1"]);
-    expect(onClearError).toHaveBeenCalledWith("type");
   });
 });
