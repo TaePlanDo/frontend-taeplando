@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { GroupCardItem } from "@/components/group/GroupCardItem";
 import { GroupDetailsForm } from "@/components/group/GroupDetailsForm";
+import { GroupSchemaForm } from "@/components/group/GroupSchemaForm";
 import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
 import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
 import { EmptyListView } from "@/components/shared/EmptyListView";
@@ -34,10 +35,17 @@ export function GroupListPage() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+  const [schemaDialogOpen, setSchemaDialogOpen] = useState(false);
+  const [schemaGroup, setSchemaGroup] = useState<Group | null>(null);
 
   function openEdit(group: Group) {
     setEditingGroup(group);
     setDialogOpen(true);
+  }
+
+  function openSchema(group: Group) {
+    setSchemaGroup(group);
+    setSchemaDialogOpen(true);
   }
 
   async function handleDelete(group: Group) {
@@ -81,6 +89,7 @@ export function GroupListPage() {
             key={group.id}
             group={group}
             onEdit={() => openEdit(group)}
+            onEditSchema={() => openSchema(group)}
             onDelete={() => handleDelete(group)}
           />
         ))}
@@ -124,6 +133,28 @@ export function GroupListPage() {
                 group={editingGroup}
                 onClose={() => setDialogOpen(false)}
               />
+            </CustomizedDialog>
+            <CustomizedDialog
+              title={
+                schemaGroup ? `Schemat: ${schemaGroup.name}` : "Schemat grupy"
+              }
+              open={schemaDialogOpen}
+              onOpenChange={(open) => {
+                setSchemaDialogOpen(open);
+                if (!open) {
+                  setSchemaGroup(null);
+                }
+              }}
+            >
+              {schemaGroup ? (
+                <GroupSchemaForm
+                  group={schemaGroup}
+                  onClose={() => {
+                    setSchemaDialogOpen(false);
+                    setSchemaGroup(null);
+                  }}
+                />
+              ) : null}
             </CustomizedDialog>
           </div>
         </div>
