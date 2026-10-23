@@ -1,4 +1,4 @@
-import { Clock, Pencil, Trash2, User } from "lucide-react";
+import { Clock, LayoutList, Pencil, Trash2, User } from "lucide-react";
 import {
   Card,
   CardAction,
@@ -18,10 +18,16 @@ import type { Group } from "@/types/group";
 interface GroupCardItemProps {
   group: Group;
   onEdit: () => void;
+  onEditSchema: () => void;
   onDelete: () => void | Promise<void>;
 }
 
-export function GroupCardItem({ group, onEdit, onDelete }: GroupCardItemProps) {
+export function GroupCardItem({
+  group,
+  onEdit,
+  onEditSchema,
+  onDelete,
+}: GroupCardItemProps) {
   return (
     <Card className="gap-3 rounded-xl bg-transparent py-4 text-foreground shadow-none">
       <CardHeader className="items-start px-6">
@@ -47,6 +53,12 @@ export function GroupCardItem({ group, onEdit, onDelete }: GroupCardItemProps) {
           onClick={onEdit}
         >
           Edytuj
+        </CardItemActionButton>
+        <CardItemActionButton
+          icon={<LayoutList className="h-4 w-4" />}
+          onClick={onEditSchema}
+        >
+          Schemat
         </CardItemActionButton>
         <CustomizedAlertDialog
           trigger={

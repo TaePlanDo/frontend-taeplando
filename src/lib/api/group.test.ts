@@ -5,6 +5,7 @@ import {
   deleteGroupRequest,
   getGroupsRequest,
   updateGroupRequest,
+  updateGroupSchemaRequest,
 } from "./group";
 
 import { ApiError } from "./errors";
@@ -45,15 +46,31 @@ describe("group API", () => {
     );
   });
 
+  const defaultSchema = [
+    {
+      segment_id: 3,
+      segment_code: "MAIN",
+      segment_name: "Część główna",
+      percentage: "100",
+      position: 1,
+    },
+  ];
+
   it("creates a group with POST", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValue(okResponse(201, { id: "1", ...payload }));
+      .mockResolvedValue(
+        okResponse(201, { id: "1", ...payload, schema: defaultSchema }),
+      );
     vi.stubGlobal("fetch", fetchMock);
 
     const group = await createGroupRequest(payload);
 
-    expect(group).toEqual({ id: "1", ...payload });
+    expect(group).toEqual({
+      id: "1",
+      ...payload,
+      schema: [{ ...defaultSchema[0], percentage: 100 }],
+    });
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/training-groups",
       expect.objectContaining({
@@ -66,7 +83,9 @@ describe("group API", () => {
   it("updates a group with PUT on its id", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValue(okResponse(200, { id: "abc", ...payload }));
+      .mockResolvedValue(
+        okResponse(200, { id: "abc", ...payload, schema: defaultSchema }),
+      );
     vi.stubGlobal("fetch", fetchMock);
 
     await updateGroupRequest("abc", payload);
@@ -110,5 +129,48 @@ describe("group API", () => {
     await expect(updateGroupRequest("abc", payload)).rejects.toEqual(
       new ApiError(404, "Group not found"),
     );
+  });
+
+  it("updates a group schema with PUT on its schema path", async () => {
+    const schemaPayload = {
+      items: [
+        { segment_id: 1, percentage: 30 },
+        { segment_id: 3, percentage: 70 },
+      ],
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      okResponse(200, {
+        id: "abc",
+        ...payload,
+        schema: [
+          {
+            segment_id: 1,
+            segment_code: "WARMUP",
+            segment_name: "Rozgrzewka",
+            percentage: "30",
+            position: 1,
+          },
+          {
+            segment_id: 3,
+            segment_code: "MAIN",
+            segment_name: "Część główna",
+            percentage: "70",
+            position: 2,
+          },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const group = await updateGroupSchemaRequest("abc", schemaPayload);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/training-groups/abc/schema",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify(schemaPayload),
+      }),
+    );
+    expect(group.schema.map((item) => item.percentage)).toEqual([30, 70]);
   });
 });

@@ -9,6 +9,16 @@ vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
+const mainSchema = [
+  {
+    segment_id: 3,
+    segment_code: "MAIN",
+    segment_name: "Część główna",
+    percentage: 100,
+    position: 1,
+  },
+];
+
 const groups: Group[] = [
   {
     id: "1",
@@ -18,6 +28,7 @@ const groups: Group[] = [
     duration_minutes: 90,
     created_at: "2026-10-11T12:00:00Z",
     updated_at: "2026-10-11T12:00:00Z",
+    schema: mainSchema,
   },
   {
     id: "2",
@@ -27,6 +38,7 @@ const groups: Group[] = [
     duration_minutes: 45,
     created_at: "2026-10-11T12:00:00Z",
     updated_at: "2026-10-11T12:00:00Z",
+    schema: mainSchema,
   },
 ];
 
@@ -64,6 +76,29 @@ vi.mock("@/hooks/groups/useDeleteGroup", () => ({
     deleteGroup: vi.fn(),
     isDeleting: false,
     error: null,
+  }),
+}));
+
+const updateGroupSchema = vi.fn();
+
+vi.mock("@/hooks/groups/useUpdateGroupSchema", () => ({
+  useUpdateGroupSchema: () => ({
+    updateGroupSchema,
+    isUpdating: false,
+    error: null,
+  }),
+}));
+
+vi.mock("@/hooks/groups/useTrainingSegments", () => ({
+  useTrainingSegments: () => ({
+    segments: [
+      { id: 1, code: "WARMUP", name: "Rozgrzewka" },
+      { id: 3, code: "MAIN", name: "Część główna" },
+    ],
+    isLoading: false,
+    isError: false,
+    error: null,
+    refetch: vi.fn(),
   }),
 }));
 
@@ -186,6 +221,18 @@ describe("GroupListPage", () => {
     expect(input("Godziny").value).toBe("0");
     expect(input("Minuty").value).toBe("45");
     expect(screen.getByRole("button", { name: "Zapisz zmiany" })).toBeTruthy();
+  });
+
+  it("opens the schema dialog for the clicked group", async () => {
+    render(<GroupListPage />);
+
+    fireEvent.click(screen.getAllByRole("button", { name: /Schemat/ })[0]);
+
+    expect(screen.getByText("Schemat: Młodzież")).toBeTruthy();
+    expect(
+      screen.getByRole("region", { name: "Schemat treningu" }),
+    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Zapisz schemat" })).toBeTruthy();
   });
 
   it("opens an empty form after editing and then clicking Dodaj grupę", async () => {

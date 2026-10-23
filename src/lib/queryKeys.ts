@@ -7,4 +7,8 @@ export const queryKeys = {
     all: ["groups"] as const,
     lists: () => [...queryKeys.groups.all, "list"] as const,
   },
+  trainingSegments: {
+    all: ["training-segments"] as const,
+    list: () => [...queryKeys.trainingSegments.all, "list"] as const,
+  },
 };
