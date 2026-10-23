@@ -15,6 +15,7 @@ type CustomizedDialogProps = {
   description?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  className?: string;
   children: ReactNode;
 };
 
@@ -24,12 +25,13 @@ export function CustomizedDialog({
   description,
   open,
   onOpenChange,
+  className,
   children,
 }: CustomizedDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent>
+      <DialogContent className={className}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description ? (

@@ -4,6 +4,7 @@ import { AuthorizedLayout } from "@/components/layout/AuthorizedLayout";
 import { Toaster } from "@/components/ui/sonner";
 import { AccountPage } from "@/pages/AccountPage";
 import { GroupListPage } from "@/pages/GroupListPage";
+import { ExerciseListPage } from "@/pages/ExerciseListPage";
 import { HomePage } from "@/pages/HomePage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
@@ -33,6 +34,7 @@ export function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/groups" element={<GroupListPage />} />
+          <Route path="/exercises" element={<ExerciseListPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

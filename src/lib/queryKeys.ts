@@ -7,4 +7,8 @@ export const queryKeys = {
     all: ["groups"] as const,
     lists: () => [...queryKeys.groups.all, "list"] as const,
   },
+  exercises: {
+    all: ["exercises"] as const,
+    lists: () => [...queryKeys.exercises.all, "list"] as const,
+  },
 };
