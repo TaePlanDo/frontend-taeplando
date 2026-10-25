@@ -10,5 +10,6 @@ export const queryKeys = {
   exercises: {
     all: ["exercises"] as const,
     lists: () => [...queryKeys.exercises.all, "list"] as const,
+    catalogs: () => [...queryKeys.exercises.all, "catalogs"] as const,
   },
 };

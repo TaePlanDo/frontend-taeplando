@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
-import { TriangleAlert, X } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
 
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
+import { CustomizedTabs } from "@/components/shared/CustomizedTabs";
 import { useExerciseCatalogs } from "@/hooks/exercises/useExerciseCatalogs";
+
+import { SelectedAttributeBadges } from "./SelectedAttributeBadges";
 
 type Tab = "equipment" | "type" | "segment";
 type Props = {
@@ -84,24 +87,25 @@ export function ExerciseAttributesSelector({
         Dodaj sprzęt potrzebny do realizacji ćwiczenia i przypisz konkretny
         Segment i Typ.
       </p>
-      <div className="grid grid-cols-3 rounded-lg border bg-input/30 p-1">
-        {tabs.map(({ id, label }) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setTab(id)}
-            className={`rounded-md py-2 text-sm ${tab === id ? "border border-primary bg-primary/15 text-primary" : "text-foreground/60 hover:text-foreground"}`}
-          >
-            {label} ({count(id)})
-            {(id === "type" || id === "segment") && count(id) === 0 ? (
-              <TriangleAlert
-                className="ml-1 inline size-3.5 text-primary"
-                aria-label={`Brak wybranego: ${label}`}
-              />
-            ) : null}
-          </button>
-        ))}
-      </div>
+      <CustomizedTabs
+        value={tab}
+        onValueChange={setTab}
+        className="grid h-auto grid-cols-3 border"
+        tabs={tabs.map(({ id, label }) => ({
+          value: id,
+          label: (
+            <span className="inline-flex items-center gap-1">
+              {label} ({count(id)})
+              {(id === "type" || id === "segment") && count(id) === 0 ? (
+                <TriangleAlert
+                  className="size-3.5 text-primary"
+                  aria-label={`Brak wybranego: ${label}`}
+                />
+              ) : null}
+            </span>
+          ),
+        }))}
+      />
       {isLoading ? (
         <p className="mt-3 text-sm text-foreground/60">
           Ładowanie elementów listy…
@@ -136,25 +140,12 @@ export function ExerciseAttributesSelector({
           Wszystkie elementy z listy są już dodane
         </p>
       )}
-      <div className="mt-3 flex min-h-8 flex-wrap gap-2">
-        {selected.map((item) => (
-          <span
-            key={item.id}
-            className="inline-flex items-center gap-1 rounded-md border border-primary/60 bg-primary/15 px-2.5 py-1 text-sm"
-          >
-            {item.name}
-            <button
-              type="button"
-              onClick={() =>
-                active.setIds(active.ids.filter((id) => id !== String(item.id)))
-              }
-              aria-label={`Usuń ${item.name}`}
-            >
-              <X className="size-3 text-primary" />
-            </button>
-          </span>
-        ))}
-      </div>
+      <SelectedAttributeBadges
+        items={selected}
+        onRemove={(id) =>
+          active.setIds(active.ids.filter((selectedId) => selectedId !== id))
+        }
+      />
       {tab === "type" && errors.type ? (
         <InputErrorMessage message={errors.type} className="mt-2" />
       ) : null}

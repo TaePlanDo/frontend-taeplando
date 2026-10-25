@@ -17,7 +17,7 @@ vi.mock("@/hooks/exercises/useExerciseCatalogs", () => ({
 }));
 
 describe("ExerciseAttributesSelector", () => {
-  it("adds a selected training type", () => {
+  it("adds a selected training type", async () => {
     const onTypeIdsChange = vi.fn();
     render(
       <ExerciseAttributesSelector
@@ -31,11 +31,31 @@ describe("ExerciseAttributesSelector", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /Typ/ }));
-    fireEvent.change(screen.getByLabelText("Dodaj typ"), {
+    const typeTab = screen.getByRole("tab", { name: /Typ/ });
+    fireEvent.mouseDown(typeTab, { button: 0, ctrlKey: false });
+    fireEvent.change(await screen.findByLabelText("Dodaj typ"), {
       target: { value: "t1" },
     });
 
     expect(onTypeIdsChange).toHaveBeenCalledWith(["t1"]);
+  });
+
+  it("removes a selected attribute through its badge", () => {
+    const onEquipmentIdsChange = vi.fn();
+    render(
+      <ExerciseAttributesSelector
+        equipmentIds={["e1"]}
+        typeIds={[]}
+        segmentIds={[]}
+        onEquipmentIdsChange={onEquipmentIdsChange}
+        onTypeIdsChange={vi.fn()}
+        onSegmentIdsChange={vi.fn()}
+        errors={{}}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Usuń Tarcza" }));
+
+    expect(onEquipmentIdsChange).toHaveBeenCalledWith([]);
   });
 });

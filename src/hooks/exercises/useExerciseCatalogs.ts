@@ -5,10 +5,11 @@ import {
   getTrainingSegmentsRequest,
   getTrainingTypesRequest,
 } from "@/lib/api/catalogs";
+import { queryKeys } from "@/lib/queryKeys";
 
 export function useExerciseCatalogs() {
   return useQuery({
-    queryKey: ["exercise-catalogs"],
+    queryKey: queryKeys.exercises.catalogs(),
     queryFn: async () => {
       const [equipment, trainingTypes, segments] = await Promise.all([
         getEquipmentRequest(),

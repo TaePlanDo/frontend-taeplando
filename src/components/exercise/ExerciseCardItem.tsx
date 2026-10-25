@@ -1,4 +1,5 @@
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Dumbbell, Eye, Layers3, Pencil, Tag, Trash2 } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { Card } from "@/components/ui/card";
 import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
@@ -12,13 +13,52 @@ type ExerciseCardItemProps = {
   onDelete: () => void | Promise<void>;
 };
 
+type AttributeBadgesProps = {
+  label: string;
+  names: string[];
+  icon: ReactNode;
+  className: string;
+};
+
+function AttributeBadges({
+  label,
+  names,
+  icon,
+  className,
+}: AttributeBadgesProps) {
+  const visibleNames = names.slice(0, 2);
+  const hiddenNames = names.slice(2);
+
+  if (!names.length) return null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-1" aria-label={label}>
+      {visibleNames.map((name) => (
+        <CardItemBadge key={name} icon={icon} className={className}>
+          {name}
+        </CardItemBadge>
+      ))}
+      {hiddenNames.length ? (
+        <CardItemBadge
+          className={className}
+          title={hiddenNames.join(", ")}
+          aria-label={`${label}: dodatkowo ${hiddenNames.join(", ")}`}
+        >
+          +{hiddenNames.length}
+        </CardItemBadge>
+      ) : null}
+    </div>
+  );
+}
+
 export function ExerciseCardItem({
   exercise,
   onEdit,
   onDelete,
 }: ExerciseCardItemProps) {
-  const typeLabel = exercise.training_types.map(({ name }) => name).join(", ");
-  const segmentLabel = exercise.segments.map(({ name }) => name).join(", ");
+  const types = exercise.training_types.map(({ name }) => name);
+  const segments = exercise.segments.map(({ name }) => name);
+  const equipment = exercise.equipment.map(({ name }) => name);
 
   return (
     <Card className="flex-row gap-4 rounded-2xl bg-transparent p-4 shadow-none">
@@ -42,9 +82,25 @@ export function ExerciseCardItem({
             <span className="hidden sm:inline">Szczegóły</span>
           </button>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <CardItemBadge>{typeLabel || "Brak typu"}</CardItemBadge>
-          <CardItemBadge>{segmentLabel || "Brak segmentu"}</CardItemBadge>
+        <div className="flex flex-col gap-1.5">
+          <AttributeBadges
+            label="Typ"
+            names={types}
+            icon={<Tag className="size-3" />}
+            className="border border-primary/50 bg-primary/10 text-primary"
+          />
+          <AttributeBadges
+            label="Segment"
+            names={segments}
+            icon={<Layers3 className="size-3" />}
+            className="border border-secondary/50 bg-secondary/10 text-secondary"
+          />
+          <AttributeBadges
+            label="Sprzęt"
+            names={equipment}
+            icon={<Dumbbell className="size-3" />}
+            className="border border-foreground/20 bg-muted text-foreground/80"
+          />
         </div>
         <div className="mt-auto flex justify-end gap-1">
           {exercise.scope === "PRIVATE" ? (
