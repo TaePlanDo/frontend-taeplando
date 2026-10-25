@@ -25,6 +25,26 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
+  @keyframes ui-col-in {
+    from {
+      max-width: 0;
+      opacity: 0;
+    }
+    to {
+      max-width: 1em;
+      opacity: 1;
+    }
+  }
+  @keyframes ui-col-out {
+    from {
+      max-width: 1em;
+      opacity: 1;
+    }
+    to {
+      max-width: 0;
+      opacity: 0;
+    }
+  }
 }
 
 :root {

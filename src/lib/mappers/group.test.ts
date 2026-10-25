@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Group } from "@/types/group";
 
-import { toFormValues, toGroupWrite } from "./group";
+import { normalizeGroup, toFormValues, toGroupWrite } from "./group";
 
 const group: Group = {
   id: "0ac590e1-2a46-4cb7-8944-803e364cc46b",
@@ -12,9 +12,27 @@ const group: Group = {
   duration_minutes: 90,
   created_at: "2026-10-11T12:00:00Z",
   updated_at: "2026-10-11T13:00:00Z",
+  schema: [
+    {
+      segment_id: 3,
+      segment_code: "MAIN",
+      segment_name: "Część główna",
+      percentage: 100,
+      position: 1,
+    },
+  ],
 };
 
 describe("group mappers", () => {
+  it("normalizes schema percentages from API strings to numbers", () => {
+    const fromApi = {
+      ...group,
+      schema: [{ ...group.schema[0], percentage: "70" }],
+    } as unknown as Group;
+
+    expect(normalizeGroup(fromApi).schema[0].percentage).toBe(70);
+  });
+
   it("returns empty values for a new group", () => {
     expect(toFormValues(null)).toEqual({
       name: "",

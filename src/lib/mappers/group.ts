@@ -4,6 +4,17 @@ import type {
 } from "@/lib/validation/group";
 import type { Group, GroupWrite } from "@/types/group";
 
+/** Coerce API schema percentages (often Decimal strings) to numbers. */
+export function normalizeGroup(group: Group): Group {
+  return {
+    ...group,
+    schema: group.schema.map((item) => ({
+      ...item,
+      percentage: Number(item.percentage),
+    })),
+  };
+}
+
 export function toFormValues(group?: Group | null): GroupDetailsFormValues {
   if (!group) {
     return { name: "", minAge: "", maxAge: "", hours: "0", minutes: "0" };

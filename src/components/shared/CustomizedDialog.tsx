@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 
 type CustomizedDialogProps = {
-  trigger: ReactNode;
+  trigger?: ReactNode;
   title: string;
   description?: string;
   open?: boolean;
@@ -30,7 +30,7 @@ export function CustomizedDialog({
 }: CustomizedDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
       <DialogContent className={className}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
