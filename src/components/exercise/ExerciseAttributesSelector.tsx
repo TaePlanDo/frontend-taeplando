@@ -95,11 +95,13 @@ export function ExerciseAttributesSelector({
         tabs={tabs.map(({ id, label }) => ({
           value: id,
           label: (
-            <span className="inline-flex items-center gap-1">
-              {label} ({count(id)})
+            <span className="inline-flex items-center gap-1 leading-none">
+              <span>
+                {label} ({count(id)})
+              </span>
               {(id === "type" || id === "segment") && count(id) === 0 ? (
                 <TriangleAlert
-                  className="size-3.5 text-primary"
+                  className="size-3.5 shrink-0 self-center text-primary"
                   aria-label={`Brak wybranego: ${label}`}
                 />
               ) : null}
@@ -107,6 +109,12 @@ export function ExerciseAttributesSelector({
           ),
         }))}
       />
+      {tab === "type" && errors.type ? (
+        <InputErrorMessage message={errors.type} className="mt-2" />
+      ) : null}
+      {tab === "segment" && errors.segment ? (
+        <InputErrorMessage message={errors.segment} className="mt-2" />
+      ) : null}
       {isLoading ? (
         <p className="mt-3 text-sm text-foreground/60">
           Ładowanie elementów listy…
@@ -146,12 +154,6 @@ export function ExerciseAttributesSelector({
           active.setIds(active.ids.filter((selectedId) => selectedId !== id))
         }
       />
-      {tab === "type" && errors.type ? (
-        <InputErrorMessage message={errors.type} className="mt-2" />
-      ) : null}
-      {tab === "segment" && errors.segment ? (
-        <InputErrorMessage message={errors.segment} className="mt-2" />
-      ) : null}
     </section>
   );
 }

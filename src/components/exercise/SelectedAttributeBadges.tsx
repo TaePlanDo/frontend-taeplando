@@ -13,8 +13,10 @@ type Props = {
 };
 
 export function SelectedAttributeBadges({ items, onRemove }: Props) {
+  if (!items.length) return null;
+
   return (
-    <div className="mt-3 flex min-h-8 flex-wrap gap-2">
+    <div className="mt-3 flex flex-wrap gap-2">
       {items.map((item) => (
         <Badge
           key={item.id}
