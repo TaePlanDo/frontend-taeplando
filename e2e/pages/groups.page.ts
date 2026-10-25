@@ -112,6 +112,67 @@ export class GroupsPage {
     await expect(this.groupDialog).toBeVisible();
   }
 
+  async openSchema(groupName: string): Promise<void> {
+    await this.groupCard(groupName)
+      .getByRole("button", { name: "Schemat" })
+      .click();
+    await expect(this.groupDialog).toBeVisible();
+    await expect(
+      this.groupDialog.getByRole("heading", {
+        name: `Schemat: ${groupName}`,
+      }),
+    ).toBeVisible();
+    await expect(
+      this.groupDialog.getByRole("region", { name: "Schemat treningu" }),
+    ).toBeVisible();
+  }
+
+  async addSchemaSegment(segmentName: string): Promise<void> {
+    await this.groupDialog
+      .getByRole("combobox", { name: "Dodaj segment" })
+      .click();
+    await this.page.getByRole("option", { name: segmentName }).click();
+  }
+
+  async removeSchemaSegment(segmentName: string): Promise<void> {
+    await this.groupDialog
+      .getByRole("button", { name: `Usuń ${segmentName}` })
+      .click();
+  }
+
+  async saveSchema(): Promise<void> {
+    await this.groupDialog
+      .getByRole("button", { name: "Zapisz schemat" })
+      .click();
+  }
+
+  async expectSchemaSaved(): Promise<void> {
+    await expect(
+      this.page.getByText("Schemat grupy został zapisany"),
+    ).toBeVisible();
+    await expect(this.groupDialog).toHaveCount(0);
+  }
+
+  async expectSchemaSegments(names: string[]): Promise<void> {
+    const list = this.groupDialog.getByRole("list", {
+      name: "Kolejność segmentów",
+    });
+    await expect(list).toBeVisible();
+    await expect(list.locator("li")).toHaveCount(names.length);
+    for (let index = 0; index < names.length; index++) {
+      await expect(list.locator("li").nth(index)).toContainText(names[index]);
+    }
+  }
+
+  async expectSchemaSegmentAbsent(segmentName: string): Promise<void> {
+    const list = this.groupDialog.getByRole("list", {
+      name: "Kolejność segmentów",
+    });
+    await expect(
+      list.locator("li").filter({ hasText: segmentName }),
+    ).toHaveCount(0);
+  }
+
   private groupCard(name: string): Locator {
     return this.page
       .locator('[data-slot="card"]')
