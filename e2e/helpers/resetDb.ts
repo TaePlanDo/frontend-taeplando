@@ -1,7 +1,7 @@
 import { psql } from "./compose";
 
 /**
- * Clear test-created app data while preserving globally seeded training segments.
+ * Clear test-created app data while preserving global exercise catalogs.
  * Re-create users and domain data via API helpers (e.g. createLocalTrainer).
  * Safe only against the taeplando-e2e Compose project.
  */
@@ -16,7 +16,11 @@ BEGIN
   INTO stmt
   FROM pg_tables
   WHERE schemaname = 'public'
-    AND tablename NOT IN ('alembic_version', 'training_segments');
+    AND tablename NOT IN (
+      'alembic_version',
+      'training_segments',
+      'training_types'
+    );
 
   IF stmt IS NOT NULL THEN
     EXECUTE stmt;
