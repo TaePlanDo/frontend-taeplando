@@ -159,8 +159,8 @@ export class GroupsPage {
     });
     await expect(list).toBeVisible();
     await expect(list.locator("li")).toHaveCount(names.length);
-    for (const name of names) {
-      await expect(list.locator("li").filter({ hasText: name })).toBeVisible();
+    for (let index = 0; index < names.length; index++) {
+      await expect(list.locator("li").nth(index)).toContainText(names[index]);
     }
   }
 
