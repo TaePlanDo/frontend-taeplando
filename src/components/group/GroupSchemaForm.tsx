@@ -10,18 +10,19 @@ import {
 } from "@dnd-kit/core";
 import {
   SortableContext,
+  arrayMove,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 import { GroupSchemaOrderRow } from "@/components/group/GroupSchemaOrderRow";
 import {
   RatioBalancer,
   type RatioSegment,
-} from "@/components/ratio-balancer/ratio-balancer";
+} from "@/components/ui/hairline/ratio-balancer/ratio-balancer";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
+import { CustomizedSelect } from "@/components/shared/CustomizedSelect";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { useTrainingSegments } from "@/hooks/groups/useTrainingSegments";
@@ -32,10 +33,9 @@ import {
   canSaveSchema,
   initDraftFromSchema,
   removeSegment,
-  reorderSegments,
   toSchemaWritePayload,
   type SchemaDraftItem,
-} from "@/lib/schema/schema-draft";
+} from "@/lib/groups/schema-draft";
 import type { Group } from "@/types/group";
 import type { TrainingSegment } from "@/types/training-segment";
 
@@ -48,6 +48,7 @@ export function GroupSchemaForm({ group, onClose }: GroupSchemaFormProps) {
   const {
     segments: catalog,
     isLoading,
+    isFetching,
     isError,
     refetch,
   } = useTrainingSegments();
@@ -64,6 +65,7 @@ export function GroupSchemaForm({ group, onClose }: GroupSchemaFormProps) {
           type="button"
           variant="primary"
           className="mx-auto w-2/3"
+          disabled={isFetching}
           onClick={() => void refetch()}
         >
           Spróbuj ponownie
@@ -141,7 +143,10 @@ function GroupSchemaEditor({
       const toIndex = current.findIndex(
         (item) => item.segmentCode === String(over.id),
       );
-      return reorderSegments(current, fromIndex, toIndex);
+      if (fromIndex < 0 || toIndex < 0) {
+        return current;
+      }
+      return arrayMove(current, fromIndex, toIndex);
     });
   }
 
@@ -201,7 +206,7 @@ function GroupSchemaEditor({
                   disabled={isUpdating}
                   onRemove={() =>
                     setItems((current) =>
-                      removeSegment(current, item.segmentCode),
+                      removeSegment(current, item.segmentId),
                     )
                   }
                 />
@@ -212,42 +217,18 @@ function GroupSchemaEditor({
       ) : null}
 
       {unusedSegments.length > 0 ? (
-        <div className="flex flex-col gap-2">
-          <label
-            htmlFor="add-schema-segment"
-            className="text-sm font-medium text-foreground"
-          >
-            Dodaj segment
-          </label>
-          <div className="relative">
-            <select
-              id="add-schema-segment"
-              className="w-full appearance-none rounded-md border border-foreground/15 bg-background py-2 pl-3 pr-10 text-sm"
-              defaultValue=""
-              disabled={isUpdating}
-              onChange={(event) => {
-                const value = Number(event.target.value);
-                if (!Number.isNaN(value) && value > 0) {
-                  handleAdd(value);
-                  event.target.value = "";
-                }
-              }}
-            >
-              <option value="" disabled>
-                Wybierz segment…
-              </option>
-              {unusedSegments.map((segment) => (
-                <option key={segment.id} value={segment.id}>
-                  {segment.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              aria-hidden
-              className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-            />
-          </div>
-        </div>
+        <CustomizedSelect
+          key={items.map((item) => item.segmentId).join("-")}
+          id="add-schema-segment"
+          label="Dodaj segment"
+          placeholder="Wybierz segment…"
+          disabled={isUpdating}
+          options={unusedSegments.map((segment) => ({
+            value: String(segment.id),
+            label: segment.name,
+          }))}
+          onValueChange={(value) => handleAdd(Number(value))}
+        />
       ) : catalog.length > 0 ? (
         <p className="text-sm text-foreground/60">
           Wszystkie segmenty z katalogu są już w schemacie.

@@ -18,6 +18,11 @@ npx shadcn@latest add button
 They will be installed in src/components/ui
 Dont change their implementation
 
+# Hairline UI components
+
+MIT components from [Hairline UI](https://hairlineui.com). Install with the shadcn CLI into
+`src/components/ui/hairline/` (e.g. `npx shadcn@latest add https://hairlineui.com/r/ratio-balancer.json --path src/components/ui/hairline`).
+
 ## Imports (cn and Radix)
 
 Two imports look a bit unusual, but this is how shadcn generates them now, so please keep it like

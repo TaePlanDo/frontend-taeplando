@@ -1,9 +1,10 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { cn } from "cn";
 import { GripVertical, Trash2 } from "lucide-react";
 
 import { CardItemActionButton } from "@/components/shared/CardItemActionButton";
-import type { SchemaDraftItem } from "@/lib/schema/schema-draft";
+import type { SchemaDraftItem } from "@/lib/groups/schema-draft";
 
 type GroupSchemaOrderRowProps = {
   item: SchemaDraftItem;
@@ -34,11 +35,11 @@ export function GroupSchemaOrderRow({
         transform: CSS.Transform.toString(transform),
         transition,
       }}
-      className={`flex items-center justify-between gap-2 rounded-md border border-transparent px-1 py-1 text-sm ${
-        isDragging
-          ? "z-10 border-foreground/10 bg-background opacity-90 shadow-sm"
-          : ""
-      }`}
+      className={cn(
+        "flex items-center justify-between gap-2 rounded-md border border-transparent px-1 py-1 text-sm",
+        isDragging &&
+          "z-10 border-foreground/10 bg-background opacity-90 shadow-sm",
+      )}
     >
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <button

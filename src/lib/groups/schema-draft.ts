@@ -1,5 +1,5 @@
-import { normalizeRatios } from "@/components/ratio-balancer/use-ratio-balancer";
-import type { GroupSchemaItem } from "@/types/group";
+import { normalizeRatios } from "@/components/ui/hairline/ratio-balancer/use-ratio-balancer";
+import type { GroupSchemaItem, GroupSchemaWrite } from "@/types/group";
 import type { TrainingSegment } from "@/types/training-segment";
 
 export type SchemaDraftItem = {
@@ -95,12 +95,12 @@ export function addSegment(
 
 export function removeSegment(
   items: SchemaDraftItem[],
-  segmentCode: string,
+  segmentId: number,
 ): SchemaDraftItem[] {
   if (items.length <= 1) {
     return items;
   }
-  const next = items.filter((item) => item.segmentCode !== segmentCode);
+  const next = items.filter((item) => item.segmentId !== segmentId);
   if (next.length === items.length) {
     return items;
   }
@@ -120,27 +120,6 @@ export function applyRatios(
   }));
 }
 
-export function reorderSegments(
-  items: SchemaDraftItem[],
-  fromIndex: number,
-  toIndex: number,
-): SchemaDraftItem[] {
-  if (
-    fromIndex < 0 ||
-    toIndex < 0 ||
-    fromIndex >= items.length ||
-    toIndex >= items.length ||
-    fromIndex === toIndex
-  ) {
-    return items;
-  }
-
-  const next = [...items];
-  const [moved] = next.splice(fromIndex, 1);
-  next.splice(toIndex, 0, moved);
-  return next;
-}
-
 export function canSaveSchema(items: SchemaDraftItem[]): boolean {
   if (items.length === 0) {
     return false;
@@ -149,7 +128,9 @@ export function canSaveSchema(items: SchemaDraftItem[]): boolean {
   return sum === 100 && items.every((item) => item.percentage >= 1);
 }
 
-export function toSchemaWritePayload(items: SchemaDraftItem[]) {
+export function toSchemaWritePayload(
+  items: SchemaDraftItem[],
+): GroupSchemaWrite {
   return {
     items: items.map((item) => ({
       segment_id: item.segmentId,

@@ -28,6 +28,7 @@ vi.mock("@/hooks/groups/useTrainingSegments", () => ({
       { id: 4, code: "COOLDOWN", name: "Wyciszenie" },
     ],
     isLoading: false,
+    isFetching: false,
     isError: false,
     error: null,
     refetch: vi.fn(),
@@ -79,12 +80,11 @@ describe("GroupSchemaForm", () => {
     });
   });
 
-  it("adds an unused segment at 1% taken from the largest row", () => {
+  it("adds an unused segment at 1% taken from the largest row", async () => {
     render(<GroupSchemaForm group={group} onClose={vi.fn()} />);
 
-    fireEvent.change(screen.getByLabelText("Dodaj segment"), {
-      target: { value: "1" },
-    });
+    fireEvent.click(screen.getByRole("combobox", { name: "Dodaj segment" }));
+    fireEvent.click(await screen.findByRole("option", { name: "Rozgrzewka" }));
 
     expect(screen.getByLabelText("Usuń Rozgrzewka")).toBeTruthy();
     expect(screen.getByText("(1%)")).toBeTruthy();
@@ -96,7 +96,8 @@ describe("GroupSchemaForm", () => {
         }) as HTMLButtonElement
       ).disabled,
     ).toBe(false);
-    // MAIN is already in the schema — not offered again
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Dodaj segment" }));
     expect(screen.queryByRole("option", { name: "Część główna" })).toBeNull();
   });
 

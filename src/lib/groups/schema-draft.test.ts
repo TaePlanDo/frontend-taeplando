@@ -5,7 +5,6 @@ import {
   canSaveSchema,
   initDraftFromSchema,
   removeSegment,
-  reorderSegments,
   toSchemaWritePayload,
   type SchemaDraftItem,
 } from "./schema-draft";
@@ -69,7 +68,7 @@ describe("schema-draft", () => {
     expect(addSegment(next, catalog[0])).toEqual(next);
   });
 
-  it("removes a row by segment code and renormalizes to 100", () => {
+  it("removes a row by segment id and renormalizes to 100", () => {
     const start: SchemaDraftItem[] = [
       {
         segmentId: 1,
@@ -84,27 +83,7 @@ describe("schema-draft", () => {
         percentage: 80,
       },
     ];
-    expect(percentages(removeSegment(start, "WARMUP"))).toEqual([100]);
-  });
-
-  it("reorders rows by index", () => {
-    const start: SchemaDraftItem[] = [
-      {
-        segmentId: 1,
-        segmentCode: "WARMUP",
-        segmentName: "Rozgrzewka",
-        percentage: 40,
-      },
-      {
-        segmentId: 3,
-        segmentCode: "MAIN",
-        segmentName: "Część główna",
-        percentage: 60,
-      },
-    ];
-    expect(
-      reorderSegments(start, 0, 1).map((item) => item.segmentCode),
-    ).toEqual(["MAIN", "WARMUP"]);
+    expect(percentages(removeSegment(start, 1))).toEqual([100]);
   });
 
   it("builds the write payload and gates save at min 1%", () => {
