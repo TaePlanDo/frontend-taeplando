@@ -41,6 +41,15 @@ const group: Group = {
   duration_minutes: 90,
   created_at: "2026-10-11T12:00:00Z",
   updated_at: "2026-10-11T13:00:00Z",
+  schema: [
+    {
+      segment_id: 3,
+      segment_code: "MAIN",
+      segment_name: "Część główna",
+      percentage: 100,
+      position: 1,
+    },
+  ],
 };
 
 function renderForm(formGroup: Group | null = null) {
