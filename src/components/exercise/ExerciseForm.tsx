@@ -61,105 +61,109 @@ export function ExerciseForm({ exercise, onClose }: Props) {
 
   return (
     <form
-      className="flex flex-col gap-4"
+      className="flex min-h-0 flex-1 flex-col"
       onSubmit={handleSubmit(submit)}
       noValidate
     >
-      <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
-        <CustomizedInputWithController
-          control={control}
-          name="name"
-          label="Nazwa ćwiczenia"
-          placeholder="np. Borek"
-          disabled={isSubmitting}
-        />
-        <CustomizedPairInputWithControllers
-          control={control}
-          title="Wiek (lata)"
-          first={{
-            name: "minAge",
-            label: "Minimalny wiek",
-            type: "number",
-            min: 1,
-          }}
-          second={{
-            name: "maxAge",
-            label: "Maksymalny wiek",
-            type: "number",
-            min: 1,
-          }}
-          disabled={isSubmitting}
-        />
-        <Controller
-          control={control}
-          name="description"
-          render={({ field, fieldState }) => (
-            <label className="flex flex-col gap-1.5 text-sm">
-              Opis
-              <textarea
-                {...field}
+      <div className="min-h-0 flex-1 overflow-y-auto px-1">
+        <div className="flex flex-col gap-4 pb-4">
+          <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
+            <CustomizedInputWithController
+              control={control}
+              name="name"
+              label="Nazwa ćwiczenia"
+              placeholder="np. Borek"
+              disabled={isSubmitting}
+            />
+            <CustomizedPairInputWithControllers
+              control={control}
+              title="Wiek (lata)"
+              first={{
+                name: "minAge",
+                label: "Minimalny wiek",
+                type: "number",
+                min: 1,
+              }}
+              second={{
+                name: "maxAge",
+                label: "Maksymalny wiek",
+                type: "number",
+                min: 1,
+              }}
+              disabled={isSubmitting}
+            />
+            <Controller
+              control={control}
+              name="description"
+              render={({ field, fieldState }) => (
+                <label className="flex flex-col gap-1.5 text-sm">
+                  Opis
+                  <textarea
+                    {...field}
+                    disabled={isSubmitting}
+                    placeholder="Opisz ćwiczenie, zasady, wariant..."
+                    className="h-24 resize-none rounded-md border border-input bg-input/30 p-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+                  />
+                  {fieldState.error?.message ? (
+                    <InputErrorMessage message={fieldState.error.message} />
+                  ) : null}
+                </label>
+              )}
+            />
+            <div className="flex flex-col gap-3">
+              <CustomizedPairInputWithControllers
+                control={control}
+                title="Liczba uczestników"
+                first={{
+                  name: "minParticipants",
+                  label: "Minimalna liczba uczestników",
+                  type: "number",
+                  min: 1,
+                }}
+                second={{
+                  name: "maxParticipants",
+                  label: "Maksymalna liczba uczestników",
+                  type: "number",
+                  min: 1,
+                }}
                 disabled={isSubmitting}
-                placeholder="Opisz ćwiczenie, zasady, wariant..."
-                className="h-24 resize-none rounded-md border border-input bg-input/30 p-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
               />
-              {fieldState.error?.message ? (
-                <InputErrorMessage message={fieldState.error.message} />
-              ) : null}
-            </label>
-          )}
-        />
-        <div className="flex flex-col gap-3">
-          <CustomizedPairInputWithControllers
-            control={control}
-            title="Liczba uczestników"
-            first={{
-              name: "minParticipants",
-              label: "Minimalna liczba uczestników",
-              type: "number",
-              min: 1,
+              <CustomizedInputWithController
+                control={control}
+                name="durationMinutes"
+                label="Czas trwania w minutach"
+                type="number"
+                min="0"
+                disabled={isSubmitting}
+              />
+            </div>
+          </div>
+          <ExerciseAttributesSelector
+            equipmentIds={values.equipmentIds}
+            typeIds={values.trainingTypeIds}
+            segmentIds={values.segmentIds.map(Number)}
+            onEquipmentIdsChange={(ids) => setValue("equipmentIds", ids)}
+            onTypeIdsChange={(ids) =>
+              setValue("trainingTypeIds", ids, { shouldValidate: true })
+            }
+            onSegmentIdsChange={(ids) =>
+              setValue("segmentIds", ids.map(String), { shouldValidate: true })
+            }
+            errors={{
+              type: errors.trainingTypeIds?.message,
+              segment: errors.segmentIds?.message,
             }}
-            second={{
-              name: "maxParticipants",
-              label: "Maksymalna liczba uczestników",
-              type: "number",
-              min: 1,
-            }}
-            disabled={isSubmitting}
           />
-          <CustomizedInputWithController
-            control={control}
-            name="durationMinutes"
-            label="Czas trwania w minutach"
-            type="number"
-            min="0"
-            disabled={isSubmitting}
-          />
+          {createError || updateError ? (
+            <InputErrorMessage message={createError ?? updateError ?? ""} />
+          ) : null}
         </div>
       </div>
-      <ExerciseAttributesSelector
-        equipmentIds={values.equipmentIds}
-        typeIds={values.trainingTypeIds}
-        segmentIds={values.segmentIds.map(Number)}
-        onEquipmentIdsChange={(ids) => setValue("equipmentIds", ids)}
-        onTypeIdsChange={(ids) =>
-          setValue("trainingTypeIds", ids, { shouldValidate: true })
-        }
-        onSegmentIdsChange={(ids) =>
-          setValue("segmentIds", ids.map(String), { shouldValidate: true })
-        }
-        errors={{
-          type: errors.trainingTypeIds?.message,
-          segment: errors.segmentIds?.message,
-        }}
-      />
-      {createError || updateError ? (
-        <InputErrorMessage message={createError ?? updateError ?? ""} />
-      ) : null}
-      <div className="-mx-6 -mb-6 flex justify-end gap-3 border-t px-6 py-4">
+      <div className="-mx-4 -mb-4 flex shrink-0 flex-col-reverse gap-3 border-t bg-background px-4 py-4 sm:-mx-6 sm:-mb-6 sm:flex-row sm:justify-end sm:px-6">
         <CustomizedButton
           type="button"
           variant="outline"
-          className="w-32"
+          className="w-full sm:w-32"
           onClick={onClose}
         >
           Anuluj
@@ -167,7 +171,7 @@ export function ExerciseForm({ exercise, onClose }: Props) {
         <CustomizedButton
           type="submit"
           variant="primary"
-          className="w-54"
+          className="w-full sm:w-54"
           disabled={isSubmitting}
         >
           {exercise ? "Edytuj ćwiczenie" : "Stwórz ćwiczenie"}
