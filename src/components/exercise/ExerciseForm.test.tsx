@@ -45,14 +45,13 @@ function renderForm() {
   return { onClose };
 }
 
-async function addFromList(label: string, value: string) {
-  fireEvent.click(screen.getByRole("button", { name: new RegExp(label) }));
-  fireEvent.change(
-    await screen.findByLabelText(`Dodaj ${label.toLowerCase()}`),
-    {
-      target: { value },
-    },
+async function addFromList(tabLabel: string, optionLabel: string) {
+  const tab = screen.getByRole("tab", { name: new RegExp(tabLabel) });
+  fireEvent.mouseDown(tab, { button: 0, ctrlKey: false });
+  fireEvent.click(
+    await screen.findByLabelText(`Dodaj ${tabLabel.toLowerCase()}`),
   );
+  fireEvent.click(await screen.findByRole("option", { name: optionLabel }));
 }
 
 describe("ExerciseForm", () => {
@@ -97,8 +96,8 @@ describe("ExerciseForm", () => {
         target: { value },
       });
     });
-    await addFromList("Typ", "t1");
-    await addFromList("Segment", "1");
+    await addFromList("Typ", "Technika");
+    await addFromList("Segment", "Rozgrzewka");
     createExercise.mockResolvedValueOnce({});
     fireEvent.click(screen.getByRole("button", { name: "Stwórz ćwiczenie" }));
     await waitFor(() => expect(createExercise).toHaveBeenCalled());

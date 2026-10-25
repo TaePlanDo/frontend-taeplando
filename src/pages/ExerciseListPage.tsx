@@ -5,6 +5,7 @@ import { ExerciseCardItem } from "@/components/exercise/ExerciseCardItem";
 import { ExerciseForm } from "@/components/exercise/ExerciseForm";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
+import { formatExerciseCount } from "@/lib/format/plural";
 import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
 import { EmptyListView } from "@/components/shared/EmptyListView";
 import { ErrorListView } from "@/components/shared/ErrorListView";
@@ -128,7 +129,7 @@ export function ExerciseListPage() {
             variant="ghost"
             className="rounded-full bg-transparent px-6 py-2 text-secondary"
           >
-            {total} ćwiczeń
+            {formatExerciseCount(total)}
           </Badge>
         </div>
         <Separator className="my-4" />

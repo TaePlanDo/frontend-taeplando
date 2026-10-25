@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatGroupCount } from "./plural";
+import { formatExerciseCount, formatGroupCount } from "./plural";
 
 describe("formatGroupCount", () => {
   it("uses singular for one", () => {
@@ -23,5 +23,24 @@ describe("formatGroupCount", () => {
   it("uses few form for 22-24", () => {
     expect(formatGroupCount(22)).toBe("22 grupy");
     expect(formatGroupCount(24)).toBe("24 grupy");
+  });
+});
+
+describe("formatExerciseCount", () => {
+  it("uses singular for one", () => {
+    expect(formatExerciseCount(1)).toBe("1 ćwiczenie");
+  });
+
+  it("uses few form for 2-4 and 22-24", () => {
+    expect(formatExerciseCount(2)).toBe("2 ćwiczenia");
+    expect(formatExerciseCount(4)).toBe("4 ćwiczenia");
+    expect(formatExerciseCount(22)).toBe("22 ćwiczenia");
+  });
+
+  it("uses many form for zero, 5+ and teens", () => {
+    expect(formatExerciseCount(0)).toBe("0 ćwiczeń");
+    expect(formatExerciseCount(5)).toBe("5 ćwiczeń");
+    expect(formatExerciseCount(11)).toBe("11 ćwiczeń");
+    expect(formatExerciseCount(21)).toBe("21 ćwiczeń");
   });
 });

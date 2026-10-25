@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { TriangleAlert } from "lucide-react";
 
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
+import { CustomizedSelect } from "@/components/shared/CustomizedSelect";
 import { CustomizedTabs } from "@/components/shared/CustomizedTabs";
 import { useExerciseCatalogs } from "@/hooks/exercises/useExerciseCatalogs";
 
@@ -122,19 +123,18 @@ export function ExerciseAttributesSelector({
           </button>
         </div>
       ) : available.length ? (
-        <select
-          value=""
-          onChange={(event) => add(event.target.value)}
-          className="mt-3 h-10 w-full rounded-md border bg-input/30 px-3 text-sm"
-          aria-label={`Dodaj ${tabs.find(({ id }) => id === tab)?.label.toLowerCase()}`}
-        >
-          <option value="">Wybierz z listy…</option>
-          {available.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
+        <CustomizedSelect
+          key={`${tab}-${active.ids.join("-")}`}
+          label={`Dodaj ${tabs.find(({ id }) => id === tab)?.label.toLowerCase()}`}
+          labelClassName="sr-only"
+          placeholder="Wybierz z listy…"
+          options={available.map((item) => ({
+            value: String(item.id),
+            label: item.name,
+          }))}
+          className="mt-3"
+          onValueChange={add}
+        />
       ) : (
         <p className="mt-3 rounded-md border border-foreground/10 bg-input/30 px-3 py-2 text-sm text-foreground/60">
           Wszystkie elementy z listy są już dodane

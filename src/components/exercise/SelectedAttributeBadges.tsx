@@ -18,7 +18,7 @@ export function SelectedAttributeBadges({ items, onRemove }: Props) {
       {items.map((item) => (
         <Badge
           key={item.id}
-          variant="secondary"
+          variant="secondaryOutline"
           className="gap-1.5 px-2.5 py-1"
         >
           {item.name}

@@ -33,9 +33,8 @@ describe("ExerciseAttributesSelector", () => {
 
     const typeTab = screen.getByRole("tab", { name: /Typ/ });
     fireEvent.mouseDown(typeTab, { button: 0, ctrlKey: false });
-    fireEvent.change(await screen.findByLabelText("Dodaj typ"), {
-      target: { value: "t1" },
-    });
+    fireEvent.click(await screen.findByLabelText("Dodaj typ"));
+    fireEvent.click(await screen.findByRole("option", { name: "Technika" }));
 
     expect(onTypeIdsChange).toHaveBeenCalledWith(["t1"]);
   });
