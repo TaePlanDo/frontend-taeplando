@@ -7,6 +7,7 @@ import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInputWithController } from "@/components/shared/CustomizedInputWithController";
 import { CustomizedPairInputWithControllers } from "@/components/shared/CustomizedPairInputWithControllers";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCreateExercise } from "@/hooks/exercises/useCreateExercise";
 import { useUpdateExercise } from "@/hooks/exercises/useUpdateExercise";
 import { toExerciseFormValues, toExerciseWrite } from "@/lib/mappers/exercise";
@@ -61,11 +62,14 @@ export function ExerciseForm({ exercise, onClose }: Props) {
 
   return (
     <form
-      className="flex min-h-0 flex-1 flex-col"
+      className="flex h-full min-h-0 flex-col overflow-hidden"
       onSubmit={handleSubmit(submit)}
       noValidate
     >
-      <div className="min-h-0 flex-1 overflow-y-auto px-1">
+      <ScrollArea
+        type="always"
+        className="h-full min-h-0 flex-1 overflow-hidden px-1"
+      >
         <div className="flex flex-col gap-4 pb-4">
           <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
             <CustomizedInputWithController
@@ -158,8 +162,8 @@ export function ExerciseForm({ exercise, onClose }: Props) {
             <InputErrorMessage message={createError ?? updateError ?? ""} />
           ) : null}
         </div>
-      </div>
-      <div className="-mx-4 -mb-4 flex shrink-0 flex-col-reverse gap-3 border-t bg-background px-4 py-4 sm:-mx-6 sm:-mb-6 sm:flex-row sm:justify-end sm:px-6">
+      </ScrollArea>
+      <div className="-mx-4 flex shrink-0 flex-col-reverse gap-3 border-t bg-background px-4 pt-4 pb-2 sm:-mx-6 sm:flex-row sm:justify-end sm:px-6">
         <CustomizedButton
           type="button"
           variant="outline"

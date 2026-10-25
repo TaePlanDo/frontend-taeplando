@@ -101,7 +101,7 @@ export function ExerciseListPage() {
             <CustomizedDialog
               open={dialogOpen}
               onOpenChange={setDialogOpen}
-              className="max-h-[calc(100dvh-2rem)] gap-5 p-4 sm:max-h-[calc(100dvh-4rem)] sm:max-w-190 sm:p-6"
+              className="grid-rows-[auto_minmax(0,1fr)] max-h-[calc(100dvh-2rem)] gap-5 overflow-hidden p-4 sm:!top-8 sm:!bottom-8 sm:!h-auto sm:!translate-y-0 sm:max-w-190 sm:p-6"
               title={editingExercise ? "Edytuj ćwiczenie" : "Stwórz ćwiczenie"}
               trigger={
                 <CustomizedButton
