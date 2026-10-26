@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { cn } from "cn";
 
 import {
@@ -21,6 +22,7 @@ type CustomizedSelectProps = {
   value?: string;
   disabled?: boolean;
   className?: string;
+  labelClassName?: string;
   onValueChange: (value: string) => void;
 };
 
@@ -32,15 +34,22 @@ export function CustomizedSelect({
   value,
   disabled,
   className,
+  labelClassName,
   onValueChange,
 }: CustomizedSelectProps) {
+  const generatedId = useId();
+  const selectId = id ?? generatedId;
+
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <label htmlFor={id} className="text-sm font-medium text-foreground">
+      <label
+        htmlFor={selectId}
+        className={cn("text-sm font-medium text-foreground", labelClassName)}
+      >
         {label}
       </label>
       <Select value={value} onValueChange={onValueChange} disabled={disabled}>
-        <SelectTrigger id={id} className="w-full">
+        <SelectTrigger id={selectId} className="w-full">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>

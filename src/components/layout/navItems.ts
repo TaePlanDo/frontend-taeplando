@@ -9,6 +9,7 @@ export type NavItem = {
 export const NAV_ITEMS: NavItem[] = [
   { label: "Start", to: "/", end: true },
   { label: "Grupy", to: "/groups" },
+  { label: "Ćwiczenia", to: "/exercises" },
   { label: "Konto", to: "/account" },
 ];
 
