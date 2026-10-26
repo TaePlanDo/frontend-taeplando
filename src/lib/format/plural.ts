@@ -35,3 +35,21 @@ function exerciseWord(count: number): string {
 export function formatExerciseCount(count: number): string {
   return `${count} ${exerciseWord(count)}`;
 }
+
+function equipmentWord(count: number): string {
+  const rule = pluralRules.select(count);
+
+  if (rule === "one") {
+    return "typ sprzętu";
+  }
+
+  if (rule === "few") {
+    return "typy sprzętu";
+  }
+
+  return "typów sprzętu";
+}
+
+export function formatEquipmentCount(count: number): string {
+  return `${count} ${equipmentWord(count)}`;
+}
