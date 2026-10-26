@@ -10,11 +10,9 @@ import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
 import { EmptyListView } from "@/components/shared/EmptyListView";
 import { ErrorListView } from "@/components/shared/ErrorListView";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useDeleteEquipment } from "@/hooks/equipment/useDeleteEquipment";
 import { useEquipment } from "@/hooks/equipment/useEquipment";
-import { formatEquipmentCount } from "@/lib/format/plural";
 import type { Equipment } from "@/types/equipment";
 
 export function EquipmentListPage() {
@@ -26,7 +24,6 @@ export function EquipmentListPage() {
     items: equipment,
     page,
     totalPages,
-    total,
     isLoading,
     isFetching,
     isError,
@@ -124,16 +121,10 @@ export function EquipmentListPage() {
             </CustomizedDialog>
           </div>
         </div>
-        <div className="mt-4 flex flex-row items-end justify-between">
+        <div className="mt-4">
           <h2 className="text-xl font-semibold text-foreground">
             Lista sprzętu
           </h2>
-          <Badge
-            variant="ghost"
-            className="rounded-full bg-transparent px-6 py-2 text-secondary"
-          >
-            {formatEquipmentCount(total)}
-          </Badge>
         </div>
         <Separator className="my-4" />
         {renderList()}

@@ -117,7 +117,6 @@ describe("EquipmentListPage", () => {
 
     expect(screen.getByText("Tarcza treningowa")).toBeTruthy();
     expect(screen.getByText("Łapy trenerskie")).toBeTruthy();
-    expect(screen.getByText("2 typy sprzętu")).toBeTruthy();
     expect(screen.getByRole("link", { current: "page" }).textContent).toBe("2");
   });
 

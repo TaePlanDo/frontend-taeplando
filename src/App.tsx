@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthorizedLayout } from "@/components/layout/AuthorizedLayout";
 import { Toaster } from "@/components/ui/sonner";
 import { AccountPage } from "@/pages/AccountPage";
+import { EquipmentListPage } from "@/pages/EquipmentListPage";
 import { GroupListPage } from "@/pages/GroupListPage";
 import { ExerciseListPage } from "@/pages/ExerciseListPage";
 import { HomePage } from "@/pages/HomePage";
@@ -34,6 +35,7 @@ export function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/groups" element={<GroupListPage />} />
+          <Route path="/equipment" element={<EquipmentListPage />} />
           <Route path="/exercises" element={<ExerciseListPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
