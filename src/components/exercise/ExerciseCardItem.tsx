@@ -85,7 +85,7 @@ export function ExerciseCardItem({
             aria-label={`Pokaż szczegóły: ${exercise.name}`}
           >
             <Eye className="size-5" aria-hidden />
-            <span className="hidden sm:inline">Szczegóły</span>
+            <span>Szczegóły</span>
           </button>
         </div>
         <div className="flex flex-col gap-1.5">

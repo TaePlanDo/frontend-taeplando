@@ -65,11 +65,12 @@ export function ExerciseListPage() {
           title={editingExercise ? "Edytuj ćwiczenie" : "Stwórz ćwiczenie"}
           trigger={
             <CustomizedButton
-              className="max-w-44 pt-2 pb-2.5 text-sm"
+              className="w-auto max-w-44 px-4 pt-2 pb-2.5 text-sm lg:w-full"
               onClick={() => setEditingExercise(null)}
             >
               <PlusIcon className="mt-0.5 size-5" />
-              Dodaj ćwiczenie
+              <span className="lg:hidden">Dodaj</span>
+              <span className="hidden lg:inline">Dodaj ćwiczenie</span>
             </CustomizedButton>
           }
         >
