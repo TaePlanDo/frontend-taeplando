@@ -46,12 +46,14 @@ export function ExerciseListPage() {
       description="Zarządzaj ćwiczeniami w jednym miejscu. Dodawaj nowe, aktualizuj szczegóły i miej całą bazę ćwiczeń zawsze pod ręką."
       sectionTitle="Lista ćwiczeń"
       sectionAccessory={
-        <Badge
-          variant="ghost"
-          className="rounded-full bg-transparent px-6 py-2 text-secondary"
-        >
-          {formatExerciseCount(total)}
-        </Badge>
+        isError ? null : (
+          <Badge
+            variant="ghost"
+            className="rounded-full bg-transparent px-6 py-2 text-secondary"
+          >
+            {formatExerciseCount(total)}
+          </Badge>
+        )
       }
       action={
         <CustomizedDialog
