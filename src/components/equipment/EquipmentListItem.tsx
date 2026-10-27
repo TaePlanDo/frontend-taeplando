@@ -38,7 +38,7 @@ export function EquipmentListItem({
             </CardItemActionButton>
           }
           title="Usuwanie sprzętu"
-          message={`Czy na pewno chcesz usunąć „${equipment.name}”? Tej operacji nie da się cofnąć.`}
+          message={`Czy na pewno chcesz usunąć „${equipment.name}”? Sprzęt zostanie także odłączony od wszystkich ćwiczeń, w których jest używany, i przestanie być w nich widoczny. Tej operacji nie da się cofnąć.`}
           onSubmit={onDelete}
         />
       </div>
