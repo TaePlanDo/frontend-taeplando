@@ -48,7 +48,7 @@ describe("EquipmentListItem", () => {
     expect(screen.getByText("Usuwanie sprzętu")).toBeTruthy();
     expect(
       screen.getByText(
-        `Czy na pewno chcesz usunąć „${equipment.name}”? Tej operacji nie da się cofnąć.`,
+        `Czy na pewno chcesz usunąć „${equipment.name}”? Sprzęt zostanie także odłączony od wszystkich ćwiczeń, w których jest używany, i przestanie być w nich widoczny. Tej operacji nie da się cofnąć.`,
       ),
     ).toBeTruthy();
     expect(onDelete).not.toHaveBeenCalled();
