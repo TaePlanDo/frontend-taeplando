@@ -3,16 +3,16 @@ import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { expect, it, vi } from "vitest";
 
-import { getEquipmentRequest } from "@/lib/api/equipment";
+import { getEquipmentPageRequest } from "@/lib/api/equipment";
 
 import { useEquipment } from "./useEquipment";
 
 vi.mock("@/lib/api/equipment", () => ({
-  getEquipmentRequest: vi.fn(),
+  getEquipmentPageRequest: vi.fn(),
 }));
 
 it("loads the first page of equipment", async () => {
-  vi.mocked(getEquipmentRequest).mockResolvedValue({
+  vi.mocked(getEquipmentPageRequest).mockResolvedValue({
     items: [{ id: "equipment-1", name: "Tarcza treningowa" }],
     total: 1,
     page: 1,
@@ -30,7 +30,7 @@ it("loads the first page of equipment", async () => {
 
   await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-  expect(getEquipmentRequest).toHaveBeenCalledWith(1, 6);
+  expect(getEquipmentPageRequest).toHaveBeenCalledWith(1, 6);
   expect(result.current.items).toEqual([
     { id: "equipment-1", name: "Tarcza treningowa" },
   ]);

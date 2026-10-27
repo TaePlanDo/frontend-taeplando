@@ -4,7 +4,7 @@ import type { PaginatedResponse } from "@/types/pagination";
 
 import { apiJson } from "./client";
 
-export async function getEquipmentRequest(
+export async function getEquipmentPageRequest(
   page: number,
   pageSize: number,
 ): Promise<PaginatedResponse<Equipment>> {

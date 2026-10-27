@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createEquipmentRequest,
   deleteEquipmentRequest,
-  getEquipmentRequest,
+  getEquipmentPageRequest,
   updateEquipmentRequest,
 } from "./equipment";
 import { ApiError } from "./errors";
@@ -21,7 +21,7 @@ describe("equipment API", () => {
     const fetchMock = vi.fn().mockResolvedValue(response(200, { items: [] }));
     vi.stubGlobal("fetch", fetchMock);
 
-    await getEquipmentRequest(2, 6);
+    await getEquipmentPageRequest(2, 6);
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/equipment?page=2&page_size=6",

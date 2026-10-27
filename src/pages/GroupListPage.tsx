@@ -1,21 +1,19 @@
 import { useState } from "react";
+import { PlusIcon } from "lucide-react";
 import { toast } from "sonner";
 
-import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { GroupCardItem } from "@/components/group/GroupCardItem";
 import { GroupDetailsForm } from "@/components/group/GroupDetailsForm";
 import { GroupSchemaForm } from "@/components/group/GroupSchemaForm";
-import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
+import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
-import { EmptyListView } from "@/components/shared/EmptyListView";
-import { ErrorListView } from "@/components/shared/ErrorListView";
-import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
+import { ListStateView } from "@/components/shared/ListStateView";
+import { ManagementPageLayout } from "@/components/shared/ManagementPageLayout";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { useDeleteGroup } from "@/hooks/groups/useDeleteGroup";
 import { useGroups } from "@/hooks/groups/useGroups";
 import { formatGroupCount } from "@/lib/format/plural";
-import { PlusIcon } from "lucide-react";
 import type { Group } from "@/types/group";
 
 export function GroupListPage() {
@@ -30,9 +28,7 @@ export function GroupListPage() {
     refetch,
     goToPage,
   } = useGroups();
-
   const { deleteGroup } = useDeleteGroup();
-
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [schemaDialogOpen, setSchemaDialogOpen] = useState(false);
@@ -57,126 +53,101 @@ export function GroupListPage() {
     }
   }
 
-  function renderList() {
-    if (isError) {
-      return (
-        <ErrorListView
-          title="Nie udało się pobrać grup"
-          message="Sprawdź połączenie i spróbuj ponownie"
-          onRetry={() => void refetch()}
-          isRetrying={isFetching}
-        />
-      );
-    }
-
-    if (isLoading) {
-      return <LoadingSpinner className="h-92" />;
-    }
-
-    if (groups.length === 0) {
-      return (
-        <EmptyListView
-          title="Jeszcze nie masz żadnych grup"
-          message="Kliknij dodaj grupę, aby utworzyć swoją pierwszą grupę"
-        />
-      );
-    }
-
-    return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {groups.map((group) => (
-          <GroupCardItem
-            key={group.id}
-            group={group}
-            onEdit={() => openEdit(group)}
-            onEditSchema={() => openSchema(group)}
-            onDelete={() => handleDelete(group)}
-          />
-        ))}
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-1 justify-center">
-      <div className="flex flex-col gap-4 h-full lg:max-w-220 max-w-96 mb-12">
-        <div className="flex flex-row gap-4 h-full mt-12">
-          <div className="flex flex-col gap-2 w-2/3">
-            <h1 className="text-2xl text-primary font-bold">
-              Wszystkie grupy treningowe
-            </h1>
-            <p className="text-lg text-foreground lg:flex hidden">
-              Organizuj grupy w jednym miejscu. Dodawaj nowe, aktualizuj
-              szczegóły i miej wszystko pod ręką.
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 w-1/3 items-end justify-end">
-            <CustomizedDialog
-              trigger={
-                <CustomizedButton
-                  className="max-w-40 text-sm pt-2 pb-2.5"
-                  onClick={() => setEditingGroup(null)}
-                >
-                  <PlusIcon className="w-5 h-5 mt-0.5" />
-                  Dodaj grupę
-                </CustomizedButton>
-              }
-              title={
-                editingGroup
-                  ? "Edytuj Grupę treningową"
-                  : "Stwórz Grupę treningową"
-              }
-              open={dialogOpen}
-              onOpenChange={setDialogOpen}
-            >
-              <GroupDetailsForm
-                group={editingGroup}
-                onClose={() => setDialogOpen(false)}
-              />
-            </CustomizedDialog>
-            <CustomizedDialog
-              title={
-                schemaGroup ? `Schemat: ${schemaGroup.name}` : "Schemat grupy"
-              }
-              open={schemaDialogOpen}
-              onOpenChange={(open) => {
-                setSchemaDialogOpen(open);
-                if (!open) {
-                  setSchemaGroup(null);
-                }
-              }}
-            >
-              {schemaGroup ? (
-                <GroupSchemaForm
-                  group={schemaGroup}
-                  onClose={() => {
-                    setSchemaDialogOpen(false);
-                    setSchemaGroup(null);
-                  }}
-                />
-              ) : null}
-            </CustomizedDialog>
-          </div>
-        </div>
-        <div className="flex flex-row justify-between items-end mt-4">
-          <h2 className="text-xl text-foreground font-semibold">Lista grup</h2>
-          <Badge
-            variant="ghost"
-            className="rounded-full bg-transparent text-secondary px-6 py-2"
+    <ManagementPageLayout
+      title="Wszystkie grupy treningowe"
+      description="Organizuj grupy w jednym miejscu. Dodawaj nowe, aktualizuj szczegóły i miej wszystko pod ręką."
+      sectionTitle="Lista grup"
+      sectionAccessory={
+        <Badge
+          variant="ghost"
+          className="rounded-full bg-transparent px-6 py-2 text-secondary"
+        >
+          {formatGroupCount(total)}
+        </Badge>
+      }
+      action={
+        <>
+          <CustomizedDialog
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+            title={
+              editingGroup
+                ? "Edytuj Grupę treningową"
+                : "Stwórz Grupę treningową"
+            }
+            trigger={
+              <CustomizedButton
+                className="max-w-40 pt-2 pb-2.5 text-sm"
+                onClick={() => setEditingGroup(null)}
+              >
+                <PlusIcon className="mt-0.5 size-5" />
+                Dodaj grupę
+              </CustomizedButton>
+            }
           >
-            {formatGroupCount(total)}
-          </Badge>
-        </div>
-        <Separator className="my-4" />
-        {renderList()}
-        {isError ? null : (
+            <GroupDetailsForm
+              group={editingGroup}
+              onClose={() => setDialogOpen(false)}
+            />
+          </CustomizedDialog>
+          <CustomizedDialog
+            title={
+              schemaGroup ? `Schemat: ${schemaGroup.name}` : "Schemat grupy"
+            }
+            open={schemaDialogOpen}
+            onOpenChange={(open) => {
+              setSchemaDialogOpen(open);
+              if (!open) {
+                setSchemaGroup(null);
+              }
+            }}
+          >
+            {schemaGroup ? (
+              <GroupSchemaForm
+                group={schemaGroup}
+                onClose={() => {
+                  setSchemaDialogOpen(false);
+                  setSchemaGroup(null);
+                }}
+              />
+            ) : null}
+          </CustomizedDialog>
+        </>
+      }
+      pagination={
+        isError ? null : (
           <CustomizedPagination
             pagesNumber={totalPages}
             currentPage={page}
             goToPage={goToPage}
           />
-        )}
-      </div>
-    </div>
+        )
+      }
+    >
+      <ListStateView
+        isError={isError}
+        isLoading={isLoading}
+        isEmpty={groups.length === 0}
+        errorTitle="Nie udało się pobrać grup"
+        errorMessage="Sprawdź połączenie i spróbuj ponownie"
+        onRetry={() => void refetch()}
+        isRetrying={isFetching}
+        emptyTitle="Jeszcze nie masz żadnych grup"
+        emptyMessage="Kliknij dodaj grupę, aby utworzyć swoją pierwszą grupę"
+      >
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {groups.map((group) => (
+            <GroupCardItem
+              key={group.id}
+              group={group}
+              onEdit={() => openEdit(group)}
+              onEditSchema={() => openSchema(group)}
+              onDelete={() => handleDelete(group)}
+            />
+          ))}
+        </div>
+      </ListStateView>
+    </ManagementPageLayout>
   );
 }
