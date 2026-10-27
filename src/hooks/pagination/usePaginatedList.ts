@@ -1,9 +1,10 @@
 import {
   keepPreviousData,
+  onlineManager,
   useQuery,
   type QueryKey,
 } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
 import type { PaginatedResponse } from "@/types/pagination";
 
@@ -17,6 +18,14 @@ type UsePaginatedListOptions<TItem> = {
   pageSize?: number;
 };
 
+function useOnlineState() {
+  return useSyncExternalStore(
+    (onStoreChange) => onlineManager.subscribe(onStoreChange),
+    () => onlineManager.isOnline(),
+    () => true,
+  );
+}
+
 export function usePaginatedList<TItem>({
   queryKey,
   fetchPage,
@@ -24,6 +33,7 @@ export function usePaginatedList<TItem>({
   pageSize = 6,
 }: UsePaginatedListOptions<TItem>) {
   const [page, setPage] = useState(initialPage);
+  const isOnline = useOnlineState();
 
   const query = useQuery({
     queryKey: [...queryKey, { page, pageSize }],
@@ -54,7 +64,9 @@ export function usePaginatedList<TItem>({
     page,
     total: data?.total ?? 0,
     totalPages,
-    isLoading: query.isLoading || query.isPlaceholderData || isPastLastPage,
+    hasData: data !== undefined,
+    isOffline: !isOnline,
+    isLoading: query.isPending || query.isPlaceholderData || isPastLastPage,
     isFetching: query.isFetching,
     isError: query.isError,
     refetch: query.refetch,

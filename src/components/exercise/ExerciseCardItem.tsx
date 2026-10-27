@@ -9,6 +9,7 @@ import type { Exercise } from "@/types/exercise";
 
 type ExerciseCardItemProps = {
   exercise: Exercise;
+  isOffline?: boolean;
   onEdit: () => void;
   onDelete: () => void | Promise<void>;
 };
@@ -53,6 +54,7 @@ function AttributeBadges({
 
 export function ExerciseCardItem({
   exercise,
+  isOffline = false,
   onEdit,
   onDelete,
 }: ExerciseCardItemProps) {
@@ -63,7 +65,11 @@ export function ExerciseCardItem({
   return (
     <Card className="flex-row gap-4 rounded-2xl bg-transparent p-4 shadow-none">
       <img
-        src={exercise.image_url ?? "/exercise-icon.png"}
+        src={
+          isOffline
+            ? "/exercise-icon.png"
+            : (exercise.image_url ?? "/exercise-icon.png")
+        }
         alt=""
         className="size-22 shrink-0 rounded-2xl bg-muted object-cover"
         onError={(event) => {

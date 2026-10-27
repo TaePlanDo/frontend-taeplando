@@ -25,6 +25,8 @@ export function GroupListPage() {
     isLoading,
     isFetching,
     isError,
+    isOffline,
+    hasData,
     refetch,
     goToPage,
   } = useGroups();
@@ -59,12 +61,14 @@ export function GroupListPage() {
       description="Organizuj grupy w jednym miejscu. Dodawaj nowe, aktualizuj szczegóły i miej wszystko pod ręką."
       sectionTitle="Lista grup"
       sectionAccessory={
-        <Badge
-          variant="ghost"
-          className="rounded-full bg-transparent px-6 py-2 text-secondary"
-        >
-          {formatGroupCount(total)}
-        </Badge>
+        isError || (isOffline && !hasData) ? null : (
+          <Badge
+            variant="ghost"
+            className="rounded-full bg-transparent px-6 py-2 text-secondary"
+          >
+            {formatGroupCount(total)}
+          </Badge>
+        )
       }
       action={
         <>
@@ -116,7 +120,7 @@ export function GroupListPage() {
         </>
       }
       pagination={
-        isError ? null : (
+        isError && !hasData ? null : (
           <CustomizedPagination
             pagesNumber={totalPages}
             currentPage={page}
@@ -127,6 +131,8 @@ export function GroupListPage() {
     >
       <ListStateView
         isError={isError}
+        isOffline={isOffline}
+        hasData={hasData}
         isLoading={isLoading}
         isEmpty={groups.length === 0}
         errorTitle="Nie udało się pobrać grup"

@@ -25,6 +25,8 @@ export function EquipmentListPage() {
     isLoading,
     isFetching,
     isError,
+    isOffline,
+    hasData,
     refetch,
     goToPage,
   } = useEquipment();
@@ -72,7 +74,7 @@ export function EquipmentListPage() {
         </CustomizedDialog>
       }
       pagination={
-        isError ? null : (
+        isError && !hasData ? null : (
           <CustomizedPagination
             pagesNumber={totalPages}
             currentPage={page}
@@ -83,6 +85,8 @@ export function EquipmentListPage() {
     >
       <ListStateView
         isError={isError}
+        isOffline={isOffline}
+        hasData={hasData}
         isLoading={isLoading}
         isEmpty={equipment.length === 0}
         errorTitle="Nie udało się pobrać sprzętu"

@@ -26,6 +26,8 @@ export function ExerciseListPage() {
     isLoading,
     isFetching,
     isError,
+    isOffline,
+    hasData,
     refetch,
     goToPage,
   } = useExercises();
@@ -46,7 +48,7 @@ export function ExerciseListPage() {
       description="Zarządzaj ćwiczeniami w jednym miejscu. Dodawaj nowe, aktualizuj szczegóły i miej całą bazę ćwiczeń zawsze pod ręką."
       sectionTitle="Lista ćwiczeń"
       sectionAccessory={
-        isError ? null : (
+        isError || (isOffline && !hasData) ? null : (
           <Badge
             variant="ghost"
             className="rounded-full bg-transparent px-6 py-2 text-secondary"
@@ -79,7 +81,7 @@ export function ExerciseListPage() {
         </CustomizedDialog>
       }
       pagination={
-        isError ? null : (
+        isError || (isOffline && !hasData) ? null : (
           <CustomizedPagination
             pagesNumber={totalPages}
             currentPage={page}
@@ -90,6 +92,8 @@ export function ExerciseListPage() {
     >
       <ListStateView
         isError={isError}
+        isOffline={isOffline}
+        hasData={hasData}
         isLoading={isLoading}
         isEmpty={exercises.length === 0}
         errorTitle="Nie udało się pobrać ćwiczeń"
@@ -104,6 +108,7 @@ export function ExerciseListPage() {
             <ExerciseCardItem
               key={exercise.id}
               exercise={exercise}
+              isOffline={isOffline}
               onEdit={() => {
                 setEditingExercise(exercise);
                 setDialogOpen(true);
