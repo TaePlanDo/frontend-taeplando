@@ -1,3 +1,4 @@
+import { seedSystemData } from "./helpers/backend";
 import { createLocalTrainerAndLogin } from "./helpers/createLocalTrainer";
 import { ExercisesPage } from "./pages/exercises.page";
 import { test } from "./playwright";
@@ -13,6 +14,8 @@ const exercise = {
 };
 
 test.describe("exercise management", () => {
+  test.beforeEach(() => seedSystemData());
+
   test("lists the catalog and manages a trainer-owned exercise", async ({
     page,
   }) => {

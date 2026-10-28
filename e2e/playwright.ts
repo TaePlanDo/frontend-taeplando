@@ -1,6 +1,5 @@
 import { test as base } from "@playwright/test";
 
-import { seedSystemData } from "./helpers/backend";
 import { resetDb } from "./helpers/resetDb";
 
 type AutoFixtures = {
@@ -20,7 +19,6 @@ export const test = base.extend<AutoFixtures>({
     // eslint-disable-next-line no-empty-pattern -- no fixture deps
     async ({}, use) => {
       resetDb();
-      seedSystemData();
       await use();
     },
     { auto: true },
