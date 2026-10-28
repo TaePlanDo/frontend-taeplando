@@ -98,7 +98,7 @@ export class ExercisesPage {
 
   private async selectAttribute(tab: "Typ" | "Segment", value: string) {
     await this.exerciseDialog
-      .getByRole("button", { name: new RegExp(`^${tab}`) })
+      .getByRole("tab", { name: new RegExp(`^${tab}`) })
       .click();
     await this.exerciseDialog
       .getByLabel(`Dodaj ${tab.toLowerCase()}`)
