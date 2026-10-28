@@ -1,8 +1,8 @@
 import { psql } from "./compose";
 
 /**
- * Clear test-created app data while preserving globally seeded training segments.
- * Re-create users and domain data via API helpers (e.g. createLocalTrainer).
+ * Clear test-created app data while preserving fixed training segments.
+ * The test fixture restores the remaining system catalog data after reset.
  * Safe only against the taeplando-e2e Compose project.
  */
 export function resetDb(): void {
