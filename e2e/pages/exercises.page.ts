@@ -101,8 +101,9 @@ export class ExercisesPage {
       .getByRole("tab", { name: new RegExp(`^${tab}`) })
       .click();
     await this.exerciseDialog
-      .getByLabel(`Dodaj ${tab.toLowerCase()}`)
-      .selectOption({ label: value });
+      .getByRole("combobox", { name: `Dodaj ${tab.toLowerCase()}` })
+      .click();
+    await this.page.getByRole("option", { name: value, exact: true }).click();
   }
 
   private exerciseCard(name: string): Locator {
