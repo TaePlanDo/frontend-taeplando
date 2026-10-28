@@ -11,6 +11,12 @@ export type ExerciseFormValues = {
   durationMinutes: number;
 };
 
+export type ExerciseAttributes = {
+  trainingType?: string;
+  segment?: string;
+  equipment?: string;
+};
+
 export class ExercisesPage {
   readonly page: Page;
   readonly heading: Locator;
@@ -35,12 +41,18 @@ export class ExercisesPage {
     await expect(this.heading).toBeVisible();
   }
 
-  async createExercise(values: ExerciseFormValues): Promise<void> {
+  async createExercise(
+    values: ExerciseFormValues,
+    attributes: ExerciseAttributes = {},
+  ): Promise<void> {
     await this.addExerciseButton.click();
     await expect(this.exerciseDialog).toBeVisible();
     await this.fillExerciseForm(values);
-    await this.selectAttribute("Typ", "Technika");
-    await this.selectAttribute("Segment", "Część główna");
+    await this.selectAttribute("Typ", attributes.trainingType ?? "Technika");
+    await this.selectAttribute("Segment", attributes.segment ?? "Część główna");
+    if (attributes.equipment) {
+      await this.selectAttribute("Sprzęt", attributes.equipment);
+    }
     await this.exerciseDialog
       .getByRole("button", { name: "Stwórz ćwiczenie" })
       .click();
@@ -80,11 +92,36 @@ export class ExercisesPage {
       .click();
   }
 
-  async expectExercise(name: string): Promise<void> {
+  async submitExerciseWithoutAttributes(
+    values: ExerciseFormValues,
+  ): Promise<void> {
+    await this.addExerciseButton.click();
+    await expect(this.exerciseDialog).toBeVisible();
+    await this.fillExerciseForm(values);
+    await this.exerciseDialog
+      .getByRole("button", { name: "Stwórz ćwiczenie" })
+      .click();
+  }
+
+  async openAttributeTab(tab: "Sprzęt" | "Typ" | "Segment"): Promise<void> {
+    await this.exerciseDialog
+      .getByRole("tab", { name: new RegExp(`^${tab}`) })
+      .click();
+  }
+
+  async expectExercise(
+    name: string,
+    attributes: ExerciseAttributes = {},
+  ): Promise<void> {
     const card = this.exerciseCard(name);
     await expect(card).toBeVisible();
-    await expect(card).toContainText("Technika");
-    await expect(card).toContainText("Część główna");
+    await expect(card).toContainText(attributes.trainingType ?? "Technika");
+    await expect(card).toContainText(attributes.segment ?? "Część główna");
+    if (attributes.equipment) {
+      await expect(card.getByLabel("Sprzęt")).toContainText(
+        attributes.equipment,
+      );
+    }
   }
 
   async expectNoExercises(): Promise<void> {
@@ -96,7 +133,10 @@ export class ExercisesPage {
     await expect(this.exerciseDialog).toBeVisible();
   }
 
-  private async selectAttribute(tab: "Typ" | "Segment", value: string) {
+  private async selectAttribute(
+    tab: "Sprzęt" | "Typ" | "Segment",
+    value: string,
+  ) {
     await this.exerciseDialog
       .getByRole("tab", { name: new RegExp(`^${tab}`) })
       .click();
