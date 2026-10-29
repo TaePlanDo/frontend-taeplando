@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { ListFilter } from "lucide-react";
 
-import { ExerciseActiveFilterChips } from "@/components/exercise/ExerciseActiveFilterChips";
 import { ExerciseFiltersDialog } from "@/components/exercise/ExerciseFiltersDialog";
+import { SelectedAttributeBadges } from "@/components/exercise/SelectedAttributeBadges";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useExerciseCatalogs } from "@/hooks/exercises/useExerciseCatalogs";
+import { buildActiveFilterChips } from "@/lib/exercises/filter-dimensions";
 import { formatExerciseCount } from "@/lib/format/plural";
 import type {
   ActiveFilterDimension,
@@ -35,6 +37,12 @@ export function ExerciseListFiltersBar({
   const [searchValue, setSearchValue] = useState(filters.name ?? "");
   const onNameChangeRef = useRef(onNameChange);
   onNameChangeRef.current = onNameChange;
+  const { data } = useExerciseCatalogs();
+  const chips = buildActiveFilterChips(filters, {
+    equipment: data?.equipment ?? [],
+    trainingTypes: data?.trainingTypes ?? [],
+    segments: data?.segments ?? [],
+  });
 
   useEffect(() => {
     setSearchValue(filters.name ?? "");
@@ -92,7 +100,10 @@ export function ExerciseListFiltersBar({
           </Badge>
         </div>
       </div>
-      <ExerciseActiveFilterChips filters={filters} onClear={onClearDimension} />
+      <SelectedAttributeBadges
+        items={chips.map((chip) => ({ id: chip.key, name: chip.label }))}
+        onRemove={(id) => onClearDimension(id as ActiveFilterDimension)}
+      />
     </div>
   );
 }
