@@ -10,6 +10,7 @@ import type { Exercise } from "@/types/exercise";
 type ExerciseCardItemProps = {
   exercise: Exercise;
   onEdit: () => void;
+  onView: () => void;
   onDelete: () => void | Promise<void>;
 };
 
@@ -55,6 +56,7 @@ export function ExerciseCardItem({
   exercise,
   onEdit,
   onDelete,
+  onView,
 }: ExerciseCardItemProps) {
   const types = exercise.training_types.map(({ name }) => name);
   const segments = exercise.segments.map(({ name }) => name);
@@ -73,14 +75,12 @@ export function ExerciseCardItem({
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
           <h3 className="truncate text-lg font-semibold">{exercise.name}</h3>
-          <button
-            type="button"
-            className="flex shrink-0 items-center gap-1 text-xs text-secondary"
-            aria-label={`Pokaż szczegóły: ${exercise.name}`}
+          <CardItemActionButton
+            icon={<Eye className="size-4" />}
+            onClick={onView}
           >
-            <Eye className="size-5" aria-hidden />
-            <span className="hidden sm:inline">Szczegóły</span>
-          </button>
+            Szczegóły
+          </CardItemActionButton>
         </div>
         <div className="flex flex-col gap-1.5">
           <AttributeBadges
