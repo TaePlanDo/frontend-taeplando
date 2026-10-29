@@ -3,9 +3,9 @@ import { PlusIcon } from "lucide-react";
 
 import { ExerciseCardItem } from "@/components/exercise/ExerciseCardItem";
 import { ExerciseForm } from "@/components/exercise/ExerciseForm";
+import { ExerciseListFiltersBar } from "@/components/exercise/ExerciseListFiltersBar";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
-import { formatExerciseCount } from "@/lib/format/plural";
 import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
 import { EmptyListView } from "@/components/shared/EmptyListView";
 import { ErrorListView } from "@/components/shared/ErrorListView";
@@ -13,7 +13,7 @@ import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { useExercises } from "@/hooks/exercises/useExercises";
 import { useDeleteExercise } from "@/hooks/exercises/useDeleteExercise";
 import { ExerciseReadonlyModal } from "@/components/exercise/ExerciseReadonlyModal";
-import { Badge } from "@/components/ui/badge";
+import { useExerciseListSearchParams } from "@/hooks/exercises/useExerciseListSearchParams";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import type { Exercise } from "@/types/exercise";
@@ -22,6 +22,16 @@ export function ExerciseListPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogReadonlyOpen, setDialogReadonlyOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
+  const {
+    filters,
+    page: pageFromUrl,
+    dialogFilterCount,
+    hasActiveFilters,
+    setFilters,
+    setPage,
+    setName,
+    clearDimension,
+  } = useExerciseListSearchParams();
   const {
     items: exercises,
     page,
@@ -32,7 +42,11 @@ export function ExerciseListPage() {
     isError,
     refetch,
     goToPage,
-  } = useExercises();
+  } = useExercises({
+    filters,
+    page: pageFromUrl,
+    onPageChange: setPage,
+  });
   const { deleteExercise } = useDeleteExercise();
 
   async function handleDelete(id: string) {
@@ -61,6 +75,14 @@ export function ExerciseListPage() {
     }
 
     if (total === 0) {
+      if (hasActiveFilters) {
+        return (
+          <EmptyListView
+            title="Brak ćwiczeń spełniających wybrane filtry"
+            message="Zmień lub wyczyść filtry, aby zobaczyć więcej wyników"
+          />
+        );
+      }
       return (
         <EmptyListView
           title="Jeszcze nie masz żadnych ćwiczeń"
@@ -142,17 +164,17 @@ export function ExerciseListPage() {
             </CustomizedDialog>
           </div>
         </div>
-        <div className="mt-4 flex flex-row items-end justify-between">
-          <h2 className="text-xl font-semibold text-foreground">
-            Lista ćwiczeń
-          </h2>
-          <Badge
-            variant="ghost"
-            className="rounded-full bg-transparent px-6 py-2 text-secondary"
-          >
-            {formatExerciseCount(total)}
-          </Badge>
-        </div>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">
+          Lista ćwiczeń
+        </h2>
+        <ExerciseListFiltersBar
+          filters={filters}
+          dialogFilterCount={dialogFilterCount}
+          total={total}
+          onNameChange={setName}
+          onFiltersApply={setFilters}
+          onClearDimension={clearDimension}
+        />
         <Separator className="my-4" />
         {renderList()}
         {!isError ? (

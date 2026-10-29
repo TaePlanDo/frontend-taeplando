@@ -1,8 +1,17 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Exercise } from "@/types/exercise";
 import { ExerciseListPage } from "./ExerciseListPage";
+
+function renderPage(initialEntry = "/exercises") {
+  return render(
+    <MemoryRouter initialEntries={[initialEntry]}>
+      <ExerciseListPage />
+    </MemoryRouter>,
+  );
+}
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("@/lib/api/catalogs", () => ({
@@ -69,8 +78,10 @@ const state = {
   refetch,
   goToPage: vi.fn(),
 };
+const useExercisesMock = vi.fn();
+useExercisesMock.mockImplementation(() => state);
 vi.mock("@/hooks/exercises/useExercises", () => ({
-  useExercises: () => state,
+  useExercises: (options?: unknown) => useExercisesMock(options),
 }));
 
 describe("ExerciseListPage", () => {
@@ -89,31 +100,48 @@ describe("ExerciseListPage", () => {
   it("shows the empty view", () => {
     state.items = [];
     state.total = 0;
-    render(<ExerciseListPage />);
+    renderPage();
     expect(screen.getByText("Jeszcze nie masz żadnych ćwiczeń")).toBeTruthy();
+  });
+  it("shows a filtered empty view when filters are active", () => {
+    state.items = [];
+    state.total = 0;
+    renderPage("/exercises?name=brak");
+    expect(
+      screen.getByText("Brak ćwiczeń spełniających wybrane filtry"),
+    ).toBeTruthy();
   });
   it("shows an error and retries", () => {
     state.items = [];
     state.total = 0;
     state.isError = true;
-    render(<ExerciseListPage />);
+    renderPage();
     fireEvent.click(screen.getByRole("button", { name: "Spróbuj ponownie" }));
     expect(refetch).toHaveBeenCalled();
   });
   it("shows loading instead of cards", () => {
     state.isLoading = true;
-    render(<ExerciseListPage />);
+    renderPage();
     expect(screen.getByRole("status")).toBeTruthy();
     expect(screen.queryByText("Ap chagi")).toBeNull();
   });
   it("shows cards with assigned type and segment", () => {
-    render(<ExerciseListPage />);
+    renderPage();
     expect(screen.getByText("Ap chagi")).toBeTruthy();
     expect(screen.getByText("Technika")).toBeTruthy();
     expect(screen.getByText("Rozgrzewka")).toBeTruthy();
   });
+  it("passes URL filters into useExercises", () => {
+    renderPage("/exercises?name=chagi&equipment_ids=eq-1&page=2");
+    expect(useExercisesMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: { name: "chagi", equipment_ids: ["eq-1"] },
+        page: 2,
+      }),
+    );
+  });
   it("opens create and prefilled edit dialogs", async () => {
-    render(<ExerciseListPage />);
+    renderPage();
     fireEvent.click(screen.getByRole("button", { name: /Dodaj ćwiczenie/ }));
     expect(
       await screen.findByRole("heading", { name: "Stwórz ćwiczenie" }),

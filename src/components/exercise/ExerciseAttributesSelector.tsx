@@ -2,11 +2,10 @@ import { useMemo, useState } from "react";
 import { TriangleAlert } from "lucide-react";
 
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
-import { CustomizedSelect } from "@/components/shared/CustomizedSelect";
 import { CustomizedTabs } from "@/components/shared/CustomizedTabs";
 import { useExerciseCatalogs } from "@/hooks/exercises/useExerciseCatalogs";
 
-import { SelectedAttributeBadges } from "./SelectedAttributeBadges";
+import { CatalogMultiSelect } from "./CatalogMultiSelect";
 
 type Tab = "equipment" | "type" | "segment";
 type Props = {
@@ -65,21 +64,12 @@ export function ExerciseAttributesSelector({
     tab,
     typeIds,
   ]);
-  const selected = active.items.filter((item) =>
-    active.ids.includes(String(item.id)),
-  );
-  const available = active.items.filter(
-    (item) => !active.ids.includes(String(item.id)),
-  );
   const count = (id: Tab) =>
     id === "equipment"
       ? equipmentIds.length
       : id === "type"
         ? typeIds.length
         : segmentIds.length;
-  const add = (id: string) => {
-    if (!active.ids.includes(id)) active.setIds([...active.ids, id]);
-  };
 
   return (
     <section className="border-t pt-4">
@@ -115,11 +105,7 @@ export function ExerciseAttributesSelector({
       {tab === "segment" && errors.segment ? (
         <InputErrorMessage message={errors.segment} className="mt-2" />
       ) : null}
-      {isLoading ? (
-        <p className="mt-3 text-sm text-foreground/60">
-          Ładowanie elementów listy…
-        </p>
-      ) : isError ? (
+      {isError ? (
         <div className="mt-3 text-sm text-destructive">
           Nie udało się pobrać elementów listy.{" "}
           <button
@@ -130,30 +116,17 @@ export function ExerciseAttributesSelector({
             Spróbuj ponownie
           </button>
         </div>
-      ) : available.length ? (
-        <CustomizedSelect
-          key={`${tab}-${active.ids.join("-")}`}
+      ) : (
+        <CatalogMultiSelect
+          className="mt-3"
           label={`Dodaj ${tabs.find(({ id }) => id === tab)?.label.toLowerCase()}`}
           labelClassName="sr-only"
-          placeholder="Wybierz z listy…"
-          options={available.map((item) => ({
-            value: String(item.id),
-            label: item.name,
-          }))}
-          className="mt-3"
-          onValueChange={add}
+          items={[...active.items]}
+          selectedIds={active.ids}
+          onSelectedIdsChange={active.setIds}
+          isLoading={isLoading}
         />
-      ) : (
-        <p className="mt-3 rounded-md border border-foreground/10 bg-input/30 px-3 py-2 text-sm text-foreground/60">
-          Wszystkie elementy z listy są już dodane
-        </p>
       )}
-      <SelectedAttributeBadges
-        items={selected}
-        onRemove={(id) =>
-          active.setIds(active.ids.filter((selectedId) => selectedId !== id))
-        }
-      />
     </section>
   );
 }
