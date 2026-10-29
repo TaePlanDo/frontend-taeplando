@@ -125,8 +125,6 @@ export function ExerciseListPage() {
                 onClose={() => setDialogOpen(false)}
               />
             </CustomizedDialog>
-          </div>
-          <div className="flex w-1/3 flex-col items-end justify-end gap-2">
             <CustomizedDialog
               open={dialogReadonlyOpen}
               onOpenChange={setDialogReadonlyOpen}
