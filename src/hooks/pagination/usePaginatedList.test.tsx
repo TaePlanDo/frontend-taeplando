@@ -135,4 +135,41 @@ describe("usePaginatedList", () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.items).toEqual([{ id: "p2" }]);
   });
+
+  it("reports past-last-page clamps through onPageChange when controlled", async () => {
+    let totalPages = 3;
+    const onPageChange = vi.fn();
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
+
+    const { result, rerender } = renderHook(
+      ({ page }: { page: number }) =>
+        usePaginatedList<Item>({
+          queryKey: ["controlled-items"],
+          fetchPage: async (current) =>
+            current > totalPages
+              ? pageOf(current, totalPages, [])
+              : pageOf(current, totalPages),
+          page,
+          onPageChange,
+        }),
+      { wrapper, initialProps: { page: 3 } },
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.page).toBe(3);
+
+    totalPages = 2;
+    act(() => {
+      void result.current.refetch();
+    });
+
+    await waitFor(() => expect(onPageChange).toHaveBeenCalledWith(2));
+    rerender({ page: 2 });
+    await waitFor(() => expect(result.current.page).toBe(2));
+  });
 });
