@@ -12,6 +12,7 @@ import { ErrorListView } from "@/components/shared/ErrorListView";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { useExercises } from "@/hooks/exercises/useExercises";
 import { useDeleteExercise } from "@/hooks/exercises/useDeleteExercise";
+import { ExerciseReadonlyModal } from "@/components/exercise/ExerciseReadonlyModal";
 import { useExerciseListSearchParams } from "@/hooks/exercises/useExerciseListSearchParams";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ import type { Exercise } from "@/types/exercise";
 
 export function ExerciseListPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogReadonlyOpen, setDialogReadonlyOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
   const {
     filters,
@@ -99,6 +101,10 @@ export function ExerciseListPage() {
               setEditingExercise(exercise);
               setDialogOpen(true);
             }}
+            onView={() => {
+              setEditingExercise(exercise);
+              setDialogReadonlyOpen(true);
+            }}
             onDelete={() => handleDelete(exercise.id)}
           />
         ))}
@@ -139,6 +145,21 @@ export function ExerciseListPage() {
                 key={editingExercise?.id ?? "new"}
                 exercise={editingExercise}
                 onClose={() => setDialogOpen(false)}
+              />
+            </CustomizedDialog>
+            <CustomizedDialog
+              open={dialogReadonlyOpen}
+              onOpenChange={setDialogReadonlyOpen}
+              className="grid-rows-[auto_minmax(0,1fr)] max-h-[calc(100dvh-2rem)] gap-5 overflow-hidden p-4 sm:!top-8 sm:!bottom-8 sm:!h-auto sm:!translate-y-0 sm:max-w-190 sm:p-6"
+              title={"Podgląd ćwiczenia"}
+            >
+              <ExerciseReadonlyModal
+                key={editingExercise?.id ?? "new"}
+                exercise={editingExercise}
+                onEdit={() => {
+                  setDialogReadonlyOpen(false);
+                  setDialogOpen(true);
+                }}
               />
             </CustomizedDialog>
           </div>

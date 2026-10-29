@@ -30,11 +30,13 @@ export function GroupCardItem({
 }: GroupCardItemProps) {
   return (
     <Card className="gap-3 rounded-xl bg-transparent py-4 text-foreground shadow-none">
-      <CardHeader className="items-start px-6">
+      <CardHeader className="items-start px-6 h-16">
         <CardTitle>
-          <h3 className="text-lg font-semibold">{group.name}</h3>
+          <h3 className="line-clamp-2 break-words text-lg font-semibold w-60 mr-4">
+            {group.name}
+          </h3>
         </CardTitle>
-        <CardAction className="text-xs text-foreground/80">
+        <CardAction className="text-xs text-foreground/80 break-words">
           {formatGroupActivity(group.created_at, group.updated_at)}
         </CardAction>
       </CardHeader>

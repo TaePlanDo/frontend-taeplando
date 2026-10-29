@@ -14,7 +14,7 @@ export function PersonalDataItem({
   return (
     <>
       <h3 className="text-xl font-semibold text-primary">{title}</h3>
-      <p className="text-lg text-foreground">{value}</p>
+      <p className="text-lg text-foreground truncate">{value}</p>
       {separator && <Separator />}
     </>
   );
