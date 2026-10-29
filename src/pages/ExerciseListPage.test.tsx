@@ -1,9 +1,18 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Exercise } from "@/types/exercise";
 import type { PaginatedListState } from "@/hooks/pagination/listState";
 import { ExerciseListPage } from "./ExerciseListPage";
+
+function renderPage(initialEntry = "/exercises") {
+  return render(
+    <MemoryRouter initialEntries={[initialEntry]}>
+      <ExerciseListPage />
+    </MemoryRouter>,
+  );
+}
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("@/lib/api/catalogs", () => ({
@@ -59,6 +68,7 @@ const exercise: Exercise = {
   segments: [{ id: 1, code: "WARMUP", name: "Rozgrzewka" }],
 };
 const refetch = vi.fn();
+const useExercisesMock = vi.fn();
 const state = {
   items: [exercise],
   page: 1,
@@ -72,12 +82,13 @@ const state = {
   goToPage: vi.fn(),
 };
 vi.mock("@/hooks/exercises/useExercises", () => ({
-  useExercises: () => state,
+  useExercises: (options?: unknown) => useExercisesMock(options),
 }));
 
 describe("ExerciseListPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useExercisesMock.mockImplementation(() => state);
     Object.assign(state, {
       items: [exercise],
       page: 1,
@@ -93,33 +104,59 @@ describe("ExerciseListPage", () => {
     state.items = [];
     state.total = 0;
     state.listState = { kind: "empty" };
-    render(<ExerciseListPage />);
+    renderPage();
     expect(screen.getByText("Jeszcze nie masz żadnych ćwiczeń")).toBeTruthy();
+  });
+  it("shows a filtered empty view when filters are active", () => {
+    state.items = [];
+    state.total = 0;
+    state.listState = { kind: "empty" };
+
+    renderPage("/exercises?name=brak");
+
+    expect(
+      screen.getByText("Brak ćwiczeń spełniających wybrane filtry"),
+    ).toBeTruthy();
   });
   it("shows an error and retries", () => {
     state.items = [];
     state.total = 0;
     state.isError = true;
     state.listState = { kind: "unavailable", reason: "error" };
-    render(<ExerciseListPage />);
+    renderPage();
     fireEvent.click(screen.getByRole("button", { name: "Spróbuj ponownie" }));
     expect(refetch).toHaveBeenCalled();
   });
   it("shows loading instead of cards", () => {
     state.isLoading = true;
     state.listState = { kind: "loading", hasData: true };
-    render(<ExerciseListPage />);
+    renderPage();
     expect(screen.getByRole("status")).toBeTruthy();
     expect(screen.queryByText("Ap chagi")).toBeNull();
   });
   it("shows cards with assigned type and segment", () => {
-    render(<ExerciseListPage />);
+    renderPage();
     expect(screen.getByText("Ap chagi")).toBeTruthy();
     expect(screen.getByText("Technika")).toBeTruthy();
     expect(screen.getByText("Rozgrzewka")).toBeTruthy();
   });
+  it("passes URL filters and page into useExercises", () => {
+    renderPage(
+      "/exercises?name=chagi&equipment_ids=8f20d653-dc8b-4b76-bdb4-b225c7d420a6&page=2",
+    );
+
+    expect(useExercisesMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: {
+          name: "chagi",
+          equipment_ids: ["8f20d653-dc8b-4b76-bdb4-b225c7d420a6"],
+        },
+        page: 2,
+      }),
+    );
+  });
   it("opens create and prefilled edit dialogs", async () => {
-    render(<ExerciseListPage />);
+    renderPage();
     fireEvent.click(screen.getByRole("button", { name: /Dodaj ćwiczenie/ }));
     expect(
       await screen.findByRole("heading", { name: "Stwórz ćwiczenie" }),
@@ -132,5 +169,21 @@ describe("ExerciseListPage", () => {
     expect(
       (screen.getByLabelText("Nazwa ćwiczenia") as HTMLInputElement).value,
     ).toBe("Ap chagi");
+  });
+
+  it("does not offer editing from a global exercise preview", async () => {
+    state.items = [{ ...exercise, scope: "GLOBAL" }];
+    renderPage();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "Podgląd ćwiczenia" }),
+    ).toBeTruthy();
+    expect(
+      screen.queryByRole("button", { name: "Edytuj ćwiczenie" }),
+    ).toBeNull();
   });
 });

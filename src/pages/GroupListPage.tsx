@@ -63,7 +63,7 @@ export function GroupListPage() {
         showListMetadata ? (
           <Badge
             variant="ghost"
-            className="rounded-full bg-transparent px-6 py-2 text-secondary"
+            className="h-10 rounded-full border border-border bg-transparent px-6 text-sm font-medium text-foreground"
           >
             {formatGroupCount(total)}
           </Badge>

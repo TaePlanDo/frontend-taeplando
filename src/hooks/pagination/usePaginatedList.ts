@@ -9,15 +9,34 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import type { PaginatedResponse } from "@/types/pagination";
 import { getPaginatedListState } from "./listState";
 
-type UsePaginatedListOptions<TItem> = {
+type PaginatedListBaseOptions<TItem> = {
   queryKey: QueryKey;
   fetchPage: (
     page: number,
     pageSize: number,
   ) => Promise<PaginatedResponse<TItem>>;
-  initialPage?: number;
   pageSize?: number;
 };
+
+type ControlledPagination = {
+  page: number;
+  onPageChange: (page: number) => void;
+};
+
+type UncontrolledPagination = {
+  initialPage?: number;
+  page?: never;
+  onPageChange?: never;
+};
+
+export type UsePaginatedListOptions<TItem> = PaginatedListBaseOptions<TItem> &
+  (ControlledPagination | UncontrolledPagination);
+
+function isControlledPagination<TItem>(
+  options: UsePaginatedListOptions<TItem>,
+): options is PaginatedListBaseOptions<TItem> & ControlledPagination {
+  return options.page !== undefined;
+}
 
 function useOnlineState() {
   return useSyncExternalStore(
@@ -27,14 +46,28 @@ function useOnlineState() {
   );
 }
 
-export function usePaginatedList<TItem>({
-  queryKey,
-  fetchPage,
-  initialPage = 1,
-  pageSize = 6,
-}: UsePaginatedListOptions<TItem>) {
-  const [page, setPage] = useState(initialPage);
+export function usePaginatedList<TItem>(
+  options: UsePaginatedListOptions<TItem>,
+) {
+  const { queryKey, fetchPage, pageSize = 6 } = options;
+  const [uncontrolledPage, setUncontrolledPage] = useState(
+    "initialPage" in options ? (options.initialPage ?? 1) : 1,
+  );
+  const controlledPagination = isControlledPagination(options);
+  const onPageChange = controlledPagination ? options.onPageChange : undefined;
+  const page = controlledPagination ? options.page : uncontrolledPage;
   const isOnline = useOnlineState();
+
+  const setPage = useCallback(
+    (next: number) => {
+      if (onPageChange) {
+        onPageChange(next);
+      } else {
+        setUncontrolledPage(next);
+      }
+    },
+    [onPageChange],
+  );
 
   const query = useQuery({
     queryKey: [...queryKey, { page, pageSize }],
@@ -63,13 +96,13 @@ export function usePaginatedList<TItem>({
     if (isPastLastPage) {
       setPage(totalPages);
     }
-  }, [isPastLastPage, totalPages]);
+  }, [isPastLastPage, totalPages, setPage]);
 
   const goToPage = useCallback(
     (target: number) => {
       setPage(Math.min(Math.max(target, 1), totalPages));
     },
-    [totalPages],
+    [setPage, totalPages],
   );
 
   return {

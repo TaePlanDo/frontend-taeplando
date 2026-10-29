@@ -1,61 +1,25 @@
 import { Dumbbell, Eye, Layers3, Pencil, Tag, Trash2 } from "lucide-react";
-import type { ReactNode } from "react";
 
 import { Card } from "@/components/ui/card";
 import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
 import { CardItemActionButton } from "@/components/shared/CardItemActionButton";
-import { CardItemBadge } from "@/components/shared/CardItemBadge";
 import type { Exercise } from "@/types/exercise";
+
+import { AttributeBadges } from "./AttributeBadges";
 
 type ExerciseCardItemProps = {
   exercise: Exercise;
   isOffline?: boolean;
   onEdit: () => void;
+  onView: () => void;
   onDelete: () => void | Promise<void>;
 };
-
-type AttributeBadgesProps = {
-  label: string;
-  names: string[];
-  icon: ReactNode;
-  className: string;
-};
-
-function AttributeBadges({
-  label,
-  names,
-  icon,
-  className,
-}: AttributeBadgesProps) {
-  const visibleNames = names.slice(0, 2);
-  const hiddenNames = names.slice(2);
-
-  if (!names.length) return null;
-
-  return (
-    <div className="flex flex-wrap items-center gap-1" aria-label={label}>
-      {visibleNames.map((name) => (
-        <CardItemBadge key={name} icon={icon} className={className}>
-          {name}
-        </CardItemBadge>
-      ))}
-      {hiddenNames.length ? (
-        <CardItemBadge
-          className={className}
-          title={hiddenNames.join(", ")}
-          aria-label={`${label}: dodatkowo ${hiddenNames.join(", ")}`}
-        >
-          +{hiddenNames.length}
-        </CardItemBadge>
-      ) : null}
-    </div>
-  );
-}
 
 export function ExerciseCardItem({
   exercise,
   isOffline = false,
   onEdit,
+  onView,
   onDelete,
 }: ExerciseCardItemProps) {
   const types = exercise.training_types.map(({ name }) => name);
@@ -83,6 +47,7 @@ export function ExerciseCardItem({
             type="button"
             className="flex shrink-0 items-center gap-1 text-xs text-secondary"
             aria-label={`Pokaż szczegóły: ${exercise.name}`}
+            onClick={onView}
           >
             <Eye className="size-5" aria-hidden />
             <span>Szczegóły</span>
@@ -94,18 +59,21 @@ export function ExerciseCardItem({
             names={types}
             icon={<Tag className="size-3" />}
             className="border border-primary/50 bg-primary/10 text-primary"
+            maxItems={2}
           />
           <AttributeBadges
             label="Segment"
             names={segments}
             icon={<Layers3 className="size-3" />}
             className="border border-secondary/50 bg-secondary/10 text-secondary"
+            maxItems={2}
           />
           <AttributeBadges
             label="Sprzęt"
             names={equipment}
             icon={<Dumbbell className="size-3" />}
             className="border border-foreground/20 bg-muted text-foreground/80"
+            maxItems={2}
           />
         </div>
         <div className="mt-auto flex justify-end gap-1">

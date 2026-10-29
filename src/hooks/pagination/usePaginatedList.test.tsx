@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { PaginatedResponse } from "@/types/pagination";
@@ -40,7 +40,11 @@ function setup(fetchPage: (page: number) => Promise<PaginatedResponse<Item>>) {
   );
 
   return renderHook(
-    () => usePaginatedList<Item>({ queryKey: ["items"], fetchPage }),
+    () =>
+      usePaginatedList<Item>({
+        queryKey: ["items"],
+        fetchPage,
+      }),
     { wrapper },
   );
 }
@@ -164,5 +168,41 @@ describe("usePaginatedList", () => {
     await waitFor(() => expect(result.current.page).toBe(2));
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.items).toEqual([{ id: "p2" }]);
+  });
+
+  it("reports past-last-page clamps through onPageChange when controlled", async () => {
+    let totalPages = 3;
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
+
+    const { result } = renderHook(
+      () => {
+        const [page, setPage] = useState(3);
+        return usePaginatedList<Item>({
+          queryKey: ["controlled-items"],
+          fetchPage: async (current) =>
+            current > totalPages
+              ? pageOf(current, totalPages, [])
+              : pageOf(current, totalPages),
+          page,
+          onPageChange: setPage,
+        });
+      },
+      { wrapper },
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.page).toBe(3);
+
+    totalPages = 2;
+    act(() => {
+      void result.current.refetch();
+    });
+
+    await waitFor(() => expect(result.current.page).toBe(2));
   });
 });
