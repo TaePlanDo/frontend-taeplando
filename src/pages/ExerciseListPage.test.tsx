@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Exercise } from "@/types/exercise";
+import type { PaginatedListState } from "@/hooks/pagination/listState";
 import { ExerciseListPage } from "./ExerciseListPage";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
@@ -66,6 +67,7 @@ const state = {
   isLoading: false,
   isFetching: false,
   isError: false,
+  listState: { kind: "ready" } as PaginatedListState,
   refetch,
   goToPage: vi.fn(),
 };
@@ -84,11 +86,13 @@ describe("ExerciseListPage", () => {
       isLoading: false,
       isFetching: false,
       isError: false,
+      listState: { kind: "ready" },
     });
   });
   it("shows the empty view", () => {
     state.items = [];
     state.total = 0;
+    state.listState = { kind: "empty" };
     render(<ExerciseListPage />);
     expect(screen.getByText("Jeszcze nie masz żadnych ćwiczeń")).toBeTruthy();
   });
@@ -96,12 +100,14 @@ describe("ExerciseListPage", () => {
     state.items = [];
     state.total = 0;
     state.isError = true;
+    state.listState = { kind: "unavailable", reason: "error" };
     render(<ExerciseListPage />);
     fireEvent.click(screen.getByRole("button", { name: "Spróbuj ponownie" }));
     expect(refetch).toHaveBeenCalled();
   });
   it("shows loading instead of cards", () => {
     state.isLoading = true;
+    state.listState = { kind: "loading", hasData: true };
     render(<ExerciseListPage />);
     expect(screen.getByRole("status")).toBeTruthy();
     expect(screen.queryByText("Ap chagi")).toBeNull();

@@ -12,6 +12,7 @@ import { ManagementPageLayout } from "@/components/shared/ManagementPageLayout";
 import { Badge } from "@/components/ui/badge";
 import { useDeleteExercise } from "@/hooks/exercises/useDeleteExercise";
 import { useExercises } from "@/hooks/exercises/useExercises";
+import { hasDisplayableListData } from "@/hooks/pagination/listState";
 import { formatExerciseCount } from "@/lib/format/plural";
 import type { Exercise } from "@/types/exercise";
 
@@ -23,15 +24,14 @@ export function ExerciseListPage() {
     page,
     totalPages,
     total,
-    isLoading,
     isFetching,
-    isError,
     isOffline,
-    hasData,
+    listState,
     refetch,
     goToPage,
   } = useExercises();
   const { deleteExercise } = useDeleteExercise();
+  const showListMetadata = hasDisplayableListData(listState);
 
   async function handleDelete(id: string) {
     try {
@@ -48,14 +48,14 @@ export function ExerciseListPage() {
       description="Zarządzaj ćwiczeniami w jednym miejscu. Dodawaj nowe, aktualizuj szczegóły i miej całą bazę ćwiczeń zawsze pod ręką."
       sectionTitle="Lista ćwiczeń"
       sectionAccessory={
-        isError || (isOffline && !hasData) ? null : (
+        showListMetadata ? (
           <Badge
             variant="ghost"
             className="rounded-full bg-transparent px-6 py-2 text-secondary"
           >
             {formatExerciseCount(total)}
           </Badge>
-        )
+        ) : null
       }
       action={
         <CustomizedDialog
@@ -82,21 +82,17 @@ export function ExerciseListPage() {
         </CustomizedDialog>
       }
       pagination={
-        isError || (isOffline && !hasData) ? null : (
+        showListMetadata ? (
           <CustomizedPagination
             pagesNumber={totalPages}
             currentPage={page}
             goToPage={goToPage}
           />
-        )
+        ) : null
       }
     >
       <ListStateView
-        isError={isError}
-        isOffline={isOffline}
-        hasData={hasData}
-        isLoading={isLoading}
-        isEmpty={exercises.length === 0}
+        state={listState}
         errorTitle="Nie udało się pobrać ćwiczeń"
         errorMessage="Sprawdź połączenie i spróbuj ponownie"
         onRetry={() => void refetch()}

@@ -11,6 +11,7 @@ import { ListStateView } from "@/components/shared/ListStateView";
 import { ManagementPageLayout } from "@/components/shared/ManagementPageLayout";
 import { useDeleteEquipment } from "@/hooks/equipment/useDeleteEquipment";
 import { useEquipment } from "@/hooks/equipment/useEquipment";
+import { hasDisplayableListData } from "@/hooks/pagination/listState";
 import type { Equipment } from "@/types/equipment";
 
 export function EquipmentListPage() {
@@ -22,15 +23,13 @@ export function EquipmentListPage() {
     items: equipment,
     page,
     totalPages,
-    isLoading,
     isFetching,
-    isError,
-    isOffline,
-    hasData,
+    listState,
     refetch,
     goToPage,
   } = useEquipment();
   const { deleteEquipment } = useDeleteEquipment();
+  const showListMetadata = hasDisplayableListData(listState);
 
   function openEdit(item: Equipment) {
     setEditingEquipment(item);
@@ -74,21 +73,17 @@ export function EquipmentListPage() {
         </CustomizedDialog>
       }
       pagination={
-        isError && !hasData ? null : (
+        showListMetadata ? (
           <CustomizedPagination
             pagesNumber={totalPages}
             currentPage={page}
             goToPage={goToPage}
           />
-        )
+        ) : null
       }
     >
       <ListStateView
-        isError={isError}
-        isOffline={isOffline}
-        hasData={hasData}
-        isLoading={isLoading}
-        isEmpty={equipment.length === 0}
+        state={listState}
         errorTitle="Nie udało się pobrać sprzętu"
         errorMessage="Sprawdź połączenie i spróbuj ponownie"
         onRetry={() => void refetch()}

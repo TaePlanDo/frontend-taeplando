@@ -54,6 +54,7 @@ describe("usePaginatedList", () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.items).toEqual([{ id: "p1" }]);
     expect(result.current.isError).toBe(false);
+    expect(result.current.listState).toEqual({ kind: "ready" });
   });
 
   it("reports a failed request as an error, not as an empty list", async () => {
@@ -64,6 +65,10 @@ describe("usePaginatedList", () => {
     expect(result.current.isLoading).toBe(false);
     expect(result.current.items).toEqual([]);
     expect(result.current.total).toBe(0);
+    expect(result.current.listState).toEqual({
+      kind: "unavailable",
+      reason: "error",
+    });
   });
 
   it("does not report an error for a real empty result", async () => {
@@ -74,6 +79,7 @@ describe("usePaginatedList", () => {
     expect(result.current.isError).toBe(false);
     expect(result.current.items).toEqual([]);
     expect(result.current.total).toBe(20);
+    expect(result.current.listState).toEqual({ kind: "empty" });
   });
 
   it("recovers after a retry of a failed request", async () => {
@@ -91,6 +97,30 @@ describe("usePaginatedList", () => {
 
     await waitFor(() => expect(result.current.isError).toBe(false));
     expect(result.current.items).toEqual([{ id: "p1" }]);
+  });
+
+  it("keeps cached data and pagination state after a refresh fails", async () => {
+    const fetchPage = vi
+      .fn<(page: number) => Promise<PaginatedResponse<Item>>>()
+      .mockResolvedValueOnce(pageOf(1))
+      .mockRejectedValueOnce(new Error("boom"));
+    const { result } = setup(fetchPage);
+
+    await waitFor(() =>
+      expect(result.current.listState).toEqual({ kind: "ready" }),
+    );
+
+    act(() => {
+      void result.current.refetch();
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.items).toEqual([{ id: "p1" }]);
+    expect(result.current.listState).toEqual({
+      kind: "stale",
+      reason: "error",
+      isEmpty: false,
+    });
   });
 
   it("does not present the previous page as loaded while the next page is fetching", async () => {

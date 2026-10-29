@@ -7,6 +7,7 @@ import {
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
 import type { PaginatedResponse } from "@/types/pagination";
+import { getPaginatedListState } from "./listState";
 
 type UsePaginatedListOptions<TItem> = {
   queryKey: QueryKey;
@@ -45,6 +46,18 @@ export function usePaginatedList<TItem>({
   const totalPages = data?.total_pages ?? 1;
 
   const isPastLastPage = data != null && page > totalPages;
+  const hasData = data !== undefined;
+  const isLoading =
+    query.isPending || query.isPlaceholderData || isPastLastPage;
+  const isEmpty = data?.items.length === 0;
+
+  const listState = getPaginatedListState({
+    hasData,
+    isOnline,
+    isLoading,
+    isError: query.isError,
+    isEmpty,
+  });
 
   useEffect(() => {
     if (isPastLastPage) {
@@ -64,11 +77,12 @@ export function usePaginatedList<TItem>({
     page,
     total: data?.total ?? 0,
     totalPages,
-    hasData: data !== undefined,
+    hasData,
     isOffline: !isOnline,
-    isLoading: query.isPending || query.isPlaceholderData || isPastLastPage,
+    isLoading,
     isFetching: query.isFetching,
     isError: query.isError,
+    listState,
     refetch: query.refetch,
     goToPage,
   };

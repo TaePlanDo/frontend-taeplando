@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Group } from "@/types/group";
+import type { PaginatedListState } from "@/hooks/pagination/listState";
 
 import { GroupListPage } from "./GroupListPage";
 
@@ -52,6 +53,7 @@ const groupsState = {
   isLoading: false,
   isFetching: false,
   isError: false,
+  listState: { kind: "ready" } as PaginatedListState,
   refetch,
   goToPage: vi.fn(),
 };
@@ -116,11 +118,13 @@ describe("GroupListPage", () => {
     groupsState.isLoading = false;
     groupsState.isFetching = false;
     groupsState.isError = false;
+    groupsState.listState = { kind: "ready" };
   });
 
   it("shows the empty view when there are no groups", () => {
     groupsState.items = [];
     groupsState.total = 0;
+    groupsState.listState = { kind: "empty" };
     render(<GroupListPage />);
 
     expect(screen.getByText("Jeszcze nie masz żadnych grup")).toBeTruthy();
@@ -131,6 +135,7 @@ describe("GroupListPage", () => {
     groupsState.items = [];
     groupsState.total = 0;
     groupsState.isError = true;
+    groupsState.listState = { kind: "unavailable", reason: "error" };
     render(<GroupListPage />);
 
     expect(screen.getByRole("alert")).toBeTruthy();
@@ -142,6 +147,7 @@ describe("GroupListPage", () => {
   it("retries loading from the error view and disables the button while retrying", () => {
     groupsState.items = [];
     groupsState.isError = true;
+    groupsState.listState = { kind: "unavailable", reason: "error" };
     const { rerender } = render(<GroupListPage />);
 
     fireEvent.click(screen.getByRole("button", { name: "Spróbuj ponownie" }));
@@ -159,6 +165,7 @@ describe("GroupListPage", () => {
   it("does not show the pager or the group count as a valid list on error", () => {
     groupsState.items = [];
     groupsState.isError = true;
+    groupsState.listState = { kind: "unavailable", reason: "error" };
     groupsState.totalPages = 3;
     render(<GroupListPage />);
 
@@ -170,6 +177,7 @@ describe("GroupListPage", () => {
     groupsState.totalPages = 3;
     groupsState.isLoading = true;
     groupsState.isFetching = true;
+    groupsState.listState = { kind: "loading", hasData: true };
     render(<GroupListPage />);
 
     expect(screen.getByRole("status")).toBeTruthy();
@@ -182,6 +190,7 @@ describe("GroupListPage", () => {
     groupsState.page = 2;
     groupsState.totalPages = 3;
     groupsState.isLoading = true;
+    groupsState.listState = { kind: "loading", hasData: true };
     render(<GroupListPage />);
 
     const current = screen.getByRole("link", { current: "page" });

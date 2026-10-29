@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Equipment } from "@/types/equipment";
+import type { PaginatedListState } from "@/hooks/pagination/listState";
 
 import { EquipmentListPage } from "./EquipmentListPage";
 
@@ -24,6 +25,7 @@ const equipmentState = {
   isLoading: false,
   isFetching: false,
   isError: false,
+  listState: { kind: "ready" } as PaginatedListState,
   refetch,
   goToPage,
 };
@@ -74,11 +76,13 @@ describe("EquipmentListPage", () => {
     equipmentState.isLoading = false;
     equipmentState.isFetching = false;
     equipmentState.isError = false;
+    equipmentState.listState = { kind: "ready" };
   });
 
   it("shows the empty view when there is no equipment", () => {
     equipmentState.items = [];
     equipmentState.total = 0;
+    equipmentState.listState = { kind: "empty" };
 
     render(<EquipmentListPage />);
 
@@ -89,6 +93,7 @@ describe("EquipmentListPage", () => {
   it("shows an error and retries loading", () => {
     equipmentState.items = [];
     equipmentState.isError = true;
+    equipmentState.listState = { kind: "unavailable", reason: "error" };
 
     render(<EquipmentListPage />);
 
@@ -102,6 +107,7 @@ describe("EquipmentListPage", () => {
 
   it("shows a loading state instead of stale equipment", () => {
     equipmentState.isLoading = true;
+    equipmentState.listState = { kind: "loading", hasData: true };
 
     render(<EquipmentListPage />);
 

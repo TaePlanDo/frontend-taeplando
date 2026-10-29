@@ -4,13 +4,10 @@ import { WifiOff } from "lucide-react";
 import { EmptyListView } from "@/components/shared/EmptyListView";
 import { ErrorListView } from "@/components/shared/ErrorListView";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import type { PaginatedListState } from "@/hooks/pagination/listState";
 
 type ListStateViewProps = {
-  isError: boolean;
-  isOffline: boolean;
-  hasData: boolean;
-  isLoading: boolean;
-  isEmpty: boolean;
+  state: PaginatedListState;
   errorTitle: string;
   errorMessage: string;
   onRetry: () => void;
@@ -21,11 +18,7 @@ type ListStateViewProps = {
 };
 
 export function ListStateView({
-  isError,
-  isOffline,
-  hasData,
-  isLoading,
-  isEmpty,
+  state,
   errorTitle,
   errorMessage,
   onRetry,
@@ -34,7 +27,7 @@ export function ListStateView({
   emptyMessage,
   children,
 }: ListStateViewProps) {
-  if (!hasData && isOffline) {
+  if (state.kind === "unavailable" && state.reason === "offline") {
     return (
       <ErrorListView
         title="Brak połączenia z internetem"
@@ -45,7 +38,7 @@ export function ListStateView({
     );
   }
 
-  if (!hasData && isError) {
+  if (state.kind === "unavailable") {
     return (
       <ErrorListView
         title={errorTitle}
@@ -56,15 +49,15 @@ export function ListStateView({
     );
   }
 
-  if (isLoading) {
+  if (state.kind === "loading") {
     return <LoadingSpinner className="h-92" />;
   }
 
-  if (isEmpty) {
+  if (state.kind === "empty") {
     return <EmptyListView title={emptyTitle} message={emptyMessage} />;
   }
 
-  if (isOffline || isError) {
+  if (state.kind === "stale") {
     return (
       <>
         <div
@@ -72,11 +65,15 @@ export function ListStateView({
           className="mb-4 flex items-center gap-2 rounded-xl border border-secondary/30 bg-secondary/10 px-4 py-3 text-sm text-secondary"
         >
           <WifiOff className="size-4 shrink-0" />
-          {isOffline
+          {state.reason === "offline"
             ? "Brak połączenia — wyświetlane są ostatnio pobrane dane."
             : "Nie udało się odświeżyć listy — wyświetlane są ostatnio pobrane dane."}
         </div>
-        {children}
+        {state.isEmpty ? (
+          <EmptyListView title={emptyTitle} message={emptyMessage} />
+        ) : (
+          children
+        )}
       </>
     );
   }

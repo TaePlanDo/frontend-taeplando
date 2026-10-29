@@ -13,6 +13,7 @@ import { ManagementPageLayout } from "@/components/shared/ManagementPageLayout";
 import { Badge } from "@/components/ui/badge";
 import { useDeleteGroup } from "@/hooks/groups/useDeleteGroup";
 import { useGroups } from "@/hooks/groups/useGroups";
+import { hasDisplayableListData } from "@/hooks/pagination/listState";
 import { formatGroupCount } from "@/lib/format/plural";
 import type { Group } from "@/types/group";
 
@@ -22,15 +23,13 @@ export function GroupListPage() {
     page,
     totalPages,
     total,
-    isLoading,
     isFetching,
-    isError,
-    isOffline,
-    hasData,
+    listState,
     refetch,
     goToPage,
   } = useGroups();
   const { deleteGroup } = useDeleteGroup();
+  const showListMetadata = hasDisplayableListData(listState);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [schemaDialogOpen, setSchemaDialogOpen] = useState(false);
@@ -61,14 +60,14 @@ export function GroupListPage() {
       description="Organizuj grupy w jednym miejscu. Dodawaj nowe, aktualizuj szczegóły i miej wszystko pod ręką."
       sectionTitle="Lista grup"
       sectionAccessory={
-        isError || (isOffline && !hasData) ? null : (
+        showListMetadata ? (
           <Badge
             variant="ghost"
             className="rounded-full bg-transparent px-6 py-2 text-secondary"
           >
             {formatGroupCount(total)}
           </Badge>
-        )
+        ) : null
       }
       action={
         <>
@@ -120,21 +119,17 @@ export function GroupListPage() {
         </>
       }
       pagination={
-        isError && !hasData ? null : (
+        showListMetadata ? (
           <CustomizedPagination
             pagesNumber={totalPages}
             currentPage={page}
             goToPage={goToPage}
           />
-        )
+        ) : null
       }
     >
       <ListStateView
-        isError={isError}
-        isOffline={isOffline}
-        hasData={hasData}
-        isLoading={isLoading}
-        isEmpty={groups.length === 0}
+        state={listState}
         errorTitle="Nie udało się pobrać grup"
         errorMessage="Sprawdź połączenie i spróbuj ponownie"
         onRetry={() => void refetch()}
