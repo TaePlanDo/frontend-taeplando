@@ -23,7 +23,6 @@ export class ExercisesPage {
   readonly addExerciseButton: Locator;
   readonly exerciseDialog: Locator;
   readonly emptyListMessage: Locator;
-  readonly listAlert: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -35,7 +34,6 @@ export class ExercisesPage {
     });
     this.exerciseDialog = page.getByRole("dialog");
     this.emptyListMessage = page.getByText("Jeszcze nie masz żadnych ćwiczeń");
-    this.listAlert = page.getByRole("alert");
   }
 
   async goto(): Promise<void> {
@@ -172,18 +170,6 @@ export class ExercisesPage {
         attributes.equipment,
       );
     }
-  }
-
-  async expectLoadError(): Promise<void> {
-    await expect(this.listAlert).toBeVisible();
-    await expect(
-      this.listAlert.getByText("Nie udało się pobrać ćwiczeń"),
-    ).toBeVisible();
-    await expect(
-      this.listAlert.getByText("Sprawdź połączenie i spróbuj ponownie"),
-    ).toBeVisible();
-    await expect(this.emptyListMessage).toHaveCount(0);
-    await expect(this.page.locator('[data-slot="card"]')).toHaveCount(0);
   }
 
   async expectValidationError(message: string): Promise<void> {

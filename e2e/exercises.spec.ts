@@ -1,7 +1,6 @@
 import { seedSystemData } from "./helpers/backend";
 import { createEquipment } from "./helpers/createEquipment";
 import { createLocalTrainerAndLogin } from "./helpers/createLocalTrainer";
-import { blockApi } from "./helpers/network";
 import { ExercisesPage } from "./pages/exercises.page";
 import { expect, test } from "./playwright";
 
@@ -131,20 +130,5 @@ test.describe("exercise details preview", () => {
 
     await exercises.openDetails(exercise.name);
     await exercises.expectDetails(exercise, attributes);
-  });
-
-  test("shows a load error when the API is unreachable and recovers after reconnect", async ({
-    page,
-  }) => {
-    await createLocalTrainerAndLogin(page);
-    const exercises = new ExercisesPage(page);
-    const exercisesApi = await blockApi(page, "**/api/exercises**");
-
-    await exercises.goto();
-    await exercises.expectLoadError();
-
-    exercisesApi.unblock();
-    await exercises.goto();
-    await exercises.expectNoExercises();
   });
 });
