@@ -138,6 +138,50 @@ export class ExercisesPage {
     await expect(this.emptyListMessage).toBeVisible();
   }
 
+  async openDetails(name: string): Promise<void> {
+    await this.exerciseCard(name)
+      .getByRole("button", { name: `Pokaż szczegóły: ${name}` })
+      .click();
+    await expect(this.exerciseDialog).toBeVisible();
+    await expect(
+      this.exerciseDialog.getByRole("heading", { name: "Podgląd ćwiczenia" }),
+    ).toBeVisible();
+  }
+
+  async expectDetails(
+    values: ExerciseFormValues,
+    attributes: ExerciseAttributes = {},
+  ): Promise<void> {
+    const dialog = this.exerciseDialog;
+    await expect(
+      dialog.getByRole("heading", { name: values.name, exact: true }),
+    ).toBeVisible();
+    await expect(dialog.getByText(values.description)).toBeVisible();
+    await expect(
+      dialog.getByText(`${values.minAge}-${values.maxAge} lat`).first(),
+    ).toBeVisible();
+    await expect(
+      dialog
+        .getByText(`${values.minParticipants}-${values.maxParticipants} osób`)
+        .first(),
+    ).toBeVisible();
+    await expect(
+      dialog.getByText(`${values.durationMinutes} minut`).first(),
+    ).toBeVisible();
+
+    await expect(dialog.getByLabel("Typ")).toContainText(
+      attributes.trainingType ?? "Technika",
+    );
+    await expect(dialog.getByLabel("Segment")).toContainText(
+      attributes.segment ?? "Część główna",
+    );
+    if (attributes.equipment) {
+      await expect(dialog.getByLabel("Sprzęt")).toContainText(
+        attributes.equipment,
+      );
+    }
+  }
+
   async expectValidationError(message: string): Promise<void> {
     await expect(this.exerciseDialog.getByText(message)).toBeVisible();
     await expect(this.exerciseDialog).toBeVisible();

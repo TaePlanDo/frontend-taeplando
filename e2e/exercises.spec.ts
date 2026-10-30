@@ -145,3 +145,27 @@ test.describe("exercise configuration", () => {
     await exercises.expectValidationError("Wybierz co najmniej jeden Segment");
   });
 });
+
+test.describe("exercise details preview", () => {
+  test.beforeEach(() => seedSystemData());
+
+  test("opens the details modal with the exercise data from the list", async ({
+    page,
+  }) => {
+    const trainer = await createLocalTrainerAndLogin(page);
+    const equipment = await createEquipment(trainer, "Tarcza treningowa");
+    const attributes = {
+      trainingType: "Technika",
+      segment: "Rozgrzewka",
+      equipment: equipment.name,
+    };
+
+    const exercises = new ExercisesPage(page);
+    await exercises.goto();
+    await exercises.createExercise(exercise, attributes);
+    await exercises.expectExercise(exercise.name, attributes);
+
+    await exercises.openDetails(exercise.name);
+    await exercises.expectDetails(exercise, attributes);
+  });
+});
