@@ -25,17 +25,14 @@ export function useExerciseListSearchParams() {
   );
 
   const commit = useCallback(
-    (
-      update: (current: ExerciseListSearchState) => ExerciseListSearchState,
-      options?: { replace?: boolean },
-    ) => {
+    (update: (current: ExerciseListSearchState) => ExerciseListSearchState) => {
       setSearchParams(
         (prev) =>
           replaceExerciseListSearchParams(
             prev,
             update(parseExerciseListSearchParams(prev)),
           ),
-        options,
+        { replace: true },
       );
     },
     [setSearchParams],
@@ -58,16 +55,13 @@ export function useExerciseListSearchParams() {
   const setName = useCallback(
     (name: string) => {
       const trimmed = name.trim();
-      commit(
-        (current) => ({
-          filters: normalizeFilters({
-            ...current.filters,
-            name: trimmed || undefined,
-          }),
-          page: 1,
+      commit((current) => ({
+        filters: normalizeFilters({
+          ...current.filters,
+          name: trimmed || undefined,
         }),
-        { replace: true },
-      );
+        page: 1,
+      }));
     },
     [commit],
   );

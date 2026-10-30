@@ -106,6 +106,9 @@ describe("ExerciseListPage", () => {
     state.listState = { kind: "empty" };
     renderPage();
     expect(screen.getByText("Jeszcze nie masz żadnych ćwiczeń")).toBeTruthy();
+    expect(
+      screen.getByRole("textbox", { name: "Wyszukaj ćwiczenie" }),
+    ).toBeTruthy();
   });
   it("shows a filtered empty view when filters are active", () => {
     state.items = [];
@@ -117,6 +120,9 @@ describe("ExerciseListPage", () => {
     expect(
       screen.getByText("Brak ćwiczeń spełniających wybrane filtry"),
     ).toBeTruthy();
+    expect(
+      screen.getByRole("textbox", { name: "Wyszukaj ćwiczenie" }),
+    ).toBeTruthy();
   });
   it("shows an error and retries", () => {
     state.items = [];
@@ -126,6 +132,9 @@ describe("ExerciseListPage", () => {
     renderPage();
     fireEvent.click(screen.getByRole("button", { name: "Spróbuj ponownie" }));
     expect(refetch).toHaveBeenCalled();
+    expect(
+      screen.queryByRole("textbox", { name: "Wyszukaj ćwiczenie" }),
+    ).toBeNull();
   });
   it("shows loading instead of cards", () => {
     state.isLoading = true;
@@ -136,6 +145,7 @@ describe("ExerciseListPage", () => {
   });
   it("shows cards with assigned type and segment", () => {
     renderPage();
+    expect(screen.getAllByText("1 ćwiczenie")).toHaveLength(2);
     expect(screen.getByText("Ap chagi")).toBeTruthy();
     expect(screen.getByText("Technika")).toBeTruthy();
     expect(screen.getByText("Rozgrzewka")).toBeTruthy();

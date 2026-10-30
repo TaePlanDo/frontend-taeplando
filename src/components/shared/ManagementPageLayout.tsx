@@ -8,6 +8,7 @@ type ManagementPageLayoutProps = {
   action: ReactNode;
   sectionTitle: string;
   sectionAccessory?: ReactNode;
+  toolbar?: ReactNode;
   pagination?: ReactNode;
   children: ReactNode;
 };
@@ -18,6 +19,7 @@ export function ManagementPageLayout({
   action,
   sectionTitle,
   sectionAccessory,
+  toolbar,
   pagination,
   children,
 }: ManagementPageLayoutProps) {
@@ -47,6 +49,7 @@ export function ManagementPageLayout({
           </h2>
           {sectionAccessory}
         </div>
+        {toolbar}
         <Separator className="my-4" />
         {children}
         {pagination}

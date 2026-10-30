@@ -94,7 +94,7 @@ export function ExerciseListFiltersBar({
           />
           <Badge
             variant="ghost"
-            className="h-10 rounded-full border border-border bg-transparent px-6 text-sm font-medium text-foreground"
+            className="hidden h-10 rounded-full border border-border bg-transparent px-6 text-sm font-medium text-foreground lg:flex"
           >
             {formatExerciseCount(total)}
           </Badge>

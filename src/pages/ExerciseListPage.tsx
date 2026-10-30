@@ -11,10 +11,12 @@ import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
 import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
 import { ListStateView } from "@/components/shared/ListStateView";
 import { ManagementPageLayout } from "@/components/shared/ManagementPageLayout";
+import { Badge } from "@/components/ui/badge";
 import { useDeleteExercise } from "@/hooks/exercises/useDeleteExercise";
 import { useExerciseListSearchParams } from "@/hooks/exercises/useExerciseListSearchParams";
 import { useExercises } from "@/hooks/exercises/useExercises";
 import { hasDisplayableListData } from "@/hooks/pagination/listState";
+import { formatExerciseCount } from "@/lib/format/plural";
 import type { Exercise } from "@/types/exercise";
 
 export function ExerciseListPage() {
@@ -48,6 +50,7 @@ export function ExerciseListPage() {
   });
   const { deleteExercise } = useDeleteExercise();
   const showListMetadata = hasDisplayableListData(listState);
+  const isListUnavailable = listState.kind === "unavailable";
 
   async function handleDelete(id: string) {
     try {
@@ -63,6 +66,28 @@ export function ExerciseListPage() {
       title="Wszystkie ćwiczenia"
       description="Zarządzaj ćwiczeniami w jednym miejscu. Dodawaj nowe, aktualizuj szczegóły i miej całą bazę ćwiczeń zawsze pod ręką."
       sectionTitle="Lista ćwiczeń"
+      sectionAccessory={
+        showListMetadata ? (
+          <Badge
+            variant="ghost"
+            className="h-10 shrink-0 rounded-full border border-border bg-transparent px-4 text-sm font-medium text-foreground lg:hidden"
+          >
+            {formatExerciseCount(total)}
+          </Badge>
+        ) : null
+      }
+      toolbar={
+        isListUnavailable ? null : (
+          <ExerciseListFiltersBar
+            filters={filters}
+            dialogFilterCount={dialogFilterCount}
+            total={total}
+            onNameChange={setName}
+            onFiltersApply={setFilters}
+            onClearDimension={clearDimension}
+          />
+        )
+      }
       action={
         <>
           <CustomizedDialog
@@ -113,16 +138,6 @@ export function ExerciseListPage() {
         ) : null
       }
     >
-      {showListMetadata ? (
-        <ExerciseListFiltersBar
-          filters={filters}
-          dialogFilterCount={dialogFilterCount}
-          total={total}
-          onNameChange={setName}
-          onFiltersApply={setFilters}
-          onClearDimension={clearDimension}
-        />
-      ) : null}
       <ListStateView
         state={listState}
         errorTitle="Nie udało się pobrać ćwiczeń"
