@@ -5,10 +5,10 @@ import { normalizeFilters } from "@/lib/exercises/exercise-list-filters";
 import {
   countActiveFilters,
   withoutFilterDimension,
-} from "@/lib/exercises/filter-dimensions";
+} from "@/lib/exercises/exercise-list-filter-chips";
 import {
   parseExerciseListSearchParams,
-  toExerciseListSearchParams,
+  replaceExerciseListSearchParams,
   type ExerciseListSearchState,
 } from "@/lib/exercises/exercise-list-search-params";
 import type {
@@ -28,7 +28,8 @@ export function useExerciseListSearchParams() {
     (update: (current: ExerciseListSearchState) => ExerciseListSearchState) => {
       setSearchParams(
         (prev) =>
-          toExerciseListSearchParams(
+          replaceExerciseListSearchParams(
+            prev,
             update(parseExerciseListSearchParams(prev)),
           ),
         { replace: true },

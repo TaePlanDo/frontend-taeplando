@@ -2,17 +2,20 @@ import { X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 
-type AttributeItem = {
-  id: string | number;
+type AttributeItem<TId extends string | number> = {
+  id: TId;
   name: string;
 };
 
-type Props = {
-  items: AttributeItem[];
-  onRemove: (id: string) => void;
+type Props<TId extends string | number> = {
+  items: AttributeItem<TId>[];
+  onRemove: (id: TId) => void;
 };
 
-export function SelectedAttributeBadges({ items, onRemove }: Props) {
+export function SelectedAttributeBadges<TId extends string | number>({
+  items,
+  onRemove,
+}: Props<TId>) {
   if (!items.length) return null;
 
   return (
@@ -26,7 +29,7 @@ export function SelectedAttributeBadges({ items, onRemove }: Props) {
           {item.name}
           <button
             type="button"
-            onClick={() => onRemove(String(item.id))}
+            onClick={() => onRemove(item.id)}
             aria-label={`Usuń ${item.name}`}
             className="rounded-sm transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >

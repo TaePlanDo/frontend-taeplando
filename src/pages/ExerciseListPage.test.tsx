@@ -3,6 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Exercise } from "@/types/exercise";
+import type { PaginatedListState } from "@/hooks/pagination/listState";
 import { ExerciseListPage } from "./ExerciseListPage";
 
 function renderPage(initialEntry = "/exercises") {
@@ -67,6 +68,7 @@ const exercise: Exercise = {
   segments: [{ id: 1, code: "WARMUP", name: "Rozgrzewka" }],
 };
 const refetch = vi.fn();
+const useExercisesMock = vi.fn();
 const state = {
   items: [exercise],
   page: 1,
@@ -75,11 +77,10 @@ const state = {
   isLoading: false,
   isFetching: false,
   isError: false,
+  listState: { kind: "ready" } as PaginatedListState,
   refetch,
   goToPage: vi.fn(),
 };
-const useExercisesMock = vi.fn();
-useExercisesMock.mockImplementation(() => state);
 vi.mock("@/hooks/exercises/useExercises", () => ({
   useExercises: (options?: unknown) => useExercisesMock(options),
 }));
@@ -87,6 +88,7 @@ vi.mock("@/hooks/exercises/useExercises", () => ({
 describe("ExerciseListPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useExercisesMock.mockImplementation(() => state);
     Object.assign(state, {
       items: [exercise],
       page: 1,
@@ -95,47 +97,70 @@ describe("ExerciseListPage", () => {
       isLoading: false,
       isFetching: false,
       isError: false,
+      listState: { kind: "ready" },
     });
   });
   it("shows the empty view", () => {
     state.items = [];
     state.total = 0;
+    state.listState = { kind: "empty" };
     renderPage();
     expect(screen.getByText("Jeszcze nie masz żadnych ćwiczeń")).toBeTruthy();
+    expect(
+      screen.getByRole("textbox", { name: "Wyszukaj ćwiczenie" }),
+    ).toBeTruthy();
   });
   it("shows a filtered empty view when filters are active", () => {
     state.items = [];
     state.total = 0;
+    state.listState = { kind: "empty" };
+
     renderPage("/exercises?name=brak");
+
     expect(
       screen.getByText("Brak ćwiczeń spełniających wybrane filtry"),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("textbox", { name: "Wyszukaj ćwiczenie" }),
     ).toBeTruthy();
   });
   it("shows an error and retries", () => {
     state.items = [];
     state.total = 0;
     state.isError = true;
+    state.listState = { kind: "unavailable", reason: "error" };
     renderPage();
     fireEvent.click(screen.getByRole("button", { name: "Spróbuj ponownie" }));
     expect(refetch).toHaveBeenCalled();
+    expect(
+      screen.queryByRole("textbox", { name: "Wyszukaj ćwiczenie" }),
+    ).toBeNull();
   });
   it("shows loading instead of cards", () => {
     state.isLoading = true;
+    state.listState = { kind: "loading", hasData: true };
     renderPage();
     expect(screen.getByRole("status")).toBeTruthy();
     expect(screen.queryByText("Ap chagi")).toBeNull();
   });
   it("shows cards with assigned type and segment", () => {
     renderPage();
+    expect(screen.getAllByText("1 ćwiczenie")).toHaveLength(2);
     expect(screen.getByText("Ap chagi")).toBeTruthy();
     expect(screen.getByText("Technika")).toBeTruthy();
     expect(screen.getByText("Rozgrzewka")).toBeTruthy();
   });
-  it("passes URL filters into useExercises", () => {
-    renderPage("/exercises?name=chagi&equipment_ids=eq-1&page=2");
+  it("passes URL filters and page into useExercises", () => {
+    renderPage(
+      "/exercises?name=chagi&equipment_ids=8f20d653-dc8b-4b76-bdb4-b225c7d420a6&page=2",
+    );
+
     expect(useExercisesMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        filters: { name: "chagi", equipment_ids: ["eq-1"] },
+        filters: {
+          name: "chagi",
+          equipment_ids: ["8f20d653-dc8b-4b76-bdb4-b225c7d420a6"],
+        },
         page: 2,
       }),
     );
@@ -154,5 +179,21 @@ describe("ExerciseListPage", () => {
     expect(
       (screen.getByLabelText("Nazwa ćwiczenia") as HTMLInputElement).value,
     ).toBe("Ap chagi");
+  });
+
+  it("does not offer editing from a global exercise preview", async () => {
+    state.items = [{ ...exercise, scope: "GLOBAL" }];
+    renderPage();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "Podgląd ćwiczenia" }),
+    ).toBeTruthy();
+    expect(
+      screen.queryByRole("button", { name: "Edytuj ćwiczenie" }),
+    ).toBeNull();
   });
 });

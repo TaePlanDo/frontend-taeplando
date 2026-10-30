@@ -37,7 +37,7 @@ export function ExerciseFiltersDialog({
     filtersToDraft(filters),
   );
   const wasOpenRef = useRef(open);
-  const { data, isLoading } = useExerciseCatalogs();
+  const { data, isLoading, isError, refetch } = useExerciseCatalogs();
 
   useEffect(() => {
     if (open && !wasOpenRef.current) {
@@ -79,6 +79,18 @@ export function ExerciseFiltersDialog({
                 }))
               }
             />
+            {isError ? (
+              <div className="text-sm text-destructive" role="alert">
+                Nie udało się pobrać dostępnych filtrów.{" "}
+                <button
+                  type="button"
+                  className="underline underline-offset-2"
+                  onClick={() => void refetch()}
+                >
+                  Spróbuj ponownie
+                </button>
+              </div>
+            ) : null}
             <CatalogMultiSelect
               label="Sprzęt"
               items={data?.equipment ?? []}
@@ -87,6 +99,7 @@ export function ExerciseFiltersDialog({
                 setDraft((current) => ({ ...current, equipment_ids }))
               }
               isLoading={isLoading}
+              unavailableMessage={isError ? "Katalog niedostępny" : undefined}
             />
             <CatalogMultiSelect
               label="Kategorie"
@@ -96,6 +109,7 @@ export function ExerciseFiltersDialog({
                 setDraft((current) => ({ ...current, training_type_ids }))
               }
               isLoading={isLoading}
+              unavailableMessage={isError ? "Katalog niedostępny" : undefined}
             />
             <CatalogMultiSelect
               label="Schematy"
@@ -108,6 +122,7 @@ export function ExerciseFiltersDialog({
                 }))
               }
               isLoading={isLoading}
+              unavailableMessage={isError ? "Katalog niedostępny" : undefined}
             />
           </div>
         </ScrollArea>

@@ -3,11 +3,13 @@ import { Dumbbell, Eye, Layers3, Pencil, Tag, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
 import { CardItemActionButton } from "@/components/shared/CardItemActionButton";
-import { AttributeBadges } from "@/components/exercise/AttributeBadges";
 import type { Exercise } from "@/types/exercise";
+
+import { AttributeBadges } from "./AttributeBadges";
 
 type ExerciseCardItemProps = {
   exercise: Exercise;
+  isOffline?: boolean;
   onEdit: () => void;
   onView: () => void;
   onDelete: () => void | Promise<void>;
@@ -15,9 +17,10 @@ type ExerciseCardItemProps = {
 
 export function ExerciseCardItem({
   exercise,
+  isOffline = false,
   onEdit,
-  onDelete,
   onView,
+  onDelete,
 }: ExerciseCardItemProps) {
   const types = exercise.training_types.map(({ name }) => name);
   const segments = exercise.segments.map(({ name }) => name);
@@ -26,7 +29,11 @@ export function ExerciseCardItem({
   return (
     <Card className="flex-row gap-4 rounded-2xl bg-transparent p-4 shadow-none">
       <img
-        src={exercise.image_url ?? "/exercise-icon.png"}
+        src={
+          isOffline
+            ? "/exercise-icon.png"
+            : (exercise.image_url ?? "/exercise-icon.png")
+        }
         alt=""
         className="size-22 shrink-0 rounded-2xl bg-muted object-cover"
         onError={(event) => {
@@ -36,34 +43,37 @@ export function ExerciseCardItem({
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
           <h3 className="truncate text-lg font-semibold">{exercise.name}</h3>
-          <CardItemActionButton
-            icon={<Eye className="size-4" />}
+          <button
+            type="button"
+            className="flex shrink-0 items-center gap-1 text-xs text-secondary"
+            aria-label={`Pokaż szczegóły: ${exercise.name}`}
             onClick={onView}
           >
-            Szczegóły
-          </CardItemActionButton>
+            <Eye className="size-5" aria-hidden />
+            <span>Szczegóły</span>
+          </button>
         </div>
         <div className="flex flex-col gap-1.5">
           <AttributeBadges
             label="Typ"
             names={types}
             icon={<Tag className="size-3" />}
-            maxItems={2}
             className="border border-primary/50 bg-primary/10 text-primary"
+            maxItems={2}
           />
           <AttributeBadges
             label="Segment"
             names={segments}
             icon={<Layers3 className="size-3" />}
-            maxItems={2}
             className="border border-secondary/50 bg-secondary/10 text-secondary"
+            maxItems={2}
           />
           <AttributeBadges
             label="Sprzęt"
             names={equipment}
             icon={<Dumbbell className="size-3" />}
-            maxItems={2}
             className="border border-foreground/20 bg-muted text-foreground/80"
+            maxItems={2}
           />
         </div>
         <div className="mt-auto flex justify-end gap-1">

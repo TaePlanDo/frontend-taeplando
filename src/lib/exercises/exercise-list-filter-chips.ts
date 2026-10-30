@@ -1,14 +1,15 @@
+import { normalizeFilters } from "./exercise-list-filters";
 import type {
   ActiveFilterDimension,
   ExerciseListFilters,
 } from "@/types/exercise-list-filters";
 
-import { normalizeFilters } from "./exercise-list-filters";
+type FilterCatalogItem = { id: string | number; name: string };
 
 export type FilterCatalogLookup = {
-  equipment: { id: string | number; name: string }[];
-  trainingTypes: { id: string | number; name: string }[];
-  segments: { id: string | number; name: string }[];
+  equipment: FilterCatalogItem[];
+  trainingTypes: FilterCatalogItem[];
+  segments: FilterCatalogItem[];
 };
 
 export type ActiveFilterChip = {
@@ -28,67 +29,75 @@ type FilterDimension = {
 
 function namesFor(
   ids: Array<string | number> | undefined,
-  catalog: { id: string | number; name: string }[],
+  catalog: FilterCatalogItem[],
 ): string {
-  if (!ids?.length) return "";
-  return ids
-    .map((id) => {
-      const match = catalog.find((item) => String(item.id) === String(id));
-      return match?.name ?? String(id);
-    })
+  return (ids ?? [])
+    .map(
+      (id) =>
+        catalog.find((item) => String(item.id) === String(id))?.name ??
+        String(id),
+    )
     .join(", ");
 }
 
-function omitKeys(
+function hasValues(value: unknown): boolean {
+  return Array.isArray(value)
+    ? value.length > 0
+    : value != null && value !== "";
+}
+
+function clearFields(
   filters: ExerciseListFilters,
-  keys: (keyof ExerciseListFilters)[],
+  fields: Array<keyof ExerciseListFilters>,
 ): ExerciseListFilters {
   const next = { ...filters };
-  for (const key of keys) delete next[key];
+  for (const field of fields) delete next[field];
   return next;
 }
 
-export const FILTER_DIMENSIONS: FilterDimension[] = [
+const FILTER_DIMENSIONS: FilterDimension[] = [
   {
     key: "name",
-    isActive: (filters) => Boolean(filters.name?.trim()),
-    clear: (filters) => omitKeys(filters, ["name"]),
-    label: (filters) => `Nazwa: ${filters.name!.trim()}`,
+    isActive: (filters) => hasValues(filters.name),
+    clear: (filters) => clearFields(filters, ["name"]),
+    label: (filters) => `Nazwa: ${filters.name}`,
   },
   {
     key: "age",
-    isActive: (filters) => filters.min_age != null || filters.max_age != null,
-    clear: (filters) => omitKeys(filters, ["min_age", "max_age"]),
+    isActive: (filters) =>
+      hasValues(filters.min_age) || hasValues(filters.max_age),
+    clear: (filters) => clearFields(filters, ["min_age", "max_age"]),
     label: (filters) =>
       `Wiek: ${filters.min_age ?? "…"}–${filters.max_age ?? "…"}`,
   },
   {
     key: "participants",
     isActive: (filters) =>
-      filters.min_participants != null || filters.max_participants != null,
+      hasValues(filters.min_participants) ||
+      hasValues(filters.max_participants),
     clear: (filters) =>
-      omitKeys(filters, ["min_participants", "max_participants"]),
+      clearFields(filters, ["min_participants", "max_participants"]),
     label: (filters) =>
       `Liczba uczestników: ${filters.min_participants ?? "…"}–${filters.max_participants ?? "…"}`,
   },
   {
     key: "equipment",
-    isActive: (filters) => Boolean(filters.equipment_ids?.length),
-    clear: (filters) => omitKeys(filters, ["equipment_ids"]),
+    isActive: (filters) => hasValues(filters.equipment_ids),
+    clear: (filters) => clearFields(filters, ["equipment_ids"]),
     label: (filters, catalogs) =>
       `Sprzęt: ${namesFor(filters.equipment_ids, catalogs.equipment)}`,
   },
   {
     key: "training_types",
-    isActive: (filters) => Boolean(filters.training_type_ids?.length),
-    clear: (filters) => omitKeys(filters, ["training_type_ids"]),
+    isActive: (filters) => hasValues(filters.training_type_ids),
+    clear: (filters) => clearFields(filters, ["training_type_ids"]),
     label: (filters, catalogs) =>
       `Kategorie: ${namesFor(filters.training_type_ids, catalogs.trainingTypes)}`,
   },
   {
     key: "segments",
-    isActive: (filters) => Boolean(filters.segment_ids?.length),
-    clear: (filters) => omitKeys(filters, ["segment_ids"]),
+    isActive: (filters) => hasValues(filters.segment_ids),
+    clear: (filters) => clearFields(filters, ["segment_ids"]),
     label: (filters, catalogs) =>
       `Schematy: ${namesFor(filters.segment_ids, catalogs.segments)}`,
   },
@@ -98,8 +107,11 @@ export function withoutFilterDimension(
   filters: ExerciseListFilters,
   dimension: ActiveFilterDimension,
 ): ExerciseListFilters {
-  const def = FILTER_DIMENSIONS.find((entry) => entry.key === dimension);
-  return def ? def.clear(filters) : filters;
+  return (
+    FILTER_DIMENSIONS.find((entry) => entry.key === dimension)?.clear(
+      filters,
+    ) ?? filters
+  );
 }
 
 export function countActiveFilters(

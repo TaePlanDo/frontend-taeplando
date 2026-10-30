@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { PaginatedResponse } from "@/types/pagination";
@@ -40,7 +40,11 @@ function setup(fetchPage: (page: number) => Promise<PaginatedResponse<Item>>) {
   );
 
   return renderHook(
-    () => usePaginatedList<Item>({ queryKey: ["items"], fetchPage }),
+    () =>
+      usePaginatedList<Item>({
+        queryKey: ["items"],
+        fetchPage,
+      }),
     { wrapper },
   );
 }
@@ -54,6 +58,7 @@ describe("usePaginatedList", () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.items).toEqual([{ id: "p1" }]);
     expect(result.current.isError).toBe(false);
+    expect(result.current.listState).toEqual({ kind: "ready" });
   });
 
   it("reports a failed request as an error, not as an empty list", async () => {
@@ -64,6 +69,10 @@ describe("usePaginatedList", () => {
     expect(result.current.isLoading).toBe(false);
     expect(result.current.items).toEqual([]);
     expect(result.current.total).toBe(0);
+    expect(result.current.listState).toEqual({
+      kind: "unavailable",
+      reason: "error",
+    });
   });
 
   it("does not report an error for a real empty result", async () => {
@@ -74,6 +83,7 @@ describe("usePaginatedList", () => {
     expect(result.current.isError).toBe(false);
     expect(result.current.items).toEqual([]);
     expect(result.current.total).toBe(20);
+    expect(result.current.listState).toEqual({ kind: "empty" });
   });
 
   it("recovers after a retry of a failed request", async () => {
@@ -91,6 +101,30 @@ describe("usePaginatedList", () => {
 
     await waitFor(() => expect(result.current.isError).toBe(false));
     expect(result.current.items).toEqual([{ id: "p1" }]);
+  });
+
+  it("keeps cached data and pagination state after a refresh fails", async () => {
+    const fetchPage = vi
+      .fn<(page: number) => Promise<PaginatedResponse<Item>>>()
+      .mockResolvedValueOnce(pageOf(1))
+      .mockRejectedValueOnce(new Error("boom"));
+    const { result } = setup(fetchPage);
+
+    await waitFor(() =>
+      expect(result.current.listState).toEqual({ kind: "ready" }),
+    );
+
+    act(() => {
+      void result.current.refetch();
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.items).toEqual([{ id: "p1" }]);
+    expect(result.current.listState).toEqual({
+      kind: "stale",
+      reason: "error",
+      isEmpty: false,
+    });
   });
 
   it("does not present the previous page as loaded while the next page is fetching", async () => {
@@ -138,7 +172,6 @@ describe("usePaginatedList", () => {
 
   it("reports past-last-page clamps through onPageChange when controlled", async () => {
     let totalPages = 3;
-    const onPageChange = vi.fn();
     const client = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
@@ -146,18 +179,20 @@ describe("usePaginatedList", () => {
       <QueryClientProvider client={client}>{children}</QueryClientProvider>
     );
 
-    const { result, rerender } = renderHook(
-      ({ page }: { page: number }) =>
-        usePaginatedList<Item>({
+    const { result } = renderHook(
+      () => {
+        const [page, setPage] = useState(3);
+        return usePaginatedList<Item>({
           queryKey: ["controlled-items"],
           fetchPage: async (current) =>
             current > totalPages
               ? pageOf(current, totalPages, [])
               : pageOf(current, totalPages),
           page,
-          onPageChange,
-        }),
-      { wrapper, initialProps: { page: 3 } },
+          onPageChange: setPage,
+        });
+      },
+      { wrapper },
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -168,8 +203,6 @@ describe("usePaginatedList", () => {
       void result.current.refetch();
     });
 
-    await waitFor(() => expect(onPageChange).toHaveBeenCalledWith(2));
-    rerender({ page: 2 });
     await waitFor(() => expect(result.current.page).toBe(2));
   });
 });

@@ -16,4 +16,8 @@ export const queryKeys = {
     lists: () => [...queryKeys.exercises.all, "list"] as const,
     catalogs: () => [...queryKeys.exercises.all, "catalogs"] as const,
   },
+  equipment: {
+    all: ["equipment"] as const,
+    lists: () => [...queryKeys.equipment.all, "list"] as const,
+  },
 };

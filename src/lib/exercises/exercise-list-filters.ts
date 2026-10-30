@@ -15,6 +15,9 @@ type FilterQueryField =
   | { key: "equipment_ids" | "training_type_ids"; kind: "stringCsv" }
   | { key: "segment_ids"; kind: "intCsv" };
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const FILTER_QUERY_FIELDS: FilterQueryField[] = [
   { key: "name", kind: "string" },
   { key: "min_age", kind: "int" },
@@ -25,6 +28,10 @@ const FILTER_QUERY_FIELDS: FilterQueryField[] = [
   { key: "training_type_ids", kind: "stringCsv" },
   { key: "segment_ids", kind: "intCsv" },
 ];
+
+export const EXERCISE_LIST_FILTER_PARAM_KEYS = FILTER_QUERY_FIELDS.map(
+  ({ key }) => key,
+);
 
 export function parsePositiveInt(raw: string | null): number | undefined {
   if (raw == null || raw === "") return undefined;
@@ -38,7 +45,7 @@ function parseStringCsv(raw: string | null): string[] | undefined {
   const values = raw
     .split(",")
     .map((part) => part.trim())
-    .filter(Boolean);
+    .filter((value) => UUID_PATTERN.test(value));
   return values.length > 0 ? values : undefined;
 }
 
@@ -63,6 +70,38 @@ function isFullRange(
   return min === bounds.min && max === bounds.max;
 }
 
+function isValidBound(value: number | undefined, bounds: RangeBounds): boolean {
+  return (
+    value != null &&
+    Number.isInteger(value) &&
+    value >= bounds.min &&
+    value <= bounds.max
+  );
+}
+
+function normalizeRange(
+  min: number | undefined,
+  max: number | undefined,
+  bounds: RangeBounds,
+): { min?: number; max?: number } {
+  const normalizedMin = isValidBound(min, bounds) ? min : undefined;
+  const normalizedMax = isValidBound(max, bounds) ? max : undefined;
+
+  if (
+    normalizedMin != null &&
+    normalizedMax != null &&
+    normalizedMin > normalizedMax
+  ) {
+    return {};
+  }
+
+  return { min: normalizedMin, max: normalizedMax };
+}
+
+function uniqueValues<T>(values: T[]): T[] {
+  return [...new Set(values)];
+}
+
 /** Drop empties and full default ranges so URL/API stay lean. */
 export function normalizeFilters(
   filters: ExerciseListFilters,
@@ -71,31 +110,41 @@ export function normalizeFilters(
   const name = filters.name?.trim();
   if (name) next.name = name;
 
-  if (!isFullRange(filters.min_age, filters.max_age, AGE_FILTER_BOUNDS)) {
-    if (filters.min_age != null) next.min_age = filters.min_age;
-    if (filters.max_age != null) next.max_age = filters.max_age;
+  const age = normalizeRange(
+    filters.min_age,
+    filters.max_age,
+    AGE_FILTER_BOUNDS,
+  );
+  if (!isFullRange(age.min, age.max, AGE_FILTER_BOUNDS)) {
+    if (age.min != null) next.min_age = age.min;
+    if (age.max != null) next.max_age = age.max;
   }
 
+  const participants = normalizeRange(
+    filters.min_participants,
+    filters.max_participants,
+    PARTICIPANTS_FILTER_BOUNDS,
+  );
   if (
-    !isFullRange(
-      filters.min_participants,
-      filters.max_participants,
-      PARTICIPANTS_FILTER_BOUNDS,
-    )
+    !isFullRange(participants.min, participants.max, PARTICIPANTS_FILTER_BOUNDS)
   ) {
-    if (filters.min_participants != null) {
-      next.min_participants = filters.min_participants;
+    if (participants.min != null) {
+      next.min_participants = participants.min;
     }
-    if (filters.max_participants != null) {
-      next.max_participants = filters.max_participants;
+    if (participants.max != null) {
+      next.max_participants = participants.max;
     }
   }
 
-  if (filters.equipment_ids?.length) next.equipment_ids = filters.equipment_ids;
-  if (filters.training_type_ids?.length) {
-    next.training_type_ids = filters.training_type_ids;
+  if (filters.equipment_ids?.length) {
+    next.equipment_ids = uniqueValues(filters.equipment_ids);
   }
-  if (filters.segment_ids?.length) next.segment_ids = filters.segment_ids;
+  if (filters.training_type_ids?.length) {
+    next.training_type_ids = uniqueValues(filters.training_type_ids);
+  }
+  if (filters.segment_ids?.length) {
+    next.segment_ids = uniqueValues(filters.segment_ids);
+  }
   return next;
 }
 

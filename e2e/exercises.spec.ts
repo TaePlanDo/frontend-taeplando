@@ -2,7 +2,7 @@ import { seedSystemData } from "./helpers/backend";
 import { createEquipment } from "./helpers/createEquipment";
 import { createLocalTrainerAndLogin } from "./helpers/createLocalTrainer";
 import { ExercisesPage } from "./pages/exercises.page";
-import { test } from "./playwright";
+import { expect, test } from "./playwright";
 
 const exercise = {
   name: "Kopnięcie frontalne",
@@ -51,6 +51,21 @@ test.describe("exercise management", () => {
     await exercises.submitInvalidExercise();
 
     await exercises.expectValidationError("Nazwa ćwiczenia jest wymagana");
+  });
+
+  test("filters by name and keeps the filter in the URL", async ({ page }) => {
+    await createLocalTrainerAndLogin(page);
+    const exercises = new ExercisesPage(page);
+    await exercises.goto();
+    await exercises.createExercise(exercise);
+    await exercises.createExercise({ ...exercise, name: "Kopnięcie okrężne" });
+
+    await exercises.searchByName(exercise.name);
+    await exercises.expectExercise(exercise.name);
+    await expect(page.getByText("Kopnięcie okrężne")).toHaveCount(0);
+
+    await exercises.clearSearch();
+    await exercises.expectExercise("Kopnięcie okrężne");
   });
 });
 

@@ -1,13 +1,15 @@
 import {
   keepPreviousData,
+  onlineManager,
   useQuery,
   type QueryKey,
 } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
 import type { PaginatedResponse } from "@/types/pagination";
+import { getPaginatedListState } from "./listState";
 
-type UsePaginatedListBase<TItem> = {
+type PaginatedListBaseOptions<TItem> = {
   queryKey: QueryKey;
   fetchPage: (
     page: number,
@@ -16,39 +18,53 @@ type UsePaginatedListBase<TItem> = {
   pageSize?: number;
 };
 
-type ControlledPage = {
+type ControlledPagination = {
   page: number;
   onPageChange: (page: number) => void;
-  initialPage?: never;
 };
 
-type UncontrolledPage = {
-  page?: undefined;
-  onPageChange?: undefined;
+type UncontrolledPagination = {
   initialPage?: number;
+  page?: never;
+  onPageChange?: never;
 };
 
-export type UsePaginatedListOptions<TItem> = UsePaginatedListBase<TItem> &
-  (ControlledPage | UncontrolledPage);
+export type UsePaginatedListOptions<TItem> = PaginatedListBaseOptions<TItem> &
+  (ControlledPagination | UncontrolledPagination);
+
+function isControlledPagination<TItem>(
+  options: UsePaginatedListOptions<TItem>,
+): options is PaginatedListBaseOptions<TItem> & ControlledPagination {
+  return options.page !== undefined;
+}
+
+function useOnlineState() {
+  return useSyncExternalStore(
+    (onStoreChange) => onlineManager.subscribe(onStoreChange),
+    () => onlineManager.isOnline(),
+    () => true,
+  );
+}
 
 export function usePaginatedList<TItem>(
   options: UsePaginatedListOptions<TItem>,
 ) {
   const { queryKey, fetchPage, pageSize = 6 } = options;
-  const isControlled = options.page != null;
-  const onPageChange = isControlled ? options.onPageChange : undefined;
-  const [uncontrolledPage, setUncontrolledPage] = useState(() =>
-    isControlled ? 1 : (options.initialPage ?? 1),
+  const [uncontrolledPage, setUncontrolledPage] = useState(
+    "initialPage" in options ? (options.initialPage ?? 1) : 1,
   );
-  const page = isControlled ? options.page : uncontrolledPage;
+  const controlledPagination = isControlledPagination(options);
+  const onPageChange = controlledPagination ? options.onPageChange : undefined;
+  const page = controlledPagination ? options.page : uncontrolledPage;
+  const isOnline = useOnlineState();
 
   const setPage = useCallback(
     (next: number) => {
       if (onPageChange) {
         onPageChange(next);
-        return;
+      } else {
+        setUncontrolledPage(next);
       }
-      setUncontrolledPage(next);
     },
     [onPageChange],
   );
@@ -63,6 +79,18 @@ export function usePaginatedList<TItem>(
   const totalPages = data?.total_pages ?? 1;
 
   const isPastLastPage = data != null && page > totalPages;
+  const hasData = data !== undefined;
+  const isLoading =
+    query.isPending || query.isPlaceholderData || isPastLastPage;
+  const isEmpty = data?.items.length === 0;
+
+  const listState = getPaginatedListState({
+    hasData,
+    isOnline,
+    isLoading,
+    isError: query.isError,
+    isEmpty,
+  });
 
   useEffect(() => {
     if (isPastLastPage) {
@@ -82,9 +110,12 @@ export function usePaginatedList<TItem>(
     page,
     total: data?.total ?? 0,
     totalPages,
-    isLoading: query.isLoading || query.isPlaceholderData || isPastLastPage,
+    hasData,
+    isOffline: !isOnline,
+    isLoading,
     isFetching: query.isFetching,
     isError: query.isError,
+    listState,
     refetch: query.refetch,
     goToPage,
   };

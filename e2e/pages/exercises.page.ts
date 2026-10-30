@@ -133,6 +133,22 @@ export class ExercisesPage {
     await expect(this.exerciseDialog).toBeVisible();
   }
 
+  async searchByName(name: string): Promise<void> {
+    await this.page
+      .getByRole("textbox", { name: "Wyszukaj ćwiczenie" })
+      .fill(name);
+    await expect
+      .poll(() => new URL(this.page.url()).searchParams.get("name"))
+      .toBe(name);
+  }
+
+  async clearSearch(): Promise<void> {
+    await this.page
+      .getByRole("textbox", { name: "Wyszukaj ćwiczenie" })
+      .fill("");
+    await expect(this.page).not.toHaveURL(/[?&]name=/);
+  }
+
   private async selectAttribute(
     tab: "Sprzęt" | "Typ" | "Segment",
     value: string,

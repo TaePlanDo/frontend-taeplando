@@ -4,7 +4,7 @@ import {
   buildActiveFilterChips,
   countActiveFilters,
   withoutFilterDimension,
-} from "./filter-dimensions";
+} from "./exercise-list-filter-chips";
 
 describe("filter-dimensions", () => {
   it("builds one chip per active dimension with catalog labels", () => {

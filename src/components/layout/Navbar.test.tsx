@@ -14,6 +14,17 @@ function renderNavbar() {
 }
 
 describe("Navbar", () => {
+  it("includes the equipment route in both navigation variants", () => {
+    expect(NAV_ITEMS).toContainEqual({ label: "Sprzęt", to: "/equipment" });
+
+    renderNavbar();
+
+    expect(screen.getByRole("link", { name: "Sprzęt" })).toHaveAttribute(
+      "href",
+      "/equipment",
+    );
+  });
+
   it("renders the brand link", () => {
     renderNavbar();
 

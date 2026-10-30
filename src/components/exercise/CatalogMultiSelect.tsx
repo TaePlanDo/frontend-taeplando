@@ -15,6 +15,7 @@ type CatalogMultiSelectProps = {
   onSelectedIdsChange: (ids: string[]) => void;
   disabled?: boolean;
   isLoading?: boolean;
+  unavailableMessage?: string;
   className?: string;
   labelClassName?: string;
 };
@@ -27,11 +28,16 @@ export function CatalogMultiSelect({
   onSelectedIdsChange,
   disabled,
   isLoading,
+  unavailableMessage,
   className,
   labelClassName,
 }: CatalogMultiSelectProps) {
-  const selected = items.filter((item) =>
-    selectedIds.includes(String(item.id)),
+  const selected = selectedIds.map(
+    (id) =>
+      items.find((item) => String(item.id) === id) ?? {
+        id,
+        name: `Niedostępny element (${id})`,
+      },
   );
   const available = items.filter(
     (item) => !selectedIds.includes(String(item.id)),
@@ -41,21 +47,28 @@ export function CatalogMultiSelect({
     <div className={className}>
       <div className="flex flex-col gap-1">
         <CustomizedSelect
-          key={`${label}-${selectedIds.join("-")}`}
           label={label}
           labelClassName={labelClassName}
+          value=""
           placeholder={
-            isLoading
-              ? "Ładowanie…"
-              : available.length === 0
-                ? "Wszystkie elementy z listy są już dodane"
-                : placeholder
+            unavailableMessage
+              ? unavailableMessage
+              : isLoading
+                ? "Ładowanie…"
+                : available.length === 0
+                  ? "Wszystkie elementy z listy są już dodane"
+                  : placeholder
           }
           options={available.map((item) => ({
             value: String(item.id),
             label: item.name,
           }))}
-          disabled={disabled || isLoading || available.length === 0}
+          disabled={
+            disabled ||
+            isLoading ||
+            Boolean(unavailableMessage) ||
+            available.length === 0
+          }
           onValueChange={(id) => {
             if (!selectedIds.includes(id)) {
               onSelectedIdsChange([...selectedIds, id]);
@@ -66,7 +79,7 @@ export function CatalogMultiSelect({
           items={selected}
           onRemove={(id) =>
             onSelectedIdsChange(
-              selectedIds.filter((selectedId) => selectedId !== id),
+              selectedIds.filter((selectedId) => selectedId !== String(id)),
             )
           }
         />

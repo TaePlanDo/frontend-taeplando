@@ -7,7 +7,7 @@ import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useExerciseCatalogs } from "@/hooks/exercises/useExerciseCatalogs";
-import { buildActiveFilterChips } from "@/lib/exercises/filter-dimensions";
+import { buildActiveFilterChips } from "@/lib/exercises/exercise-list-filter-chips";
 import { formatExerciseCount } from "@/lib/format/plural";
 import type {
   ActiveFilterDimension,
@@ -94,7 +94,7 @@ export function ExerciseListFiltersBar({
           />
           <Badge
             variant="ghost"
-            className="h-10 rounded-full border border-border bg-transparent px-6 text-sm font-medium text-foreground"
+            className="hidden h-10 rounded-full border border-border bg-transparent px-6 text-sm font-medium text-foreground lg:flex"
           >
             {formatExerciseCount(total)}
           </Badge>
@@ -102,7 +102,7 @@ export function ExerciseListFiltersBar({
       </div>
       <SelectedAttributeBadges
         items={chips.map((chip) => ({ id: chip.key, name: chip.label }))}
-        onRemove={(id) => onClearDimension(id as ActiveFilterDimension)}
+        onRemove={onClearDimension}
       />
     </div>
   );
