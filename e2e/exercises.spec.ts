@@ -2,7 +2,7 @@ import { seedSystemData } from "./helpers/backend";
 import { createEquipment } from "./helpers/createEquipment";
 import { createLocalTrainerAndLogin } from "./helpers/createLocalTrainer";
 import { ExercisesPage } from "./pages/exercises.page";
-import { expect, test } from "./playwright";
+import { test } from "./playwright";
 
 const exercise = {
   name: "Kopnięcie frontalne",
@@ -52,20 +52,57 @@ test.describe("exercise management", () => {
 
     await exercises.expectValidationError("Nazwa ćwiczenia jest wymagana");
   });
+});
 
-  test("filters by name and keeps the filter in the URL", async ({ page }) => {
+test.describe("exercise search and filters", () => {
+  test.beforeEach(() => seedSystemData());
+
+  test("searches by name and filters by category", async ({ page }) => {
     await createLocalTrainerAndLogin(page);
     const exercises = new ExercisesPage(page);
     await exercises.goto();
-    await exercises.createExercise(exercise);
-    await exercises.createExercise({ ...exercise, name: "Kopnięcie okrężne" });
 
-    await exercises.searchByName(exercise.name);
-    await exercises.expectExercise(exercise.name);
-    await expect(page.getByText("Kopnięcie okrężne")).toHaveCount(0);
+    await exercises.createExercise(exercise, { trainingType: "Technika" });
+    await exercises.createExercise(
+      { ...exercise, name: "Kopnięcie okrężne" },
+      { trainingType: "Poomsae" },
+    );
+
+    await exercises.searchByName("Kopnięcie");
+    await exercises.expectExercise(exercise.name, { trainingType: "Technika" });
+    await exercises.expectExercise("Kopnięcie okrężne", {
+      trainingType: "Poomsae",
+    });
+
+    await exercises.applyCatalogFilter("Kategorie", "Technika");
+    await exercises.expectExercise(exercise.name, { trainingType: "Technika" });
+    await exercises.expectExerciseHidden("Kopnięcie okrężne");
+    await exercises.expectActiveFilterChip("Nazwa: Kopnięcie");
+    await exercises.expectActiveFilterChip("Kategorie: Technika");
+    await exercises.expectListQuery({
+      training_type_ids: /^[0-9a-f-]{36}$/i,
+    });
 
     await exercises.clearSearch();
-    await exercises.expectExercise("Kopnięcie okrężne");
+    await exercises.expectExercise(exercise.name);
+    await exercises.expectExerciseHidden("Kopnięcie okrężne");
+  });
+
+  test("shows an empty state when filters match nothing", async ({ page }) => {
+    await createLocalTrainerAndLogin(page);
+    const exercises = new ExercisesPage(page);
+    await exercises.goto();
+
+    await exercises.createExercise(exercise, { trainingType: "Technika" });
+    await exercises.expectExercise(exercise.name);
+
+    await exercises.applyCatalogFilter("Kategorie", "Poomsae");
+    await exercises.expectFilteredEmpty();
+    await exercises.expectExerciseHidden(exercise.name);
+    await exercises.expectActiveFilterChip("Kategorie: Poomsae");
+    await exercises.expectListQuery({
+      training_type_ids: /^[0-9a-f-]{36}$/i,
+    });
   });
 });
 
