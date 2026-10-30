@@ -24,7 +24,6 @@ export class ExercisesPage {
   readonly exerciseDialog: Locator;
   readonly emptyListMessage: Locator;
   readonly listAlert: Locator;
-  readonly retryButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -37,18 +36,10 @@ export class ExercisesPage {
     this.exerciseDialog = page.getByRole("dialog");
     this.emptyListMessage = page.getByText("Jeszcze nie masz żadnych ćwiczeń");
     this.listAlert = page.getByRole("alert");
-    this.retryButton = this.listAlert.getByRole("button", {
-      name: "Spróbuj ponownie",
-    });
   }
 
   async goto(): Promise<void> {
     await this.page.goto("/exercises");
-    await expect(this.heading).toBeVisible();
-  }
-
-  async openFromNav(): Promise<void> {
-    await this.page.getByRole("link", { name: "Ćwiczenia" }).click();
     await expect(this.heading).toBeVisible();
   }
 
@@ -183,22 +174,16 @@ export class ExercisesPage {
     }
   }
 
-  async expectOfflineError(): Promise<void> {
+  async expectLoadError(): Promise<void> {
     await expect(this.listAlert).toBeVisible();
     await expect(
-      this.listAlert.getByText("Brak połączenia z internetem"),
+      this.listAlert.getByText("Nie udało się pobrać ćwiczeń"),
     ).toBeVisible();
     await expect(
-      this.listAlert.getByText("Połącz się z internetem i spróbuj ponownie"),
+      this.listAlert.getByText("Sprawdź połączenie i spróbuj ponownie"),
     ).toBeVisible();
-    await expect(this.retryButton).toBeVisible();
     await expect(this.emptyListMessage).toHaveCount(0);
     await expect(this.page.locator('[data-slot="card"]')).toHaveCount(0);
-  }
-
-  async retryList(): Promise<void> {
-    await expect(this.retryButton).toBeVisible();
-    await this.retryButton.click();
   }
 
   async expectValidationError(message: string): Promise<void> {

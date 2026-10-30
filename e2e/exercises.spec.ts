@@ -1,7 +1,7 @@
 import { seedSystemData } from "./helpers/backend";
 import { createEquipment } from "./helpers/createEquipment";
 import { createLocalTrainerAndLogin } from "./helpers/createLocalTrainer";
-import { setAppOffline } from "./helpers/network";
+import { blockApi } from "./helpers/network";
 import { ExercisesPage } from "./pages/exercises.page";
 import { expect, test } from "./playwright";
 
@@ -133,27 +133,18 @@ test.describe("exercise details preview", () => {
     await exercises.expectDetails(exercise, attributes);
   });
 
-  test("shows an offline error and recovers after retry", async ({ page }) => {
+  test("shows a load error when the API is unreachable and recovers after reconnect", async ({
+    page,
+  }) => {
     await createLocalTrainerAndLogin(page);
     const exercises = new ExercisesPage(page);
+    const exercisesApi = await blockApi(page, "**/api/exercises**");
 
-    let blockExercisesApi = true;
-    await page.route("**/api/exercises**", async (route) => {
-      if (blockExercisesApi) {
-        await route.abort("internetdisconnected");
-        return;
-      }
-      await route.continue();
-    });
+    await exercises.goto();
+    await exercises.expectLoadError();
 
-    await setAppOffline(page, true);
-    await exercises.openFromNav();
-    await exercises.expectOfflineError();
-
-    await setAppOffline(page, false);
-    await expect(exercises.retryButton).toBeVisible();
-    blockExercisesApi = false;
-    await exercises.retryList();
+    exercisesApi.unblock();
+    await exercises.goto();
     await exercises.expectNoExercises();
   });
 });

@@ -1,14 +1,22 @@
 import type { Page } from "@playwright/test";
 
-export async function setAppOffline(
+export async function blockApi(
   page: Page,
-  offline: boolean,
-): Promise<void> {
-  await page.evaluate((isOffline) => {
-    Object.defineProperty(navigator, "onLine", {
-      configurable: true,
-      get: () => !isOffline,
-    });
-    window.dispatchEvent(new Event(isOffline ? "offline" : "online"));
-  }, offline);
+  url: string,
+): Promise<{ unblock: () => void }> {
+  let blocked = true;
+
+  await page.route(url, async (route) => {
+    if (blocked) {
+      await route.abort("internetdisconnected");
+      return;
+    }
+    await route.continue();
+  });
+
+  return {
+    unblock: () => {
+      blocked = false;
+    },
+  };
 }
