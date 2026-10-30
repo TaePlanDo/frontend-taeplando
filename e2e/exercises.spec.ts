@@ -1,6 +1,7 @@
 import { seedSystemData } from "./helpers/backend";
 import { createEquipment } from "./helpers/createEquipment";
 import { createLocalTrainerAndLogin } from "./helpers/createLocalTrainer";
+import { setAppOffline } from "./helpers/network";
 import { ExercisesPage } from "./pages/exercises.page";
 import { expect, test } from "./playwright";
 
@@ -106,5 +107,53 @@ test.describe("exercise configuration", () => {
     await exercises.expectValidationError("Wybierz co najmniej jeden Typ");
     await exercises.openAttributeTab("Segment");
     await exercises.expectValidationError("Wybierz co najmniej jeden Segment");
+  });
+});
+
+test.describe("exercise details preview", () => {
+  test.beforeEach(() => seedSystemData());
+
+  test("opens the details modal with the exercise data from the list", async ({
+    page,
+  }) => {
+    const trainer = await createLocalTrainerAndLogin(page);
+    const equipment = await createEquipment(trainer, "Tarcza treningowa");
+    const attributes = {
+      trainingType: "Technika",
+      segment: "Rozgrzewka",
+      equipment: equipment.name,
+    };
+
+    const exercises = new ExercisesPage(page);
+    await exercises.goto();
+    await exercises.createExercise(exercise, attributes);
+    await exercises.expectExercise(exercise.name, attributes);
+
+    await exercises.openDetails(exercise.name);
+    await exercises.expectDetails(exercise, attributes);
+  });
+
+  test("shows an offline error and recovers after retry", async ({ page }) => {
+    await createLocalTrainerAndLogin(page);
+    const exercises = new ExercisesPage(page);
+
+    let blockExercisesApi = true;
+    await page.route("**/api/exercises**", async (route) => {
+      if (blockExercisesApi) {
+        await route.abort("internetdisconnected");
+        return;
+      }
+      await route.continue();
+    });
+
+    await setAppOffline(page, true);
+    await exercises.openFromNav();
+    await exercises.expectOfflineError();
+
+    await setAppOffline(page, false);
+    await expect(exercises.retryButton).toBeVisible();
+    blockExercisesApi = false;
+    await exercises.retryList();
+    await exercises.expectNoExercises();
   });
 });
