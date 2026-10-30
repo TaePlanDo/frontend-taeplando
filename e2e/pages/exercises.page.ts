@@ -22,6 +22,7 @@ export class ExercisesPage {
   readonly heading: Locator;
   readonly addExerciseButton: Locator;
   readonly exerciseDialog: Locator;
+  readonly filtersDialog: Locator;
   readonly emptyListMessage: Locator;
 
   constructor(page: Page) {
@@ -32,7 +33,12 @@ export class ExercisesPage {
     this.addExerciseButton = page.getByRole("button", {
       name: "Dodaj ćwiczenie",
     });
-    this.exerciseDialog = page.getByRole("dialog");
+    this.exerciseDialog = page.getByRole("dialog", {
+      name: /^(Stwórz ćwiczenie|Edytuj ćwiczenie|Podgląd ćwiczenia)$/,
+    });
+    this.filtersDialog = page.getByRole("dialog", {
+      name: "Filtry ćwiczeń",
+    });
     this.emptyListMessage = page.getByText("Jeszcze nie masz żadnych ćwiczeń");
   }
 
@@ -124,6 +130,10 @@ export class ExercisesPage {
     }
   }
 
+  async expectExerciseHidden(name: string): Promise<void> {
+    await expect(this.exerciseCard(name)).toHaveCount(0);
+  }
+
   async expectNoExercises(): Promise<void> {
     await expect(this.emptyListMessage).toBeVisible();
   }
@@ -147,6 +157,47 @@ export class ExercisesPage {
       .getByRole("textbox", { name: "Wyszukaj ćwiczenie" })
       .fill("");
     await expect(this.page).not.toHaveURL(/[?&]name=/);
+  }
+
+  async applyCatalogFilter(
+    field: "Sprzęt" | "Kategorie" | "Schematy",
+    value: string,
+  ): Promise<void> {
+    await this.page.getByRole("button", { name: /Filtruj/ }).click();
+    await expect(this.filtersDialog).toBeVisible();
+    await this.filtersDialog.getByRole("combobox", { name: field }).click();
+    await this.page.getByRole("option", { name: value, exact: true }).click();
+    await this.filtersDialog
+      .getByRole("button", { name: "Zastosuj filtry" })
+      .click();
+    await expect(this.filtersDialog).toHaveCount(0);
+  }
+
+  async expectActiveFilterChip(label: string): Promise<void> {
+    await expect(
+      this.page.getByRole("button", { name: `Usuń ${label}` }),
+    ).toBeVisible();
+  }
+
+  async expectFilteredEmpty(): Promise<void> {
+    await expect(
+      this.page.getByText("Brak ćwiczeń spełniających wybrane filtry"),
+    ).toBeVisible();
+    await expect(
+      this.page.getByText(
+        "Zmień lub wyczyść filtry, aby zobaczyć więcej wyników",
+      ),
+    ).toBeVisible();
+  }
+
+  async expectListQuery(
+    params: Record<string, string | RegExp>,
+  ): Promise<void> {
+    for (const [name, value] of Object.entries(params)) {
+      await expect
+        .poll(() => new URL(this.page.url()).searchParams.get(name) ?? "")
+        .toMatch(value);
+    }
   }
 
   private async selectAttribute(
