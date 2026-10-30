@@ -137,9 +137,9 @@ export class ExercisesPage {
     await this.page
       .getByRole("textbox", { name: "Wyszukaj ćwiczenie" })
       .fill(name);
-    await expect(this.page).toHaveURL(
-      new RegExp(`name=${encodeURIComponent(name)}`),
-    );
+    await expect
+      .poll(() => new URL(this.page.url()).searchParams.get("name"))
+      .toBe(name);
   }
 
   async clearSearch(): Promise<void> {
