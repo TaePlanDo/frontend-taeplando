@@ -26,12 +26,12 @@ test.describe("group schema", () => {
 
     await groups.openSchema(groupValues.name);
     await groups.addSchemaSegment("Rozgrzewka");
-    await groups.expectSchemaSegments(["Część główna", "Rozgrzewka"]);
+    await groups.expectSchemaSegments(["Ćwiczenia", "Rozgrzewka"]);
     await groups.saveSchema();
     await groups.expectSchemaSaved();
 
     await groups.openSchema(groupValues.name);
-    await groups.expectSchemaSegments(["Część główna", "Rozgrzewka"]);
+    await groups.expectSchemaSegments(["Ćwiczenia", "Rozgrzewka"]);
   });
 
   test("removes a segment from a group schema and saves", async ({ page }) => {
@@ -39,16 +39,16 @@ test.describe("group schema", () => {
 
     await groups.openSchema(groupValues.name);
     await groups.addSchemaSegment("Rozgrzewka");
-    await groups.addSchemaSegment("Wyciszenie");
+    await groups.addSchemaSegment("Rozciąganie");
 
     await groups.removeSchemaSegment("Rozgrzewka");
-    await groups.expectSchemaSegments(["Część główna", "Wyciszenie"]);
+    await groups.expectSchemaSegments(["Ćwiczenia", "Rozciąganie"]);
     await groups.expectSchemaSegmentAbsent("Rozgrzewka");
     await groups.saveSchema();
     await groups.expectSchemaSaved();
 
     await groups.openSchema(groupValues.name);
-    await groups.expectSchemaSegments(["Część główna", "Wyciszenie"]);
+    await groups.expectSchemaSegments(["Ćwiczenia", "Rozciąganie"]);
     await groups.expectSchemaSegmentAbsent("Rozgrzewka");
   });
 });
