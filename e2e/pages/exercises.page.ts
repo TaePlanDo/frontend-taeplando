@@ -55,7 +55,7 @@ export class ExercisesPage {
     await expect(this.exerciseDialog).toBeVisible();
     await this.fillExerciseForm(values);
     await this.selectAttribute("Typ", attributes.trainingType ?? "Technika");
-    await this.selectAttribute("Segment", attributes.segment ?? "Część główna");
+    await this.selectAttribute("Segment", attributes.segment ?? "Ćwiczenia");
     if (attributes.equipment) {
       await this.selectAttribute("Sprzęt", attributes.equipment);
     }
@@ -122,7 +122,7 @@ export class ExercisesPage {
     const card = this.exerciseCard(name);
     await expect(card).toBeVisible();
     await expect(card).toContainText(attributes.trainingType ?? "Technika");
-    await expect(card).toContainText(attributes.segment ?? "Część główna");
+    await expect(card).toContainText(attributes.segment ?? "Ćwiczenia");
     if (attributes.equipment) {
       await expect(card.getByLabel("Sprzęt")).toContainText(
         attributes.equipment,
@@ -173,7 +173,7 @@ export class ExercisesPage {
       attributes.trainingType ?? "Technika",
     );
     await expect(dialog.getByLabel("Segment")).toContainText(
-      attributes.segment ?? "Część główna",
+      attributes.segment ?? "Ćwiczenia",
     );
     if (attributes.equipment) {
       await expect(dialog.getByLabel("Sprzęt")).toContainText(

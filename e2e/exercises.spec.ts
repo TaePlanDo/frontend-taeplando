@@ -5,7 +5,7 @@ import { ExercisesPage } from "./pages/exercises.page";
 import { test } from "./playwright";
 
 const exercise = {
-  name: "Kopnięcie frontalne",
+  name: "E2E kopnięcie frontalne",
   description: "Ćwiczenie kopnięcia frontalnego na komendę.",
   minAge: 7,
   maxAge: 14,
@@ -24,9 +24,15 @@ test.describe("exercise management", () => {
 
     const exercises = new ExercisesPage(page);
     await exercises.goto();
-    await exercises.expectNoExercises();
+    await exercises.searchByName("Bieg między liniami");
+    await exercises.expectExercise("Bieg między liniami", {
+      trainingType: "Kondycja",
+      segment: "Rozgrzewka",
+    });
+    await exercises.clearSearch();
 
     await exercises.createExercise(exercise);
+    await exercises.searchByName(exercise.name);
     await exercises.expectExercise(exercise.name);
 
     const updatedExercise = {
@@ -35,10 +41,16 @@ test.describe("exercise management", () => {
       durationMinutes: 15,
     };
     await exercises.editExercise(exercise.name, updatedExercise);
+    await exercises.searchByName(updatedExercise.name);
     await exercises.expectExercise(updatedExercise.name);
 
     await exercises.deactivateExercise(updatedExercise.name);
-    await exercises.expectNoExercises();
+    await exercises.expectFilteredEmpty();
+    await exercises.searchByName("Bieg między liniami");
+    await exercises.expectExercise("Bieg między liniami", {
+      trainingType: "Kondycja",
+      segment: "Rozgrzewka",
+    });
   });
 
   test("shows validation feedback for a missing required field", async ({
@@ -64,28 +76,27 @@ test.describe("exercise search and filters", () => {
 
     await exercises.createExercise(exercise, { trainingType: "Technika" });
     await exercises.createExercise(
-      { ...exercise, name: "Kopnięcie okrężne" },
-      { trainingType: "Poomsae" },
+      { ...exercise, name: "E2E kopnięcie okrężne" },
+      { trainingType: "Walka" },
     );
 
-    await exercises.searchByName("Kopnięcie");
+    await exercises.searchByName("E2E");
     await exercises.expectExercise(exercise.name, { trainingType: "Technika" });
-    await exercises.expectExercise("Kopnięcie okrężne", {
-      trainingType: "Poomsae",
+    await exercises.expectExercise("E2E kopnięcie okrężne", {
+      trainingType: "Walka",
     });
 
     await exercises.applyCatalogFilter("Kategorie", "Technika");
     await exercises.expectExercise(exercise.name, { trainingType: "Technika" });
-    await exercises.expectExerciseHidden("Kopnięcie okrężne");
-    await exercises.expectActiveFilterChip("Nazwa: Kopnięcie");
+    await exercises.expectExerciseHidden("E2E kopnięcie okrężne");
+    await exercises.expectActiveFilterChip("Nazwa: E2E");
     await exercises.expectActiveFilterChip("Kategorie: Technika");
     await exercises.expectListQuery({
       training_type_ids: /^[0-9a-f-]{36}$/i,
     });
 
     await exercises.clearSearch();
-    await exercises.expectExercise(exercise.name);
-    await exercises.expectExerciseHidden("Kopnięcie okrężne");
+    await exercises.expectExerciseHidden("E2E kopnięcie okrężne");
   });
 
   test("shows an empty state when filters match nothing", async ({ page }) => {
@@ -94,12 +105,13 @@ test.describe("exercise search and filters", () => {
     await exercises.goto();
 
     await exercises.createExercise(exercise, { trainingType: "Technika" });
+    await exercises.searchByName(exercise.name);
     await exercises.expectExercise(exercise.name);
 
-    await exercises.applyCatalogFilter("Kategorie", "Poomsae");
+    await exercises.applyCatalogFilter("Kategorie", "Walka");
     await exercises.expectFilteredEmpty();
     await exercises.expectExerciseHidden(exercise.name);
-    await exercises.expectActiveFilterChip("Kategorie: Poomsae");
+    await exercises.expectActiveFilterChip("Kategorie: Walka");
     await exercises.expectListQuery({
       training_type_ids: /^[0-9a-f-]{36}$/i,
     });
@@ -123,6 +135,7 @@ test.describe("exercise configuration", () => {
       segment: "Rozgrzewka",
       equipment: equipment.name,
     });
+    await exercises.searchByName(exercise.name);
     await exercises.expectExercise(exercise.name, {
       trainingType: "Technika",
       segment: "Rozgrzewka",
@@ -163,6 +176,7 @@ test.describe("exercise details preview", () => {
     const exercises = new ExercisesPage(page);
     await exercises.goto();
     await exercises.createExercise(exercise, attributes);
+    await exercises.searchByName(exercise.name);
     await exercises.expectExercise(exercise.name, attributes);
 
     await exercises.openDetails(exercise.name);
