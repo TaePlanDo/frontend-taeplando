@@ -1,4 +1,5 @@
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
+import { ExerciseImage } from "@/components/shared/ExerciseImage";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import type { Exercise } from "@/types/exercise";
@@ -42,13 +43,9 @@ export function ExerciseReadonlyModal({
         <div className="block min-w-full">
           <div className="flex flex-col gap-4 pb-4">
             <div className="flex flex-row gap-6 mt-6">
-              <img
-                src={exercise.image_url ?? "/exercise-icon.png"}
-                alt=""
+              <ExerciseImage
+                src={exercise.image_url}
                 className="size-52 shrink-0 self-start rounded-2xl bg-muted object-cover my-auto"
-                onError={(event) => {
-                  event.currentTarget.src = "/exercise-icon.png";
-                }}
               />
               <div className="flex min-w-0 flex-1 flex-col">
                 <h1 className="text-2xl font-semibold text-foreground">

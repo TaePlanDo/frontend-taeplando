@@ -8,6 +8,8 @@ import { GroupListPage } from "@/pages/GroupListPage";
 import { ExerciseListPage } from "@/pages/ExerciseListPage";
 import { HomePage } from "@/pages/HomePage";
 import { LoginPage } from "@/pages/LoginPage";
+import { PlanDetailPage } from "@/pages/PlanDetailPage";
+import { PlanGenerationPage } from "@/pages/PlanGenerationPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { RedirectIfAuth } from "@/routes/RedirectIfAuth";
 import { RequireAuth } from "@/routes/RequireAuth";
@@ -37,6 +39,11 @@ export function App() {
           <Route path="/groups" element={<GroupListPage />} />
           <Route path="/equipment" element={<EquipmentListPage />} />
           <Route path="/exercises" element={<ExerciseListPage />} />
+          <Route
+            path="/plan-generation/:jobId"
+            element={<PlanGenerationPage />}
+          />
+          <Route path="/plans/:planId" element={<PlanDetailPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

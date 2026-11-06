@@ -8,7 +8,7 @@ import { ApiError } from "@/lib/api/errors";
 
 type EntityMutationOptions<TVariables, TResult> = {
   mutationFn: (variables: TVariables) => Promise<TResult>;
-  invalidateKey: QueryKey;
+  invalidateKey?: QueryKey;
   fallbackMessage: string;
   statusMessages?: Partial<Record<number, string>>;
 };
@@ -30,12 +30,17 @@ export function useEntityMutation<TVariables, TResult>({
         throw new Error(message ?? fallbackMessage);
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: invalidateKey }),
+    onSuccess: () => {
+      if (invalidateKey) {
+        void queryClient.invalidateQueries({ queryKey: invalidateKey });
+      }
+    },
   });
 
   return {
     mutate: mutation.mutateAsync,
     isPending: mutation.isPending,
     error: mutation.error?.message ?? null,
+    reset: mutation.reset,
   };
 }

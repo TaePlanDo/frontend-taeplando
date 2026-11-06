@@ -1,0 +1,107 @@
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { planFixture } from "@/test/planFixture";
+
+import { PlanDetailPage } from "./PlanDetailPage";
+
+vi.mock("sonner", () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
+}));
+
+const usePlan = vi.fn();
+const startPlanGeneration = vi.fn();
+
+vi.mock("@/hooks/plans/usePlan", () => ({
+  usePlan: (...args: unknown[]) => usePlan(...args),
+}));
+
+vi.mock("@/hooks/plans/useStartPlanGeneration", () => ({
+  useStartPlanGeneration: () => ({
+    startPlanGeneration,
+    isStarting: false,
+    error: null,
+    reset: vi.fn(),
+  }),
+}));
+
+function renderPage() {
+  return render(
+    <MemoryRouter initialEntries={["/plans/plan-1"]}>
+      <Routes>
+        <Route path="/plans/:planId" element={<PlanDetailPage />} />
+        <Route
+          path="/plan-generation/:jobId"
+          element={<div>Generation job</div>}
+        />
+      </Routes>
+    </MemoryRouter>,
+  );
+}
+
+describe("PlanDetailPage", () => {
+  beforeEach(() => {
+    usePlan.mockReset();
+    startPlanGeneration.mockReset();
+    usePlan.mockReturnValue({
+      plan: planFixture,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+  });
+
+  it("renders plan header, phases and exercises", () => {
+    renderPage();
+
+    expect(screen.getByRole("heading", { name: "Plan A" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Wróć do listy" })).toBeTruthy();
+    expect(screen.getByText("Młodzież")).toBeTruthy();
+    expect(screen.getByText("Sprzęt dostępny na sali")).toBeTruthy();
+    expect(screen.getAllByText(/Rozgrzewka/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Część główna/).length).toBeGreaterThan(0);
+    expect(screen.getByText("Bieg")).toBeTruthy();
+    expect(screen.getByText("Sparing")).toBeTruthy();
+    expect(screen.getAllByText("Tarcza").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Intensywność").length).toBeGreaterThan(0);
+    expect(screen.getByText("1")).toBeTruthy();
+  });
+
+  it("opens regenerate dialog with prefilled participant count", async () => {
+    startPlanGeneration.mockResolvedValue({
+      id: "job-2",
+      status: "QUEUED",
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: "Wygeneruj ponownie" }));
+
+    expect(
+      screen.getByRole("heading", { name: "Potwierdź liczebność grupy" }),
+    ).toBeTruthy();
+
+    const input = screen.getByLabelText(
+      "Liczba uczestników",
+    ) as HTMLInputElement;
+    expect(input.value).toBe("10");
+
+    fireEvent.change(input, { target: { value: "12" } });
+    fireEvent.click(screen.getByRole("button", { name: "Generuj" }));
+
+    await waitFor(() => {
+      expect(startPlanGeneration).toHaveBeenCalledWith({
+        training_group_id: "group-1",
+        participant_count: 12,
+        available_equipment_ids: ["eq-1"],
+        training_type_id: "tt-1",
+      });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Generation job")).toBeTruthy();
+    });
+  });
+});

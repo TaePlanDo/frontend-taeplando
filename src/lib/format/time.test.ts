@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDuration } from "./time";
+import { formatDuration, formatSignedMinutes } from "./time";
 
 describe("formatDuration", () => {
   it("shows only minutes under one hour", () => {
@@ -23,5 +23,13 @@ describe("formatDuration", () => {
 
   it("ignores fractional minutes", () => {
     expect(formatDuration(90.9)).toBe("1 h 30 min");
+  });
+});
+
+describe("formatSignedMinutes", () => {
+  it("formats signed minute deltas", () => {
+    expect(formatSignedMinutes(0)).toBe("0 min");
+    expect(formatSignedMinutes(5)).toBe("+5 min");
+    expect(formatSignedMinutes(-3)).toBe("-3 min");
   });
 });

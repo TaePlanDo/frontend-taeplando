@@ -20,4 +20,14 @@ export const queryKeys = {
     all: ["equipment"] as const,
     lists: () => [...queryKeys.equipment.all, "list"] as const,
   },
+  plans: {
+    all: ["plans"] as const,
+    detail: (planId: string) =>
+      [...queryKeys.plans.all, "detail", planId] as const,
+  },
+  planGeneration: {
+    all: ["plan-generation"] as const,
+    status: (jobId: string) =>
+      [...queryKeys.planGeneration.all, "status", jobId] as const,
+  },
 };
