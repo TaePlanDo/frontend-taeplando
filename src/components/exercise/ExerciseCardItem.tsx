@@ -3,6 +3,7 @@ import { Dumbbell, Eye, Layers3, Pencil, Tag, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
 import { CardItemActionButton } from "@/components/shared/CardItemActionButton";
+import { ExerciseImage } from "@/components/shared/ExerciseImage";
 import type { Exercise } from "@/types/exercise";
 
 import { AttributeBadges } from "./AttributeBadges";
@@ -28,17 +29,10 @@ export function ExerciseCardItem({
 
   return (
     <Card className="flex-row gap-4 rounded-2xl bg-transparent p-4 shadow-none">
-      <img
-        src={
-          isOffline
-            ? "/exercise-icon.png"
-            : (exercise.image_url ?? "/exercise-icon.png")
-        }
-        alt=""
+      <ExerciseImage
+        src={exercise.image_url}
+        forceFallback={isOffline}
         className="size-22 shrink-0 rounded-2xl bg-muted object-cover"
-        onError={(event) => {
-          event.currentTarget.src = "/exercise-icon.png";
-        }}
       />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-2">

@@ -25,6 +25,17 @@ describe("Navbar", () => {
     );
   });
 
+  it("includes Plany linking to /plans", () => {
+    expect(NAV_ITEMS).toContainEqual({ label: "Plany", to: "/plans" });
+
+    renderNavbar();
+
+    expect(screen.getByRole("link", { name: "Plany" })).toHaveAttribute(
+      "href",
+      "/plans",
+    );
+  });
+
   it("renders the brand link", () => {
     renderNavbar();
 

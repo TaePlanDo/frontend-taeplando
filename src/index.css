@@ -22,6 +22,10 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-plan-rating-core: var(--plan-rating-core);
+  --color-plan-rating-core-foreground: var(--plan-rating-core-foreground);
+  --color-plan-schema-peach: var(--plan-schema-peach);
+  --color-plan-schema-brown: var(--plan-schema-brown);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -67,6 +71,10 @@
   --border: #27272a;
   --input: #232326;
   --ring: #c64218;
+  --plan-rating-core: #c4a574;
+  --plan-rating-core-foreground: #e0c9a0;
+  --plan-schema-peach: #f0b27a;
+  --plan-schema-brown: #7a3a1a;
   --radius: 0.5rem;
 }
 

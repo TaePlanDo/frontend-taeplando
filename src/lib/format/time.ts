@@ -15,3 +15,11 @@ export function formatDuration(totalMinutes: number): string {
 
   return `${numberFormat.format(hours)} h ${numberFormat.format(minutes)} min`;
 }
+
+export function formatSignedMinutes(deltaMinutes: number): string {
+  if (deltaMinutes === 0) {
+    return "0 min";
+  }
+  const sign = deltaMinutes > 0 ? "+" : "";
+  return `${sign}${deltaMinutes} min`;
+}

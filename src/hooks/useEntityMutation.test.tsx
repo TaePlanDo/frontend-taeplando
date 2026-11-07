@@ -28,3 +28,25 @@ it("invalidates the configured query key after success", async () => {
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["items"] }),
   );
 });
+
+it("skips cache invalidation when no key is configured", async () => {
+  const client = new QueryClient({
+    defaultOptions: { mutations: { retry: false } },
+  });
+  const invalidate = vi.spyOn(client, "invalidateQueries");
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  );
+  const { result } = renderHook(
+    () =>
+      useEntityMutation({
+        mutationFn: async (id: string) => ({ id }),
+        fallbackMessage: "Błąd",
+      }),
+    { wrapper },
+  );
+
+  await act(() => result.current.mutate("1"));
+  await waitFor(() => expect(result.current.isPending).toBe(false));
+  expect(invalidate).not.toHaveBeenCalled();
+});

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { formatGroupActivity, formatRelativeTime } from "./date-to-text";
+import {
+  formatGroupActivity,
+  formatMediumDate,
+  formatRelativeTime,
+} from "./date-to-text";
 
 const now = new Date("2026-10-15T12:00:00Z");
 
@@ -61,5 +65,19 @@ describe("formatGroupActivity", () => {
     expect(
       formatGroupActivity("2026-10-15T08:00:00Z", "2026-10-15T10:00:00Z", now),
     ).toBe("Edytowano 2 godziny temu");
+  });
+});
+
+describe("formatMediumDate", () => {
+  it("formats a valid ISO date with pl-PL medium style", () => {
+    expect(formatMediumDate("2026-03-15T10:00:00Z")).toBe(
+      new Date("2026-03-15T10:00:00Z").toLocaleDateString("pl-PL", {
+        dateStyle: "medium",
+      }),
+    );
+  });
+
+  it("returns the original string for invalid dates", () => {
+    expect(formatMediumDate("not-a-date")).toBe("not-a-date");
   });
 });

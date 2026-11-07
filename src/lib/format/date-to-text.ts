@@ -58,3 +58,11 @@ export function formatGroupActivity(
 
   return `${action} ${formatRelativeTime(updated, now)}`;
 }
+
+export function formatMediumDate(value: Date | string): string {
+  const date = toDate(value);
+  if (Number.isNaN(date.getTime())) {
+    return typeof value === "string" ? value : "";
+  }
+  return date.toLocaleDateString("pl-PL", { dateStyle: "medium" });
+}
