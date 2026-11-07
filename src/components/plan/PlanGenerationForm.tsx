@@ -188,7 +188,7 @@ export function PlanGenerationForm({
           className="h-auto w-full py-4 text-3xl lg:w-auto lg:min-w-70 lg:px-10"
           disabled={busy || unavailable}
         >
-          {busy ? "Rozpoczynanie…" : "Generuj Plan"}
+          {busy ? "Rozpoczynanie…" : "Generuj plan"}
         </CustomizedButton>
         {error ? <InputErrorMessage message={error} /> : null}
         {failedQueries.length > 0 ? (
