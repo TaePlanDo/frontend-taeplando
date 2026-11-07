@@ -44,8 +44,9 @@ export const PLAN_RATING_COLUMNS: PlanRatingColumn[] = [
   {
     label: "Core",
     key: "core_load_snapshot",
-    fillClass: "bg-[#c4a574]",
-    headerClass: "border-[#c4a574]/50 bg-[#c4a574]/15 text-[#e0c9a0]",
+    fillClass: "bg-plan-rating-core",
+    headerClass:
+      "border-plan-rating-core/50 bg-plan-rating-core/15 text-plan-rating-core-foreground",
   },
 ];
 
@@ -53,4 +54,4 @@ export const PLAN_RATING_MAX = 5;
 
 /** Shared width so header badges and meters stay aligned. */
 export const PLAN_RATING_COLUMNS_CLASS =
-  "grid w-full grid-cols-5 gap-2 lg:w-[30rem]";
+  "grid w-full grid-cols-5 gap-1.5 lg:w-[24rem]";

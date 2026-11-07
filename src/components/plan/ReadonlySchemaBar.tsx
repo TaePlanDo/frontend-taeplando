@@ -8,9 +8,9 @@ type ReadonlySchemaBarProps = {
 };
 
 const SEGMENT_COLORS = [
-  "bg-[#f0b27a]",
+  "bg-plan-schema-peach",
   "bg-primary",
-  "bg-[#7a3a1a]",
+  "bg-plan-schema-brown",
   "bg-primary-foreground",
 ] as const;
 

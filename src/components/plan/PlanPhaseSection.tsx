@@ -25,7 +25,7 @@ function RatingColumnHeaders({ className }: { className?: string }) {
           key={column.key}
           variant="outline"
           className={cn(
-            "flex h-7 w-full min-w-0 items-center justify-center rounded-md px-1.5 text-center text-[11px] font-medium leading-none",
+            "flex h-7 w-full min-w-0 items-center justify-center rounded-md px-1 text-center text-[10px] font-medium leading-none",
             column.headerClass,
           )}
         >

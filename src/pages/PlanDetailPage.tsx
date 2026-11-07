@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 import { PlanDetailHeader } from "@/components/plan/PlanDetailHeader";
 import { PlanEquipmentSection } from "@/components/plan/PlanEquipmentSection";
@@ -22,6 +23,20 @@ export function PlanDetailPage() {
   const { plan, isLoading, isError, refetch } = usePlan(planId);
   const { deletePlan } = useDeletePlan();
   const [regenerateOpen, setRegenerateOpen] = useState(false);
+
+  async function handleDelete() {
+    if (!plan) {
+      return;
+    }
+
+    try {
+      await deletePlan(plan.id);
+      toast.success("Plan został usunięty");
+      navigate("/plans");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error));
+    }
+  }
 
   if (isLoading) {
     return <CenteredLoading label="Ładowanie planu…" />;
@@ -50,33 +65,32 @@ export function PlanDetailPage() {
   const phases = groupPlanPhases(plan);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 p-6">
-      <PlanDetailHeader
-        plan={plan}
-        onBack={() => navigate("/plans")}
-        onRegenerate={() => setRegenerateOpen(true)}
-        onDelete={async () => {
-          await deletePlan(plan.id);
-          navigate("/plans");
-        }}
-      />
+    <div className="flex flex-1 justify-center p-6">
+      <div className="mb-12 flex w-full max-w-96 flex-col gap-8 lg:max-w-220">
+        <PlanDetailHeader
+          plan={plan}
+          onBack={() => navigate("/plans")}
+          onRegenerate={() => setRegenerateOpen(true)}
+          onDelete={handleDelete}
+        />
 
-      <PlanSummaryCards plan={plan} />
+        <PlanSummaryCards plan={plan} />
 
-      <PlanEquipmentSection equipment={plan.available_equipment_snapshot} />
+        <PlanEquipmentSection equipment={plan.available_equipment_snapshot} />
 
-      <div className="flex flex-col gap-3">
-        {phases.map((phase) => (
-          <PlanPhaseSection key={phase.schema.position} phase={phase} />
-        ))}
+        <div className="flex flex-col gap-3">
+          {phases.map((phase) => (
+            <PlanPhaseSection key={phase.schema.position} phase={phase} />
+          ))}
+        </div>
+
+        <RegeneratePlanDialog
+          plan={plan}
+          open={regenerateOpen}
+          onOpenChange={setRegenerateOpen}
+          onStarted={(jobId) => navigate(`/plans/generation/${jobId}`)}
+        />
       </div>
-
-      <RegeneratePlanDialog
-        plan={plan}
-        open={regenerateOpen}
-        onOpenChange={setRegenerateOpen}
-        onStarted={(jobId) => navigate(`/plans/generation/${jobId}`)}
-      />
     </div>
   );
 }

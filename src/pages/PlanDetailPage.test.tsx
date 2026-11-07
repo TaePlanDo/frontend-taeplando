@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { planFixture } from "@/test/planFixture";
@@ -56,6 +57,8 @@ describe("PlanDetailPage", () => {
     usePlan.mockReset();
     startPlanGeneration.mockReset();
     deletePlan.mockReset();
+    vi.mocked(toast.success).mockReset();
+    vi.mocked(toast.error).mockReset();
     usePlan.mockReturnValue({
       plan: planFixture,
       isLoading: false,
@@ -133,7 +136,23 @@ describe("PlanDetailPage", () => {
       expect(deletePlan).toHaveBeenCalledWith("plan-1");
     });
     await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("Plan został usunięty");
       expect(screen.getByText("Plans list")).toBeTruthy();
     });
+  });
+
+  it("shows an error toast when delete fails and stays on the page", async () => {
+    deletePlan.mockRejectedValue(new Error("Serwer niedostępny"));
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: "Usuń" }));
+    fireEvent.click(screen.getByRole("button", { name: "Usuń" }));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Serwer niedostępny");
+    });
+    expect(screen.getByRole("heading", { name: "Plan A" })).toBeTruthy();
+    expect(toast.success).not.toHaveBeenCalled();
   });
 });

@@ -10,6 +10,7 @@ import {
 import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { Button } from "@/components/ui/button";
+import { formatMediumDate } from "@/lib/format/date-to-text";
 import { formatExerciseCount } from "@/lib/format/plural";
 import type { PlanDetail } from "@/types/plan";
 
@@ -19,14 +20,6 @@ type PlanDetailHeaderProps = {
   onRegenerate: () => void;
   onDelete: () => void | Promise<void>;
 };
-
-function formatGeneratedDate(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) {
-    return iso;
-  }
-  return date.toLocaleDateString("pl-PL", { dateStyle: "medium" });
-}
 
 export function PlanDetailHeader({
   plan,
@@ -51,7 +44,7 @@ export function PlanDetailHeader({
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="min-w-0 text-3xl font-bold text-primary sm:text-4xl">
+          <h1 className="min-w-0 text-2xl font-bold text-primary">
             {plan.name}
           </h1>
           <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -81,7 +74,7 @@ export function PlanDetailHeader({
         <ul className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-foreground">
           <li className="inline-flex items-center gap-2">
             <CalendarDays className="size-4 text-primary" aria-hidden />
-            Wygenerowano {formatGeneratedDate(plan.generated_at)}
+            Wygenerowano {formatMediumDate(plan.generated_at)}
           </li>
           <li className="inline-flex items-center gap-2">
             <Users className="size-4 text-primary" aria-hidden />
