@@ -44,11 +44,12 @@ function setup() {
 it("loads options and refreshes them after group or equipment invalidation", async () => {
   const { result, client } = setup();
   await waitFor(() =>
-    expect(result.current.trainingTypes.isSuccess).toBe(true),
+    expect(result.current.trainingTypes.status).toBe("ready"),
   );
-  expect(result.current.groups.data).toEqual([]);
-  expect(result.current.equipment.data?.[0].name).toBe("Tarcza");
-  expect(result.current.trainingTypes.data?.[0].name).toBe("Technika");
+  expect(result.current.groups.items).toEqual([]);
+  expect(result.current.state.kind).toBe("empty");
+  expect(result.current.equipment.items[0].name).toBe("Tarcza");
+  expect(result.current.trainingTypes.items[0].name).toBe("Technika");
   await act(async () => {
     await client.invalidateQueries({ queryKey: queryKeys.groups.all });
     await client.invalidateQueries({ queryKey: queryKeys.equipment.all });
@@ -61,12 +62,19 @@ it("loads options and refreshes them after group or equipment invalidation", asy
 it("exposes a failed request for inline feedback and allows retry without losing other catalogs", async () => {
   vi.mocked(getEquipmentRequest).mockRejectedValueOnce(new Error("Offline"));
   const { result } = setup();
-  await waitFor(() => expect(result.current.equipment.isError).toBe(true));
-  expect(result.current.trainingTypes.data?.[0].name).toBe("Technika");
+  await waitFor(() =>
+    expect(result.current.state).toEqual({
+      kind: "error",
+      message: "Nie udało się pobrać sprzętu.",
+      retrying: false,
+    }),
+  );
+  expect(result.current.equipment.status).toBe("error");
+  expect(result.current.trainingTypes.items[0].name).toBe("Technika");
   await act(async () => {
-    await result.current.equipment.refetch();
+    await result.current.retry();
   });
-  await waitFor(() => expect(result.current.equipment.isSuccess).toBe(true));
-  expect(result.current.equipment.data?.[0].name).toBe("Tarcza");
+  await waitFor(() => expect(result.current.equipment.status).toBe("ready"));
+  expect(result.current.equipment.items[0].name).toBe("Tarcza");
   expect(getTrainingTypesRequest).toHaveBeenCalledTimes(1);
 });

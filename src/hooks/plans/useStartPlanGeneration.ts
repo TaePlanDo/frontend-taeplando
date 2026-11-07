@@ -4,6 +4,7 @@ import type { PlanGenerationParameters } from "@/types/plan";
 
 export function useStartPlanGeneration() {
   const { mutate, isPending, error, reset } = useEntityMutation({
+    networkMode: "always",
     mutationFn: (parameters: PlanGenerationParameters) =>
       startPlanGenerationRequest(parameters),
     fallbackMessage:

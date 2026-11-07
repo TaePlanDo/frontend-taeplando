@@ -27,7 +27,13 @@ export function PlanGenerationForm({
 }: {
   onStarted: (jobId: string) => void;
 }) {
-  const { groups, equipment, trainingTypes } = usePlanGenerationOptions();
+  const {
+    groups,
+    equipment,
+    trainingTypes,
+    state: optionsState,
+    retry,
+  } = usePlanGenerationOptions();
   const { startPlanGeneration, isStarting, error, reset } =
     useStartPlanGeneration();
   const submitting = useRef(false);
@@ -41,21 +47,13 @@ export function PlanGenerationForm({
     defaultValues: toPlanGenerationFormValues(),
   });
   const busy = isStarting || isSubmitting;
-  const loading =
-    groups.isPending || equipment.isPending || trainingTypes.isPending;
-  const failedQueries = [
-    { query: groups, label: "grup treningowych" },
-    { query: equipment, label: "sprzętu" },
-    { query: trainingTypes, label: "typów treningu" },
-  ].filter(({ query }) => query.isError);
-  const noGroups = groups.isSuccess && groups.data.length === 0;
-  const unavailable = loading || failedQueries.length > 0 || noGroups;
+  const noGroups = groups.status === "ready" && groups.items.length === 0;
 
   async function submit(values: PlanGenerationFormOutput) {
-    if (submitting.current || unavailable) return;
+    if (submitting.current || optionsState.kind !== "ready") return;
     reset();
     let invalid = false;
-    if (!groups.data?.some(({ id }) => id === values.trainingGroupId)) {
+    if (!groups.items.some(({ id }) => id === values.trainingGroupId)) {
       setError("trainingGroupId", {
         message: "Wybrana grupa jest niedostępna. Wybierz inną.",
       });
@@ -63,7 +61,7 @@ export function PlanGenerationForm({
     }
     if (
       values.equipmentIds.some(
-        (id) => !equipment.data?.some((item) => item.id === id),
+        (id) => !equipment.items.some((item) => item.id === id),
       )
     ) {
       setError("equipmentIds", {
@@ -73,7 +71,7 @@ export function PlanGenerationForm({
     }
     if (
       values.trainingTypeId !== null &&
-      !trainingTypes.data?.some(({ id }) => id === values.trainingTypeId)
+      !trainingTypes.items.some(({ id }) => id === values.trainingTypeId)
     ) {
       setError("trainingTypeId", {
         message: "Wybrany typ jest niedostępny. Wybierz inny lub Auto.",
@@ -106,14 +104,20 @@ export function PlanGenerationForm({
         render={({ field, fieldState }) => (
           <CustomizedSelect
             label="Grupa treningowa"
-            placeholder={groups.isPending ? "Ładowanie…" : "Wybierz grupę…"}
-            options={(groups.data ?? []).map(({ id, name }) => ({
+            placeholder={
+              groups.status === "offline"
+                ? "Brak połączenia"
+                : groups.status === "loading"
+                  ? "Ładowanie…"
+                  : "Wybierz grupę…"
+            }
+            options={groups.items.map(({ id, name }) => ({
               value: id,
               label: name,
             }))}
             value={field.value}
             onValueChange={field.onChange}
-            disabled={busy || !groups.isSuccess || noGroups}
+            disabled={busy || groups.status !== "ready" || noGroups}
             error={fieldState.error?.message}
           />
         )}
@@ -150,11 +154,14 @@ export function PlanGenerationForm({
           <CatalogMultiSelect
             label="Sprzęt treningowy"
             placeholder="Wybierz sprzęt…"
-            items={equipment.data ?? []}
+            items={equipment.items}
             selectedIds={field.value}
             onSelectedIdsChange={field.onChange}
-            isLoading={equipment.isPending}
-            disabled={busy || equipment.isError}
+            isLoading={equipment.status === "loading"}
+            unavailableMessage={
+              equipment.status === "offline" ? "Brak połączenia" : undefined
+            }
+            disabled={busy || equipment.status === "error"}
             error={fieldState.error?.message}
           />
         )}
@@ -167,7 +174,7 @@ export function PlanGenerationForm({
             label="Typ treningu"
             options={[
               { value: "auto", label: "Auto" },
-              ...(trainingTypes.data ?? []).map(({ id, name }) => ({
+              ...trainingTypes.items.map(({ id, name }) => ({
                 value: id,
                 label: name,
               })),
@@ -176,7 +183,7 @@ export function PlanGenerationForm({
             onValueChange={(value) =>
               field.onChange(value === "auto" ? null : value)
             }
-            disabled={busy || !trainingTypes.isSuccess}
+            disabled={busy || trainingTypes.status !== "ready"}
             error={fieldState.error?.message}
           />
         )}
@@ -186,24 +193,22 @@ export function PlanGenerationForm({
           type="submit"
           variant="hero"
           className="h-auto w-full py-4 text-3xl lg:w-auto lg:min-w-70 lg:px-10"
-          disabled={busy || unavailable}
+          disabled={busy || optionsState.kind !== "ready"}
         >
           {busy ? "Rozpoczynanie…" : "Generuj plan"}
         </CustomizedButton>
         {error ? <InputErrorMessage message={error} /> : null}
-        {failedQueries.length > 0 ? (
+        {optionsState.kind === "offline" || optionsState.kind === "error" ? (
           <div className="text-center text-sm text-destructive">
-            <InputErrorMessage
-              message={`Nie udało się pobrać ${failedQueries.map(({ label }) => label).join(", ")}.`}
-            />
+            <InputErrorMessage message={optionsState.message} />
             <button
               type="button"
               className="mt-1 underline disabled:opacity-50"
-              disabled={failedQueries.some(({ query }) => query.isFetching)}
+              disabled={
+                optionsState.kind === "offline" || optionsState.retrying
+              }
               onClick={() => {
-                void Promise.all(
-                  failedQueries.map(({ query }) => query.refetch()),
-                );
+                void retry();
               }}
             >
               Spróbuj ponownie

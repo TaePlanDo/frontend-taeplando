@@ -1,6 +1,7 @@
 import {
   useMutation,
   useQueryClient,
+  type NetworkMode,
   type QueryKey,
 } from "@tanstack/react-query";
 
@@ -11,6 +12,7 @@ type EntityMutationOptions<TVariables, TResult> = {
   invalidateKey?: QueryKey;
   fallbackMessage: string;
   statusMessages?: Partial<Record<number, string>>;
+  networkMode?: NetworkMode;
 };
 
 export function useEntityMutation<TVariables, TResult>({
@@ -18,9 +20,11 @@ export function useEntityMutation<TVariables, TResult>({
   invalidateKey,
   fallbackMessage,
   statusMessages = {},
+  networkMode,
 }: EntityMutationOptions<TVariables, TResult>) {
   const queryClient = useQueryClient();
   const mutation = useMutation<TResult, Error, TVariables>({
+    ...(networkMode ? { networkMode } : {}),
     mutationFn: async (variables) => {
       try {
         return await mutationFn(variables);

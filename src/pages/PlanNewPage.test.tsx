@@ -46,17 +46,19 @@ function select(label: string, option: string) {
 function loadedOptions() {
   return {
     groups: {
-      data: [{ id: "group-1", name: "Grupa dzieci" }],
-      isSuccess: true,
+      items: [{ id: "group-1", name: "Grupa dzieci" }],
+      status: "ready",
     },
     equipment: {
-      data: [{ id: "equipment-1", name: "Tarcze" }],
-      isSuccess: true,
+      items: [{ id: "equipment-1", name: "Tarcze" }],
+      status: "ready",
     },
     trainingTypes: {
-      data: [{ id: "type-1", name: "Technika" }],
-      isSuccess: true,
+      items: [{ id: "type-1", name: "Technika" }],
+      status: "ready",
     },
+    state: { kind: "ready" },
+    retry: vi.fn(),
   };
 }
 
@@ -67,14 +69,15 @@ beforeEach(() => {
 
 it("keeps the form visible without groups and links to group creation", () => {
   const options = loadedOptions();
-  options.groups.data = [];
+  options.groups.items = [];
+  options.state = { kind: "empty" };
   useOptions.mockReturnValue(options);
   renderPage();
   expect(screen.getByRole("link", { name: "Utwórz grupę" })).toHaveAttribute(
     "href",
     "/groups",
   );
-  expect(screen.getByRole("button", { name: "Generuj Plan" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Generuj plan" })).toBeDisabled();
   expect(screen.getByRole("slider")).toBeVisible();
 });
 
@@ -83,18 +86,21 @@ it("shows an inline catalog error and retries only failed queries", () => {
   useOptions.mockReturnValue({
     ...loadedOptions(),
     equipment: {
-      data: undefined,
-      isError: true,
-      isPending: false,
-      isFetching: false,
-      refetch: retry,
+      items: [],
+      status: "error",
     },
+    state: {
+      kind: "error",
+      message: "Nie udało się pobrać sprzętu.",
+      retrying: false,
+    },
+    retry,
   });
   renderPage();
   expect(screen.getByRole("alert")).toHaveTextContent(
     "Nie udało się pobrać sprzętu.",
   );
-  expect(screen.getByRole("button", { name: "Generuj Plan" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Generuj plan" })).toBeDisabled();
   expect(
     screen.getByRole("combobox", { name: "Sprzęt treningowy" }),
   ).toBeDisabled();
@@ -109,9 +115,9 @@ it("rejects equipment removed from the catalog after selection", async () => {
   renderPage();
   select("Grupa treningowa", "Grupa dzieci");
   select("Sprzęt treningowy", "Tarcze");
-  options.equipment.data = [];
+  options.equipment.items = [];
   fireEvent.keyDown(screen.getByRole("slider"), { key: "ArrowRight" });
-  fireEvent.click(screen.getByRole("button", { name: "Generuj Plan" }));
+  fireEvent.click(screen.getByRole("button", { name: "Generuj plan" }));
   expect(
     await screen.findByText(
       "Wybrany sprzęt jest niedostępny. Usuń go z listy.",
@@ -131,11 +137,11 @@ it("requires a group and submits Auto with 20 participants and no equipment", as
     status: "QUEUED",
   });
   renderPage();
-  fireEvent.click(screen.getByRole("button", { name: "Generuj Plan" }));
+  fireEvent.click(screen.getByRole("button", { name: "Generuj plan" }));
   expect(await screen.findByText("Wybierz grupę treningową")).toBeVisible();
   expect(startPlanGenerationRequest).not.toHaveBeenCalled();
   select("Grupa treningowa", "Grupa dzieci");
-  fireEvent.click(screen.getByRole("button", { name: "Generuj Plan" }));
+  fireEvent.click(screen.getByRole("button", { name: "Generuj plan" }));
   expect(await screen.findByText("Zadanie: job-1")).toBeVisible();
   expect(startPlanGenerationRequest).toHaveBeenCalledWith({
     training_group_id: "group-1",
@@ -152,7 +158,7 @@ it("submits selected options and blocks edits and duplicate requests while start
   select("Sprzęt treningowy", "Tarcze");
   select("Typ treningu", "Technika");
   fireEvent.keyDown(screen.getByRole("slider"), { key: "End" });
-  fireEvent.click(screen.getByRole("button", { name: "Generuj Plan" }));
+  fireEvent.click(screen.getByRole("button", { name: "Generuj plan" }));
   const button = await screen.findByRole("button", { name: "Rozpoczynanie…" });
   expect(button).toBeDisabled();
   fireEvent.click(button);
@@ -178,7 +184,7 @@ it("keeps selections on a server error and allows another attempt", async () => 
   renderPage();
   select("Grupa treningowa", "Grupa dzieci");
   select("Sprzęt treningowy", "Tarcze");
-  fireEvent.click(screen.getByRole("button", { name: "Generuj Plan" }));
+  fireEvent.click(screen.getByRole("button", { name: "Generuj plan" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Nie udało się rozpocząć generowania planu",
   );
@@ -186,6 +192,6 @@ it("keeps selections on a server error and allows another attempt", async () => 
     screen.getByRole("combobox", { name: "Grupa treningowa" }),
   ).toHaveTextContent("Grupa dzieci");
   expect(screen.getByRole("button", { name: "Usuń Tarcze" })).toBeEnabled();
-  fireEvent.click(screen.getByRole("button", { name: "Generuj Plan" }));
+  fireEvent.click(screen.getByRole("button", { name: "Generuj plan" }));
   expect(await screen.findByText("Zadanie: job-2")).toBeVisible();
 });
