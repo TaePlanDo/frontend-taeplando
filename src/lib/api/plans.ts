@@ -8,3 +8,9 @@ export function getPlanRequest(planId: string): Promise<PlanDetail> {
     method: "GET",
   });
 }
+
+export function deletePlanRequest(planId: string): Promise<void> {
+  return apiJson<void>(apiUrl(`/training-plans/${planId}`), {
+    method: "DELETE",
+  });
+}

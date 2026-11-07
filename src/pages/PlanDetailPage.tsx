@@ -12,6 +12,7 @@ import {
 } from "@/components/shared/CenteredStatus";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { HomeLink } from "@/components/shared/HomeLink";
+import { useDeletePlan } from "@/hooks/plans/useDeletePlan";
 import { usePlan } from "@/hooks/plans/usePlan";
 import { groupPlanPhases } from "@/lib/plan/phaseGrouping";
 
@@ -19,6 +20,7 @@ export function PlanDetailPage() {
   const { planId } = useParams<{ planId: string }>();
   const navigate = useNavigate();
   const { plan, isLoading, isError, refetch } = usePlan(planId);
+  const { deletePlan } = useDeletePlan();
   const [regenerateOpen, setRegenerateOpen] = useState(false);
 
   if (isLoading) {
@@ -53,6 +55,10 @@ export function PlanDetailPage() {
         plan={plan}
         onBack={() => navigate("/plans")}
         onRegenerate={() => setRegenerateOpen(true)}
+        onDelete={async () => {
+          await deletePlan(plan.id);
+          navigate("/plans");
+        }}
       />
 
       <PlanSummaryCards plan={plan} />

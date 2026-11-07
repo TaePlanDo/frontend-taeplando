@@ -12,6 +12,7 @@ vi.mock("sonner", () => ({
 
 const usePlan = vi.fn();
 const startPlanGeneration = vi.fn();
+const deletePlan = vi.fn();
 
 vi.mock("@/hooks/plans/usePlan", () => ({
   usePlan: (...args: unknown[]) => usePlan(...args),
@@ -26,6 +27,14 @@ vi.mock("@/hooks/plans/useStartPlanGeneration", () => ({
   }),
 }));
 
+vi.mock("@/hooks/plans/useDeletePlan", () => ({
+  useDeletePlan: () => ({
+    deletePlan,
+    isDeleting: false,
+    error: null,
+  }),
+}));
+
 function renderPage() {
   return render(
     <MemoryRouter initialEntries={["/plans/plan-1"]}>
@@ -35,6 +44,8 @@ function renderPage() {
           path="/plans/generation/:jobId"
           element={<div>Generation job</div>}
         />
+        <Route path="/plans" element={<div>Plans list</div>} />
+        <Route path="/" element={<div>Home</div>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -44,6 +55,7 @@ describe("PlanDetailPage", () => {
   beforeEach(() => {
     usePlan.mockReset();
     startPlanGeneration.mockReset();
+    deletePlan.mockReset();
     usePlan.mockReturnValue({
       plan: planFixture,
       isLoading: false,
@@ -102,6 +114,26 @@ describe("PlanDetailPage", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Generation job")).toBeTruthy();
+    });
+  });
+
+  it("deletes the plan after confirmation and leaves the page", async () => {
+    deletePlan.mockResolvedValue(undefined);
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: "Usuń" }));
+    expect(
+      screen.getByRole("heading", { name: "Usuwanie planu" }),
+    ).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Usuń" }));
+
+    await waitFor(() => {
+      expect(deletePlan).toHaveBeenCalledWith("plan-1");
+    });
+    await waitFor(() => {
+      expect(screen.getByText("Plans list")).toBeTruthy();
     });
   });
 });

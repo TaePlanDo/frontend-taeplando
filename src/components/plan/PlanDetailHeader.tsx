@@ -1,5 +1,13 @@
-import { ArrowLeft, CalendarDays, ListOrdered, Tag, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  ListOrdered,
+  Tag,
+  Trash2,
+  Users,
+} from "lucide-react";
 
+import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { Button } from "@/components/ui/button";
 import { formatExerciseCount } from "@/lib/format/plural";
@@ -9,6 +17,7 @@ type PlanDetailHeaderProps = {
   plan: PlanDetail;
   onBack: () => void;
   onRegenerate: () => void;
+  onDelete: () => void | Promise<void>;
 };
 
 function formatGeneratedDate(iso: string): string {
@@ -23,6 +32,7 @@ export function PlanDetailHeader({
   plan,
   onBack,
   onRegenerate,
+  onDelete,
 }: PlanDetailHeaderProps) {
   const primaryType = plan.training_types_snapshot[0]?.name;
 
@@ -44,13 +54,29 @@ export function PlanDetailHeader({
           <h1 className="min-w-0 text-3xl font-bold text-primary sm:text-4xl">
             {plan.name}
           </h1>
-          <CustomizedButton
-            variant="outline"
-            className="w-auto shrink-0 px-4 text-sm"
-            onClick={onRegenerate}
-          >
-            Wygeneruj ponownie
-          </CustomizedButton>
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <CustomizedButton
+              variant="outline"
+              className="w-auto px-4 text-sm"
+              onClick={onRegenerate}
+            >
+              Wygeneruj ponownie
+            </CustomizedButton>
+            <CustomizedAlertDialog
+              trigger={
+                <CustomizedButton
+                  variant="danger"
+                  className="w-auto gap-2 px-4 text-sm"
+                >
+                  <Trash2 className="size-4" aria-hidden />
+                  Usuń
+                </CustomizedButton>
+              }
+              title="Usuwanie planu"
+              message={`Czy na pewno chcesz usunąć „${plan.name}”? Tej operacji nie da się cofnąć.`}
+              onSubmit={onDelete}
+            />
+          </div>
         </div>
         <ul className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-foreground">
           <li className="inline-flex items-center gap-2">
