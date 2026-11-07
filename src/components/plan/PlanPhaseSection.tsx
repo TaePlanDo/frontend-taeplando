@@ -93,7 +93,7 @@ export function PlanPhaseSection({
               <PlanExerciseRow
                 key={exercise.id}
                 exercise={exercise}
-                index={phase.exerciseOffset + index + 1}
+                number={phase.exerciseOffset + index + 1}
               />
             ))
           ) : (

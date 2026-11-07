@@ -15,10 +15,10 @@ vi.mock("@/hooks/plans/usePlanGenerationStatus", () => ({
 
 function renderPage(jobId = "job-1") {
   return render(
-    <MemoryRouter initialEntries={[`/plan-generation/${jobId}`]}>
+    <MemoryRouter initialEntries={[`/plans/generation/${jobId}`]}>
       <Routes>
         <Route
-          path="/plan-generation/:jobId"
+          path="/plans/generation/:jobId"
           element={<PlanGenerationPage />}
         />
         <Route path="/plans/:planId" element={<div>Plan detail</div>} />

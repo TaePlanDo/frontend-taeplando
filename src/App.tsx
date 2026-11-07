@@ -39,8 +39,9 @@ export function App() {
           <Route path="/groups" element={<GroupListPage />} />
           <Route path="/equipment" element={<EquipmentListPage />} />
           <Route path="/exercises" element={<ExerciseListPage />} />
+          <Route path="/plans" element={<Navigate to="/" replace />} />
           <Route
-            path="/plan-generation/:jobId"
+            path="/plans/generation/:jobId"
             element={<PlanGenerationPage />}
           />
           <Route path="/plans/:planId" element={<PlanDetailPage />} />

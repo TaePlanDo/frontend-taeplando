@@ -51,7 +51,7 @@ export function PlanDetailPage() {
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 p-6">
       <PlanDetailHeader
         plan={plan}
-        onBack={() => navigate(-1)}
+        onBack={() => navigate("/plans")}
         onRegenerate={() => setRegenerateOpen(true)}
       />
 
@@ -69,7 +69,7 @@ export function PlanDetailPage() {
         plan={plan}
         open={regenerateOpen}
         onOpenChange={setRegenerateOpen}
-        onStarted={(jobId) => navigate(`/plan-generation/${jobId}`)}
+        onStarted={(jobId) => navigate(`/plans/generation/${jobId}`)}
       />
     </div>
   );

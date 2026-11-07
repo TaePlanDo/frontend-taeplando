@@ -32,7 +32,7 @@ function renderPage() {
       <Routes>
         <Route path="/plans/:planId" element={<PlanDetailPage />} />
         <Route
-          path="/plan-generation/:jobId"
+          path="/plans/generation/:jobId"
           element={<div>Generation job</div>}
         />
       </Routes>

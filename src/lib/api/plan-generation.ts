@@ -25,6 +25,5 @@ export function getPlanGenerationStatusRequest(
 ): Promise<PlanGenerationStatus> {
   return apiJson<PlanGenerationStatus>(apiUrl(`/plan-generation/${jobId}`), {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
   });
 }

@@ -10,10 +10,10 @@ import { RatingMeter } from "./RatingMeter";
 
 type PlanExerciseRowProps = {
   exercise: PlanExercise;
-  index: number;
+  number: number;
 };
 
-export function PlanExerciseRow({ exercise, index }: PlanExerciseRowProps) {
+export function PlanExerciseRow({ exercise, number }: PlanExerciseRowProps) {
   const equipment = exercise.equipment_snapshot;
   const trainingTypes = exercise.training_types_snapshot;
 
@@ -26,7 +26,7 @@ export function PlanExerciseRow({ exercise, index }: PlanExerciseRowProps) {
             className="size-16 rounded-xl bg-muted object-cover sm:size-20"
           />
           <span className="absolute -left-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-foreground">
-            {index}
+            {number}
           </span>
         </div>
 
