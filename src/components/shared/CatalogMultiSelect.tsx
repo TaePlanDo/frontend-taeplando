@@ -58,9 +58,11 @@ export function CatalogMultiSelect({
               ? unavailableMessage
               : isLoading
                 ? "Ładowanie…"
-                : available.length === 0
-                  ? "Wszystkie elementy z listy są już dodane"
-                  : placeholder
+                : items.length === 0
+                  ? "Brak dostępnych elementów"
+                  : available.length === 0
+                    ? "Wszystkie elementy z listy są już dodane"
+                    : placeholder
           }
           options={available.map((item) => ({
             value: String(item.id),

@@ -1,37 +1,24 @@
 const pluralRules = new Intl.PluralRules("pl-PL", { type: "cardinal" });
 
-function groupWord(count: number): string {
+function formatCount(
+  count: number,
+  one: string,
+  few: string,
+  many: string,
+): string {
   const rule = pluralRules.select(count);
-
-  if (rule === "one") {
-    return "grupa";
-  }
-
-  if (rule === "few") {
-    return "grupy";
-  }
-
-  return "grup";
+  const word = rule === "one" ? one : rule === "few" ? few : many;
+  return `${count} ${word}`;
 }
 
 export function formatGroupCount(count: number): string {
-  return `${count} ${groupWord(count)}`;
-}
-
-function exerciseWord(count: number): string {
-  const rule = pluralRules.select(count);
-
-  if (rule === "one") {
-    return "ćwiczenie";
-  }
-
-  if (rule === "few") {
-    return "ćwiczenia";
-  }
-
-  return "ćwiczeń";
+  return formatCount(count, "grupa", "grupy", "grup");
 }
 
 export function formatExerciseCount(count: number): string {
-  return `${count} ${exerciseWord(count)}`;
+  return formatCount(count, "ćwiczenie", "ćwiczenia", "ćwiczeń");
+}
+
+export function formatParticipantCount(count: number): string {
+  return formatCount(count, "osoba", "osoby", "osób");
 }

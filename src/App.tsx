@@ -10,6 +10,7 @@ import { HomePage } from "@/pages/HomePage";
 import { LoginPage } from "@/pages/LoginPage";
 import { PlanDetailPage } from "@/pages/PlanDetailPage";
 import { PlanGenerationPage } from "@/pages/PlanGenerationPage";
+import { PlanNewPage } from "@/pages/PlanNewPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { RedirectIfAuth } from "@/routes/RedirectIfAuth";
 import { RequireAuth } from "@/routes/RequireAuth";
@@ -39,7 +40,8 @@ export function App() {
           <Route path="/groups" element={<GroupListPage />} />
           <Route path="/equipment" element={<EquipmentListPage />} />
           <Route path="/exercises" element={<ExerciseListPage />} />
-          <Route path="/plans" element={<Navigate to="/" replace />} />
+          <Route path="/plans" element={<PlanNewPage />} />
+          <Route path="/plans/new" element={<PlanNewPage />} />
           <Route
             path="/plans/generation/:jobId"
             element={<PlanGenerationPage />}

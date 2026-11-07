@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { HeroDescription } from "@/components/home/HeroDescription";
 import { HeroHeading } from "@/components/home/HeroHeading";
 import { BackgroundDots } from "@/components/shared/BackgroundDots";
@@ -15,8 +16,12 @@ export function HomePage() {
 
           <HeroDescription description="Stwórz grupę treningową i wygeneruj dla niej plan treningowy według własnych kryteriów." />
 
-          <CustomizedButton variant="hero" className="lg:mt-8 w-2/3 mt-16">
-            Generuj plan
+          <CustomizedButton
+            variant="hero"
+            className="lg:mt-8 w-2/3 mt-16"
+            asChild
+          >
+            <Link to="/plans/new">Generuj plan</Link>
           </CustomizedButton>
         </div>
       </div>
