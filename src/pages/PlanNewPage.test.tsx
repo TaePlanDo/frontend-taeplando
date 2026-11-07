@@ -6,24 +6,13 @@ import { beforeEach, expect, it, vi } from "vitest";
 import { startPlanGenerationRequest } from "@/lib/api/plan-generation";
 import { PlanNewPage } from "./PlanNewPage";
 
+const { useOptions } = vi.hoisted(() => ({ useOptions: vi.fn() }));
+
 vi.mock("@/lib/api/plan-generation", () => ({
   startPlanGenerationRequest: vi.fn(),
 }));
 vi.mock("@/hooks/plans/usePlanGenerationOptions", () => ({
-  usePlanGenerationOptions: () => ({
-    groups: {
-      data: [{ id: "group-1", name: "Grupa dzieci" }],
-      isSuccess: true,
-    },
-    equipment: {
-      data: [{ id: "equipment-1", name: "Tarcze" }],
-      isSuccess: true,
-    },
-    trainingTypes: {
-      data: [{ id: "type-1", name: "Technika" }],
-      isSuccess: true,
-    },
-  }),
+  usePlanGenerationOptions: useOptions,
 }));
 
 function Job() {
@@ -54,7 +43,87 @@ function select(label: string, option: string) {
   fireEvent.click(screen.getByRole("option", { name: option }));
 }
 
-beforeEach(() => vi.resetAllMocks());
+function loadedOptions() {
+  return {
+    groups: {
+      data: [{ id: "group-1", name: "Grupa dzieci" }],
+      isSuccess: true,
+    },
+    equipment: {
+      data: [{ id: "equipment-1", name: "Tarcze" }],
+      isSuccess: true,
+    },
+    trainingTypes: {
+      data: [{ id: "type-1", name: "Technika" }],
+      isSuccess: true,
+    },
+  };
+}
+
+beforeEach(() => {
+  vi.resetAllMocks();
+  useOptions.mockReturnValue(loadedOptions());
+});
+
+it("keeps the form visible without groups and links to group creation", () => {
+  const options = loadedOptions();
+  options.groups.data = [];
+  useOptions.mockReturnValue(options);
+  renderPage();
+  expect(screen.getByRole("link", { name: "Utwórz grupę" })).toHaveAttribute(
+    "href",
+    "/groups",
+  );
+  expect(screen.getByRole("button", { name: "Generuj Plan" })).toBeDisabled();
+  expect(screen.getByRole("slider")).toBeVisible();
+});
+
+it("shows an inline catalog error and retries only failed queries", () => {
+  const retry = vi.fn().mockResolvedValue(undefined);
+  useOptions.mockReturnValue({
+    ...loadedOptions(),
+    equipment: {
+      data: undefined,
+      isError: true,
+      isPending: false,
+      isFetching: false,
+      refetch: retry,
+    },
+  });
+  renderPage();
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "Nie udało się pobrać sprzętu.",
+  );
+  expect(screen.getByRole("button", { name: "Generuj Plan" })).toBeDisabled();
+  expect(
+    screen.getByRole("combobox", { name: "Sprzęt treningowy" }),
+  ).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Spróbuj ponownie" }));
+  expect(retry).toHaveBeenCalledTimes(1);
+  expect(startPlanGenerationRequest).not.toHaveBeenCalled();
+});
+
+it("rejects equipment removed from the catalog after selection", async () => {
+  const options = loadedOptions();
+  useOptions.mockReturnValue(options);
+  renderPage();
+  select("Grupa treningowa", "Grupa dzieci");
+  select("Sprzęt treningowy", "Tarcze");
+  options.equipment.data = [];
+  fireEvent.keyDown(screen.getByRole("slider"), { key: "ArrowRight" });
+  fireEvent.click(screen.getByRole("button", { name: "Generuj Plan" }));
+  expect(
+    await screen.findByText(
+      "Wybrany sprzęt jest niedostępny. Usuń go z listy.",
+    ),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("button", {
+      name: "Usuń Niedostępny element (equipment-1)",
+    }),
+  ).toBeEnabled();
+  expect(startPlanGenerationRequest).not.toHaveBeenCalled();
+});
 
 it("requires a group and submits Auto with 20 participants and no equipment", async () => {
   vi.mocked(startPlanGenerationRequest).mockResolvedValue({
