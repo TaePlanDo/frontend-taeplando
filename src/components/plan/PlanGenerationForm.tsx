@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 
@@ -12,10 +11,7 @@ import { usePlanGenerationOptions } from "@/hooks/plans/usePlanGenerationOptions
 import { useStartPlanGeneration } from "@/hooks/plans/useStartPlanGeneration";
 import { PLAN_GENERATION_LIMITS } from "@/lib/constants/planGeneration";
 import { formatParticipantCount } from "@/lib/format/plural";
-import {
-  toPlanGenerationFormValues,
-  toPlanGenerationParameters,
-} from "@/lib/mappers/planGeneration";
+import { toPlanGenerationParameters } from "@/lib/plan/buildGenerationParameters";
 import {
   planGenerationSchema,
   type PlanGenerationFormValues,
@@ -36,7 +32,6 @@ export function PlanGenerationForm({
   } = usePlanGenerationOptions();
   const { startPlanGeneration, isStarting, error, reset } =
     useStartPlanGeneration();
-  const submitting = useRef(false);
   const {
     control,
     handleSubmit,
@@ -44,13 +39,18 @@ export function PlanGenerationForm({
     formState: { isSubmitting },
   } = useForm<PlanGenerationFormValues, unknown, PlanGenerationFormOutput>({
     resolver: zodResolver(planGenerationSchema),
-    defaultValues: toPlanGenerationFormValues(),
+    defaultValues: {
+      trainingGroupId: "",
+      participantCount: PLAN_GENERATION_LIMITS.DEFAULT_PARTICIPANTS,
+      equipmentIds: [],
+      trainingTypeId: null,
+    },
   });
   const busy = isStarting || isSubmitting;
   const noGroups = groups.status === "ready" && groups.items.length === 0;
 
   async function submit(values: PlanGenerationFormOutput) {
-    if (submitting.current || optionsState.kind !== "ready") return;
+    if (optionsState.kind !== "ready") return;
     reset();
     let invalid = false;
     if (!groups.items.some(({ id }) => id === values.trainingGroupId)) {
@@ -79,7 +79,6 @@ export function PlanGenerationForm({
       invalid = true;
     }
     if (invalid) return;
-    submitting.current = true;
     try {
       const accepted = await startPlanGeneration(
         toPlanGenerationParameters(values),
@@ -87,8 +86,6 @@ export function PlanGenerationForm({
       onStarted(accepted.id);
     } catch {
       // The mutation hook exposes the message next to the submit button.
-    } finally {
-      submitting.current = false;
     }
   }
 

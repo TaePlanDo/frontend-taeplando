@@ -40,6 +40,7 @@ export function App() {
           <Route path="/groups" element={<GroupListPage />} />
           <Route path="/equipment" element={<EquipmentListPage />} />
           <Route path="/exercises" element={<ExerciseListPage />} />
+          {/* Temporary: show the generation form until the plans list is available. */}
           <Route path="/plans" element={<PlanNewPage />} />
           <Route path="/plans/new" element={<PlanNewPage />} />
           <Route

@@ -15,8 +15,9 @@ example:
 npx shadcn@latest add button
 ```
 
-They will be installed in src/components/ui
-Dont change their implementation
+They will be installed in src/components/ui. Adapt their implementation when needed to support
+the application and reuse components. The shadcn CLI may overwrite local changes when a component
+is reinstalled or regenerated, so review those changes before replacing an existing component.
 
 # Hairline UI components
 

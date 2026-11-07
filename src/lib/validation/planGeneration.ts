@@ -9,11 +9,11 @@ export const planGenerationSchema = z.object({
     .int("Liczba uczestników musi być liczbą całkowitą")
     .min(
       PLAN_GENERATION_LIMITS.MIN_PARTICIPANTS,
-      "Liczba uczestników musi wynosić co najmniej 1",
+      `Liczba uczestników musi wynosić co najmniej ${PLAN_GENERATION_LIMITS.MIN_PARTICIPANTS}`,
     )
     .max(
       PLAN_GENERATION_LIMITS.MAX_PARTICIPANTS,
-      "Liczba uczestników nie może przekraczać 50",
+      `Liczba uczestników nie może przekraczać ${PLAN_GENERATION_LIMITS.MAX_PARTICIPANTS}`,
     ),
   equipmentIds: z
     .array(z.string().trim().min(1, "Wybierz poprawny sprzęt"))

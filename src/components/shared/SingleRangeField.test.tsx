@@ -50,18 +50,23 @@ describe("SingleRangeField", () => {
   });
 
   it("preserves both thumbs for existing range fields", () => {
+    const onChange = vi.fn();
     render(
       <DualRangeField
         label="Wiek"
         min={1}
         max={99}
         value={[10, 30]}
-        onValueChange={vi.fn()}
+        onValueChange={onChange}
       />,
     );
     const sliders = screen.getAllByRole("slider");
     expect(sliders).toHaveLength(2);
     expect(sliders[0]).toHaveAttribute("aria-valuenow", "10");
     expect(sliders[1]).toHaveAttribute("aria-valuenow", "30");
+    expect(sliders[0]).toHaveAccessibleName("Wiek");
+    expect(sliders[1]).toHaveAccessibleName("Wiek");
+    fireEvent.keyDown(sliders[0], { key: "ArrowRight" });
+    expect(onChange).toHaveBeenCalledWith([11, 30]);
   });
 });

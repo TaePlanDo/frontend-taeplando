@@ -1,23 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  toPlanGenerationFormValues,
-  toPlanGenerationParameters,
-} from "@/lib/mappers/planGeneration";
+import { toPlanGenerationParameters } from "@/lib/plan/buildGenerationParameters";
 import { planGenerationSchema } from "./planGeneration";
 
 describe("plan generation parameters", () => {
-  it("starts at 20 participants and submits Auto without equipment", () => {
-    const defaults = toPlanGenerationFormValues();
-    expect(defaults).toEqual({
-      trainingGroupId: "",
+  it("accepts Auto without equipment", () => {
+    const parsed = planGenerationSchema.parse({
+      trainingGroupId: "group-1",
       participantCount: 20,
       equipmentIds: [],
       trainingTypeId: null,
-    });
-    const parsed = planGenerationSchema.parse({
-      ...defaults,
-      trainingGroupId: "group-1",
     });
     expect(toPlanGenerationParameters(parsed)).toEqual({
       training_group_id: "group-1",
@@ -47,7 +39,8 @@ describe("plan generation parameters", () => {
   it("reports missing groups, invalid counts and duplicate equipment on their fields", () => {
     for (const count of [0, 51, 1.5, NaN]) {
       const result = planGenerationSchema.safeParse({
-        ...toPlanGenerationFormValues(),
+        trainingGroupId: "",
+        trainingTypeId: null,
         participantCount: count,
         equipmentIds: ["same", "same"],
       });

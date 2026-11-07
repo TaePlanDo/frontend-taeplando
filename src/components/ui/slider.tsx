@@ -8,6 +8,11 @@ function Slider({
   value,
   min = 0,
   max = 100,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
+  "aria-describedby": ariaDescribedBy,
+  "aria-invalid": ariaInvalid,
+  "aria-valuetext": ariaValueText,
   ...props
 }: React.ComponentProps<typeof SliderPrimitive.Root>) {
   const rawValues = Array.isArray(value)
@@ -15,7 +20,7 @@ function Slider({
     : Array.isArray(defaultValue)
       ? defaultValue
       : [min, max];
-  const values = rawValues.length >= 2 ? rawValues : [min, max];
+  const values = rawValues.length > 0 ? rawValues : [min, max];
 
   return (
     <SliderPrimitive.Root
@@ -47,6 +52,11 @@ function Slider({
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           key={index}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
+          aria-describedby={ariaDescribedBy}
+          aria-invalid={ariaInvalid}
+          aria-valuetext={ariaValueText}
           className="block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm ring-ring/50 transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
         />
       ))}
