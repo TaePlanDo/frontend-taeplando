@@ -89,7 +89,7 @@ export function RegeneratePlanDialog({
           </CustomizedButton>
           <CustomizedButton
             variant="primary"
-            className="w-full sm:w-auto px-6"
+            className="w-full rounded-full sm:w-auto px-6"
             onClick={() => void handleConfirm()}
             disabled={isStarting}
           >

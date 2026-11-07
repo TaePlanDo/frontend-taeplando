@@ -6,7 +6,8 @@ import type {
   PasswordChangeCredentials,
 } from "@/types/auth";
 
-import { apiJson } from "./client";
+import { apiJson, refreshSession } from "./client";
+import { ApiError } from "./errors";
 
 export async function loginRequest(
   credentials: LoginCredentials,
@@ -35,9 +36,11 @@ export async function logoutRequest(): Promise<void> {
 }
 
 export async function refreshRequest(): Promise<TokenResponse> {
-  return apiJson<TokenResponse>(apiUrl("/auth/refresh"), {
-    method: "POST",
-  });
+  const tokens = await refreshSession();
+  if (!tokens) {
+    throw new ApiError(401, "Invalid or expired refresh token");
+  }
+  return tokens;
 }
 
 export async function fetchMe(): Promise<User> {

@@ -38,6 +38,39 @@ describe("apiFetch", () => {
     );
   });
 
+  it("shares one refresh across concurrent 401s", async () => {
+    setAccessToken("old-token");
+    let refreshCalls = 0;
+    const fetchMock = vi.fn().mockImplementation(async (path: string) => {
+      if (path === "/api/auth/refresh") {
+        refreshCalls += 1;
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            access_token: "new-token",
+            token_type: "bearer",
+            expires_in: 900,
+          }),
+        };
+      }
+      if (refreshCalls === 0) {
+        return { status: 401, ok: false };
+      }
+      return { status: 200, ok: true };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const [first, second] = await Promise.all([
+      apiFetch("/api/equipment"),
+      apiFetch("/api/training-groups"),
+    ]);
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+    expect(refreshCalls).toBe(1);
+  });
+
   it("clears session via onAuthLost when refresh fails", async () => {
     setAccessToken("old-token");
     const onAuthLost = vi.fn();

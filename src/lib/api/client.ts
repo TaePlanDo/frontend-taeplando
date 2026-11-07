@@ -1,5 +1,6 @@
 import { getAccessToken, setAccessToken } from "@/auth/tokenRef";
 import { apiUrl } from "@/config/env";
+import type { TokenResponse } from "@/types/auth";
 
 import { ApiError, readErrorMessage } from "./errors";
 
@@ -13,26 +14,40 @@ export function setOnAuthLost(handler: (() => void) | null): void {
 const refreshUrl = apiUrl("/auth/refresh");
 const loginUrl = apiUrl("/auth/login");
 
-/** Refresh via cookie; does not go through apiFetch (avoids retry loops). */
-async function refreshAccessToken(): Promise<string | null> {
-  try {
-    const response = await fetch(refreshUrl, {
-      method: "POST",
-      credentials: "include",
+/** Shared in-flight refresh so concurrent 401s rotate the cookie only once. */
+let refreshInFlight: Promise<TokenResponse | null> | null = null;
+
+/**
+ * Refresh via cookie; does not go through apiFetch (avoids retry loops).
+ * Concurrent callers await the same promise.
+ */
+export async function refreshSession(): Promise<TokenResponse | null> {
+  if (!refreshInFlight) {
+    refreshInFlight = (async () => {
+      try {
+        const response = await fetch(refreshUrl, {
+          method: "POST",
+          credentials: "include",
+        });
+        if (!response.ok) {
+          setAccessToken(null);
+          onAuthLost?.();
+          return null;
+        }
+        const body = (await response.json()) as TokenResponse;
+        setAccessToken(body.access_token);
+        return body;
+      } catch {
+        setAccessToken(null);
+        onAuthLost?.();
+        return null;
+      }
+    })().finally(() => {
+      refreshInFlight = null;
     });
-    if (!response.ok) {
-      setAccessToken(null);
-      onAuthLost?.();
-      return null;
-    }
-    const body = (await response.json()) as { access_token: string };
-    setAccessToken(body.access_token);
-    return body.access_token;
-  } catch {
-    setAccessToken(null);
-    onAuthLost?.();
-    return null;
   }
+
+  return refreshInFlight;
 }
 
 export async function apiFetch(
@@ -57,10 +72,10 @@ export async function apiFetch(
     path !== refreshUrl &&
     path !== loginUrl
   ) {
-    const newToken = await refreshAccessToken();
-    if (newToken) {
+    const refreshed = await refreshSession();
+    if (refreshed) {
       const retryHeaders = new Headers(options.headers);
-      retryHeaders.set("Authorization", `Bearer ${newToken}`);
+      retryHeaders.set("Authorization", `Bearer ${refreshed.access_token}`);
       return fetch(path, {
         ...options,
         headers: retryHeaders,
