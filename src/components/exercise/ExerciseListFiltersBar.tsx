@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ListFilter } from "lucide-react";
 
 import { ExerciseFiltersDialog } from "@/components/exercise/ExerciseFiltersDialog";
-import { SelectedAttributeBadges } from "@/components/exercise/SelectedAttributeBadges";
+import { SelectedAttributeBadges } from "@/components/shared/SelectedAttributeBadges";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";

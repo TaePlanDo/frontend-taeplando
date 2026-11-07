@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { CatalogMultiSelect } from "@/components/exercise/CatalogMultiSelect";
+import { CatalogMultiSelect } from "@/components/shared/CatalogMultiSelect";
 import { DualRangeField } from "@/components/shared/DualRangeField";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedDialog } from "@/components/shared/CustomizedDialog";

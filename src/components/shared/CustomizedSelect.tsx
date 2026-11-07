@@ -1,5 +1,6 @@
 import { useId } from "react";
 import { cn } from "cn";
+import { InputErrorMessage } from "./InputErrorMessage";
 
 import {
   Select,
@@ -23,6 +24,7 @@ type CustomizedSelectProps = {
   disabled?: boolean;
   className?: string;
   labelClassName?: string;
+  error?: string;
   onValueChange: (value: string) => void;
 };
 
@@ -35,6 +37,7 @@ export function CustomizedSelect({
   disabled,
   className,
   labelClassName,
+  error,
   onValueChange,
 }: CustomizedSelectProps) {
   const generatedId = useId();
@@ -49,7 +52,12 @@ export function CustomizedSelect({
         {label}
       </label>
       <Select value={value} onValueChange={onValueChange} disabled={disabled}>
-        <SelectTrigger id={selectId} className="w-full">
+        <SelectTrigger
+          id={selectId}
+          className="w-full"
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? `${selectId}-error` : undefined}
+        >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
@@ -60,6 +68,9 @@ export function CustomizedSelect({
           ))}
         </SelectContent>
       </Select>
+      {error ? (
+        <InputErrorMessage id={`${selectId}-error`} message={error} />
+      ) : null}
     </div>
   );
 }

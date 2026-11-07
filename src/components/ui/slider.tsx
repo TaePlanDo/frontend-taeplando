@@ -15,7 +15,7 @@ function Slider({
     : Array.isArray(defaultValue)
       ? defaultValue
       : [min, max];
-  const values = rawValues.length >= 2 ? rawValues : [min, max];
+  const values = rawValues.length > 0 ? rawValues : [min, max];
 
   return (
     <SliderPrimitive.Root
@@ -47,6 +47,11 @@ function Slider({
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           key={index}
+          aria-label={props["aria-label"]}
+          aria-labelledby={props["aria-labelledby"]}
+          aria-describedby={props["aria-describedby"]}
+          aria-invalid={props["aria-invalid"]}
+          aria-valuetext={props["aria-valuetext"]}
           className="block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm ring-ring/50 transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
         />
       ))}

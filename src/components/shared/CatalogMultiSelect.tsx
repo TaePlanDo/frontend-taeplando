@@ -18,6 +18,7 @@ type CatalogMultiSelectProps = {
   unavailableMessage?: string;
   className?: string;
   labelClassName?: string;
+  error?: string;
 };
 
 export function CatalogMultiSelect({
@@ -31,6 +32,7 @@ export function CatalogMultiSelect({
   unavailableMessage,
   className,
   labelClassName,
+  error,
 }: CatalogMultiSelectProps) {
   const selected = selectedIds.map(
     (id) =>
@@ -48,6 +50,7 @@ export function CatalogMultiSelect({
       <div className="flex flex-col gap-1">
         <CustomizedSelect
           label={label}
+          error={error}
           labelClassName={labelClassName}
           value=""
           placeholder={
@@ -77,6 +80,7 @@ export function CatalogMultiSelect({
         />
         <SelectedAttributeBadges
           items={selected}
+          disabled={disabled || isLoading || Boolean(unavailableMessage)}
           onRemove={(id) =>
             onSelectedIdsChange(
               selectedIds.filter((selectedId) => selectedId !== String(id)),
