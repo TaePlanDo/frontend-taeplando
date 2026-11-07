@@ -4,6 +4,7 @@ import {
   createGroupRequest,
   deleteGroupRequest,
   getGroupsRequest,
+  getAllGroupsRequest,
   updateGroupRequest,
   updateGroupSchemaRequest,
 } from "./group";
@@ -55,6 +56,43 @@ describe("group API", () => {
       position: 1,
     },
   ];
+
+  it("loads every group page and normalizes its schema", async () => {
+    const fetchMock = vi.fn().mockImplementation(async (url: string) => {
+      const page = Number(
+        new URL(url, "http://localhost").searchParams.get("page"),
+      );
+      return okResponse(200, {
+        items: [{ id: String(page), ...payload, schema: defaultSchema }],
+        page,
+        page_size: 100,
+        total: 201,
+        total_pages: 3,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const groups = await getAllGroupsRequest();
+    expect(groups.map(({ id }) => id)).toEqual(["1", "2", "3"]);
+    expect(groups.map(({ schema }) => schema[0].percentage)).toEqual([
+      100, 100, 100,
+    ]);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "/api/training-groups?page=3&page_size=100",
+      expect.anything(),
+    );
+  });
+
+  it("rejects an incomplete group list when a later page fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(okResponse(200, { items: [], total_pages: 2 }))
+        .mockRejectedValueOnce(new Error("Network error")),
+    );
+    await expect(getAllGroupsRequest()).rejects.toThrow("Network error");
+  });
 
   it("creates a group with POST", async () => {
     const fetchMock = vi
