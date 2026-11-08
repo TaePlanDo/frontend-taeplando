@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -200,5 +200,49 @@ describe("ExerciseListPage", () => {
     expect(
       screen.queryByRole("button", { name: "Edytuj ćwiczenie" }),
     ).toBeNull();
+  });
+
+  it("shows planning attributes in the preview", async () => {
+    state.items = [
+      {
+        ...exercise,
+        physical_difficulty: 1,
+        technical_difficulty: 2,
+        upper_body_load: 3,
+        lower_body_load: 4,
+        core_load: 5,
+      },
+    ];
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    const dialog = await screen.findByRole("dialog");
+    for (const [label, value] of [
+      ["Intensywność fizyczna", "1"],
+      ["Trudność techniczna", "2"],
+      ["Zaangażowanie górnych partii", "3"],
+      ["Zaangażowanie dolnych partii", "4"],
+      ["Zaangażowanie partii core", "5"],
+    ]) {
+      const block = within(dialog).getByText(label).parentElement!;
+      expect(within(block).getByText(value)).toBeTruthy();
+    }
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Edytuj ćwiczenie" }),
+    );
+    expect(
+      await screen.findByRole("heading", { name: "Edytuj ćwiczenie" }),
+    ).toBeTruthy();
+  });
+
+  it("closes the exercise preview", async () => {
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    const dialog = await screen.findByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Zamknij" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });
