@@ -9,6 +9,11 @@ const positiveInteger = (label: string) =>
     .transform(Number)
     .pipe(z.number().min(1, `${label} musi być większy od 0`));
 
+const planningValue = (label: string) =>
+  positiveInteger(label).pipe(
+    z.number().max(5, `${label} musi być w zakresie 1–5`),
+  );
+
 export const exerciseFormSchema = z
   .object({
     name: z
@@ -22,6 +27,11 @@ export const exerciseFormSchema = z
     minParticipants: positiveInteger("Minimalna liczba uczestników"),
     maxParticipants: positiveInteger("Maksymalna liczba uczestników"),
     durationMinutes: positiveInteger("Czas trwania"),
+    physicalDifficulty: planningValue("Intensywność fizyczna"),
+    technicalDifficulty: planningValue("Trudność techniczna"),
+    upperBodyLoad: planningValue("Zaangażowanie górnych partii"),
+    lowerBodyLoad: planningValue("Zaangażowanie dolnych partii"),
+    coreLoad: planningValue("Zaangażowanie partii core"),
     equipmentIds: z.array(z.string()),
     trainingTypeIds: z
       .array(z.string())

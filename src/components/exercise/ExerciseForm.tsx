@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { ExerciseAttributesSelector } from "@/components/exercise/ExerciseAttributesSelector";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInputWithController } from "@/components/shared/CustomizedInputWithController";
-import { CustomizedPairInputWithControllers } from "@/components/shared/CustomizedPairInputWithControllers";
+import { DualRangeField } from "@/components/shared/DualRangeField";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCreateExercise } from "@/hooks/exercises/useCreateExercise";
@@ -46,7 +46,7 @@ export function ExerciseForm({ exercise, onClose }: Props) {
 
   const submit: SubmitHandler<ExerciseFormOutput> = async (formValues) => {
     try {
-      const payload = toExerciseWrite(formValues);
+      const payload = toExerciseWrite(formValues, exercise?.image_url ?? null);
       if (exercise) {
         await updateExercise({ id: exercise.id, payload });
         toast.success("Ćwiczenie zostało zaktualizowane");
@@ -70,8 +70,8 @@ export function ExerciseForm({ exercise, onClose }: Props) {
         type="always"
         className="h-full min-h-0 flex-1 overflow-hidden px-1"
       >
-        <div className="flex flex-col gap-4 pb-4">
-          <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
+        <div className="flex flex-col gap-4 pr-4 pb-4">
+          <div className="grid gap-4 sm:grid-cols-[1.35fr_1fr]">
             <CustomizedInputWithController
               control={control}
               name="name"
@@ -79,20 +79,14 @@ export function ExerciseForm({ exercise, onClose }: Props) {
               placeholder="np. Borek"
               disabled={isSubmitting}
             />
-            <CustomizedPairInputWithControllers
-              control={control}
-              title="Wiek (lata)"
-              first={{
-                name: "minAge",
-                label: "Minimalny wiek",
-                type: "number",
-                min: 1,
-              }}
-              second={{
-                name: "maxAge",
-                label: "Maksymalny wiek",
-                type: "number",
-                min: 1,
+            <DualRangeField
+              label="Wiek"
+              min={1}
+              max={Math.max(99, exercise?.max_age ?? 99)}
+              value={[Number(values.minAge), Number(values.maxAge)]}
+              onValueChange={([min, max]) => {
+                setValue("minAge", String(min), { shouldValidate: true });
+                setValue("maxAge", String(max), { shouldValidate: true });
               }}
               disabled={isSubmitting}
             />
@@ -114,33 +108,79 @@ export function ExerciseForm({ exercise, onClose }: Props) {
                 </label>
               )}
             />
-            <div className="flex flex-col gap-3">
-              <CustomizedPairInputWithControllers
-                control={control}
-                title="Liczba uczestników"
-                first={{
-                  name: "minParticipants",
-                  label: "Minimalna liczba uczestników",
-                  type: "number",
-                  min: 1,
-                }}
-                second={{
-                  name: "maxParticipants",
-                  label: "Maksymalna liczba uczestników",
-                  type: "number",
-                  min: 1,
-                }}
-                disabled={isSubmitting}
-              />
-              <CustomizedInputWithController
-                control={control}
-                name="durationMinutes"
-                label="Czas trwania w minutach"
-                type="number"
-                min="0"
-                disabled={isSubmitting}
-              />
-            </div>
+            <DualRangeField
+              label="Liczba uczestników"
+              min={1}
+              max={Math.max(99, exercise?.max_participants ?? 99)}
+              value={[
+                Number(values.minParticipants),
+                Number(values.maxParticipants),
+              ]}
+              onValueChange={([min, max]) => {
+                setValue("minParticipants", String(min), {
+                  shouldValidate: true,
+                });
+                setValue("maxParticipants", String(max), {
+                  shouldValidate: true,
+                });
+              }}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <CustomizedInputWithController
+              control={control}
+              name="physicalDifficulty"
+              label="Intensywność fizyczna"
+              type="number"
+              min="1"
+              max="5"
+              disabled={isSubmitting}
+            />
+            <CustomizedInputWithController
+              control={control}
+              name="technicalDifficulty"
+              label="Trudność techniczna"
+              type="number"
+              min="1"
+              max="5"
+              disabled={isSubmitting}
+            />
+            <CustomizedInputWithController
+              control={control}
+              name="durationMinutes"
+              label="Czas trwania w minutach"
+              type="number"
+              min="1"
+              disabled={isSubmitting}
+            />
+            <CustomizedInputWithController
+              control={control}
+              name="upperBodyLoad"
+              label="Zaangażowanie górnych partii"
+              type="number"
+              min="1"
+              max="5"
+              disabled={isSubmitting}
+            />
+            <CustomizedInputWithController
+              control={control}
+              name="lowerBodyLoad"
+              label="Zaangażowanie dolnych partii"
+              type="number"
+              min="1"
+              max="5"
+              disabled={isSubmitting}
+            />
+            <CustomizedInputWithController
+              control={control}
+              name="coreLoad"
+              label="Zaangażowanie partii core"
+              type="number"
+              min="1"
+              max="5"
+              disabled={isSubmitting}
+            />
           </div>
           <ExerciseAttributesSelector
             equipmentIds={values.equipmentIds}
