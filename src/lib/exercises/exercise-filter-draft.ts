@@ -1,13 +1,16 @@
 import {
   AGE_FILTER_BOUNDS,
   PARTICIPANTS_FILTER_BOUNDS,
+  PLANNING_FILTERS,
+  PLANNING_FILTER_BOUNDS,
   type ExerciseListFilters,
 } from "@/types/exercise-list-filters";
 
 import { normalizeFilters } from "./exercise-list-filters";
 
 /** Concrete dialog draft — ranges and catalog ids always present. */
-export type ExerciseFilterDraft = {
+type PlanningBound = (typeof PLANNING_FILTERS)[number]["min" | "max"];
+export type ExerciseFilterDraft = Record<PlanningBound, number> & {
   min_age: number;
   max_age: number;
   min_participants: number;
@@ -21,6 +24,12 @@ export function filtersToDraft(
   filters: ExerciseListFilters,
 ): ExerciseFilterDraft {
   return {
+    ...(Object.fromEntries(
+      PLANNING_FILTERS.flatMap(({ min, max }) => [
+        [min, filters[min] ?? PLANNING_FILTER_BOUNDS.min],
+        [max, filters[max] ?? PLANNING_FILTER_BOUNDS.max],
+      ]),
+    ) as Record<PlanningBound, number>),
     min_age: filters.min_age ?? AGE_FILTER_BOUNDS.min,
     max_age: filters.max_age ?? AGE_FILTER_BOUNDS.max,
     min_participants:

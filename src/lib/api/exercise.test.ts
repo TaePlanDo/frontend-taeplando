@@ -51,12 +51,14 @@ describe("exercise API", () => {
       name: "chagi",
       min_age: 7,
       max_age: 14,
+      min_core_load: 2,
+      max_core_load: 4,
       equipment_ids: ["eq-1"],
       training_type_ids: ["type-1"],
       segment_ids: [3],
     });
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/exercises?name=chagi&min_age=7&max_age=14&equipment_ids=eq-1&training_type_ids=type-1&segment_ids=3&page=1&page_size=6",
+      "/api/exercises?name=chagi&min_age=7&max_age=14&min_core_load=2&max_core_load=4&equipment_ids=eq-1&training_type_ids=type-1&segment_ids=3&page=1&page_size=6",
       expect.objectContaining({ method: "GET" }),
     );
   });

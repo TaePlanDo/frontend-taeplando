@@ -56,7 +56,7 @@ describe("ExerciseFiltersDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "Zastosuj filtry" }));
     expect(onApply).toHaveBeenCalledWith({
       name: "chagi",
-      min_age: 1,
+      min_age: 2,
       max_age: 99,
       min_participants: 2,
       max_participants: 99,
@@ -77,6 +77,8 @@ describe("ExerciseFiltersDialog", () => {
           name: "chagi",
           min_age: 7,
           max_age: 14,
+          min_core_load: 2,
+          max_core_load: 4,
           equipment_ids: ["eq-1"],
         }}
         onApply={onApply}
@@ -87,6 +89,24 @@ describe("ExerciseFiltersDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "Wyczyść" }));
     fireEvent.click(screen.getByRole("button", { name: "Zastosuj filtry" }));
     expect(onApply).toHaveBeenCalledWith({ name: "chagi" });
+  });
+
+  it("preserves planning filters when applying the current dialog", () => {
+    const onApply = vi.fn();
+    render(
+      <ExerciseFiltersDialog
+        open
+        onOpenChange={vi.fn()}
+        filters={{ min_core_load: 2, max_core_load: 4 }}
+        onApply={onApply}
+        trigger={<button type="button">Filtruj</button>}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Zastosuj filtry" }));
+    expect(onApply).toHaveBeenCalledWith({
+      min_core_load: 2,
+      max_core_load: 4,
+    });
   });
 
   it("shows a retry action instead of an empty catalog message on failure", () => {

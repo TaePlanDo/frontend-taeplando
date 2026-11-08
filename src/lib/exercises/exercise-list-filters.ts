@@ -1,6 +1,8 @@
 import {
   AGE_FILTER_BOUNDS,
   PARTICIPANTS_FILTER_BOUNDS,
+  PLANNING_FILTER_BOUNDS,
+  PLANNING_FILTERS,
   type ExerciseListFilters,
 } from "@/types/exercise-list-filters";
 
@@ -9,7 +11,12 @@ type RangeBounds = { min: number; max: number };
 type FilterQueryField =
   | { key: "name"; kind: "string" }
   | {
-      key: "min_age" | "max_age" | "min_participants" | "max_participants";
+      key:
+        | "min_age"
+        | "max_age"
+        | "min_participants"
+        | "max_participants"
+        | (typeof PLANNING_FILTERS)[number]["min" | "max"];
       kind: "int";
     }
   | { key: "equipment_ids" | "training_type_ids"; kind: "stringCsv" }
@@ -24,6 +31,10 @@ const FILTER_QUERY_FIELDS: FilterQueryField[] = [
   { key: "max_age", kind: "int" },
   { key: "min_participants", kind: "int" },
   { key: "max_participants", kind: "int" },
+  ...PLANNING_FILTERS.flatMap(({ min, max }) => [
+    { key: min, kind: "int" as const },
+    { key: max, kind: "int" as const },
+  ]),
   { key: "equipment_ids", kind: "stringCsv" },
   { key: "training_type_ids", kind: "stringCsv" },
   { key: "segment_ids", kind: "intCsv" },
@@ -111,7 +122,7 @@ export function normalizeFilters(
   if (name) next.name = name;
 
   const age = normalizeRange(
-    filters.min_age,
+    filters.min_age === 0 ? AGE_FILTER_BOUNDS.min : filters.min_age,
     filters.max_age,
     AGE_FILTER_BOUNDS,
   );
@@ -133,6 +144,18 @@ export function normalizeFilters(
     }
     if (participants.max != null) {
       next.max_participants = participants.max;
+    }
+  }
+
+  for (const { min, max } of PLANNING_FILTERS) {
+    const range = normalizeRange(
+      filters[min],
+      filters[max],
+      PLANNING_FILTER_BOUNDS,
+    );
+    if (!isFullRange(range.min, range.max, PLANNING_FILTER_BOUNDS)) {
+      if (range.min != null) next[min] = range.min;
+      if (range.max != null) next[max] = range.max;
     }
   }
 
