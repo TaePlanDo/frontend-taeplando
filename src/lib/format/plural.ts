@@ -19,6 +19,10 @@ export function formatExerciseCount(count: number): string {
   return formatCount(count, "ćwiczenie", "ćwiczenia", "ćwiczeń");
 }
 
+export function formatPlanCount(count: number): string {
+  return formatCount(count, "plan", "plany", "planów");
+}
+
 export function formatParticipantCount(count: number): string {
   return formatCount(count, "osoba", "osoby", "osób");
 }
