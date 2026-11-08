@@ -109,6 +109,52 @@ describe("ExerciseFiltersDialog", () => {
     });
   });
 
+  it("applies both bounds of a planning slider", () => {
+    const onApply = vi.fn();
+    render(
+      <ExerciseFiltersDialog
+        open
+        onOpenChange={vi.fn()}
+        filters={{}}
+        onApply={onApply}
+        trigger={<button type="button">Filtruj</button>}
+      />,
+    );
+    const sliders = screen.getAllByRole("slider", {
+      name: "Intensywność fizyczna",
+    });
+    sliders[0].focus();
+    fireEvent.keyDown(sliders[0], { key: "ArrowRight" });
+    sliders[1].focus();
+    fireEvent.keyDown(sliders[1], { key: "ArrowLeft" });
+    fireEvent.click(screen.getByRole("button", { name: "Zastosuj filtry" }));
+    expect(onApply).toHaveBeenCalledWith({
+      min_physical_difficulty: 2,
+      max_physical_difficulty: 4,
+    });
+  });
+
+  it("restores applied planning ranges when reopened", () => {
+    const props = {
+      onOpenChange: vi.fn(),
+      filters: { min_core_load: 2, max_core_load: 4 },
+      onApply: vi.fn(),
+      trigger: <button type="button">Filtruj</button>,
+    };
+    const { rerender } = render(<ExerciseFiltersDialog {...props} open />);
+    let sliders = screen.getAllByRole("slider", {
+      name: "Zaangażowanie partii core",
+    });
+    fireEvent.keyDown(sliders[0], { key: "ArrowRight" });
+    rerender(<ExerciseFiltersDialog {...props} open={false} />);
+    rerender(<ExerciseFiltersDialog {...props} open />);
+    sliders = screen.getAllByRole("slider", {
+      name: "Zaangażowanie partii core",
+    });
+    expect(sliders[0].getAttribute("aria-valuenow")).toBe("2");
+    expect(sliders[1].getAttribute("aria-valuenow")).toBe("4");
+  });
+
   it("shows a retry action instead of an empty catalog message on failure", () => {
     const refetch = vi.fn();
     useExerciseCatalogsMock.mockReturnValue({
