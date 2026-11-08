@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { PLANNING_FILTER_BOUNDS } from "@/types/exercise-list-filters";
+
 const positiveInteger = (label: string) =>
   z
     .string()
@@ -11,7 +13,12 @@ const positiveInteger = (label: string) =>
 
 const planningValue = (label: string) =>
   positiveInteger(label).pipe(
-    z.number().max(5, `${label} musi być w zakresie 1–5`),
+    z
+      .number()
+      .max(
+        PLANNING_FILTER_BOUNDS.max,
+        `${label} musi być w zakresie ${PLANNING_FILTER_BOUNDS.min}–${PLANNING_FILTER_BOUNDS.max}`,
+      ),
   );
 
 export const exerciseFormSchema = z

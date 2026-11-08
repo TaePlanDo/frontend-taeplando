@@ -15,7 +15,7 @@ export function toExerciseFormValues(
       maxAge: "99",
       minParticipants: "1",
       maxParticipants: "99",
-      durationMinutes: "0",
+      durationMinutes: "1",
       physicalDifficulty: "3",
       technicalDifficulty: "3",
       upperBodyLoad: "3",

@@ -17,6 +17,7 @@ import {
   type ExerciseFormValues,
 } from "@/lib/validation/exercise";
 import type { Exercise } from "@/types/exercise";
+import { PLANNING_FILTER_BOUNDS } from "@/types/exercise-list-filters";
 
 type Props = { exercise?: Exercise | null; onClose: () => void };
 
@@ -133,8 +134,8 @@ export function ExerciseForm({ exercise, onClose }: Props) {
               name="physicalDifficulty"
               label="Intensywność fizyczna"
               type="number"
-              min="1"
-              max="5"
+              min={PLANNING_FILTER_BOUNDS.min}
+              max={PLANNING_FILTER_BOUNDS.max}
               disabled={isSubmitting}
             />
             <CustomizedInputWithController
@@ -142,8 +143,8 @@ export function ExerciseForm({ exercise, onClose }: Props) {
               name="technicalDifficulty"
               label="Trudność techniczna"
               type="number"
-              min="1"
-              max="5"
+              min={PLANNING_FILTER_BOUNDS.min}
+              max={PLANNING_FILTER_BOUNDS.max}
               disabled={isSubmitting}
             />
             <CustomizedInputWithController
@@ -159,8 +160,8 @@ export function ExerciseForm({ exercise, onClose }: Props) {
               name="upperBodyLoad"
               label="Zaangażowanie górnych partii"
               type="number"
-              min="1"
-              max="5"
+              min={PLANNING_FILTER_BOUNDS.min}
+              max={PLANNING_FILTER_BOUNDS.max}
               disabled={isSubmitting}
             />
             <CustomizedInputWithController
@@ -168,8 +169,8 @@ export function ExerciseForm({ exercise, onClose }: Props) {
               name="lowerBodyLoad"
               label="Zaangażowanie dolnych partii"
               type="number"
-              min="1"
-              max="5"
+              min={PLANNING_FILTER_BOUNDS.min}
+              max={PLANNING_FILTER_BOUNDS.max}
               disabled={isSubmitting}
             />
             <CustomizedInputWithController
@@ -177,8 +178,8 @@ export function ExerciseForm({ exercise, onClose }: Props) {
               name="coreLoad"
               label="Zaangażowanie partii core"
               type="number"
-              min="1"
-              max="5"
+              min={PLANNING_FILTER_BOUNDS.min}
+              max={PLANNING_FILTER_BOUNDS.max}
               disabled={isSubmitting}
             />
           </div>

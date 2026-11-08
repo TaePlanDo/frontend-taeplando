@@ -4,27 +4,14 @@ export type ExerciseListFilters = {
   max_age?: number;
   min_participants?: number;
   max_participants?: number;
-  min_physical_difficulty?: number;
-  max_physical_difficulty?: number;
-  min_technical_difficulty?: number;
-  max_technical_difficulty?: number;
-  min_upper_body_load?: number;
-  max_upper_body_load?: number;
-  min_lower_body_load?: number;
-  max_lower_body_load?: number;
-  min_core_load?: number;
-  max_core_load?: number;
   equipment_ids?: string[];
   training_type_ids?: string[];
   segment_ids?: number[];
-};
+} & Partial<Record<PlanningFilterBound, number>>;
 
-export type PlanningFilterDimension =
-  | "physical_difficulty"
-  | "technical_difficulty"
-  | "upper_body_load"
-  | "lower_body_load"
-  | "core_load";
+export type PlanningFilterDimension = (typeof PLANNING_FILTERS)[number]["key"];
+export type PlanningFilterBound = (typeof PLANNING_FILTERS)[number][
+  "min" | "max"];
 export type ActiveFilterDimension =
   | "name"
   | "age"
