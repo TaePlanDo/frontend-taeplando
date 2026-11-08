@@ -11,7 +11,10 @@ import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { Button } from "@/components/ui/button";
 import { formatMediumDate } from "@/lib/format/date-to-text";
-import { formatExerciseCount } from "@/lib/format/plural";
+import {
+  formatExerciseCount,
+  formatParticipantCount,
+} from "@/lib/format/plural";
 import type { PlanDetail } from "@/types/plan";
 
 type PlanDetailHeaderProps = {
@@ -78,7 +81,7 @@ export function PlanDetailHeader({
           </li>
           <li className="inline-flex items-center gap-2">
             <Users className="size-4 text-primary" aria-hidden />
-            {plan.participant_count} osób
+            {formatParticipantCount(plan.participant_count)}
           </li>
           {primaryType ? (
             <li className="inline-flex items-center gap-2">

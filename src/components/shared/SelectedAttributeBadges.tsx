@@ -10,11 +10,13 @@ type AttributeItem<TId extends string | number> = {
 type Props<TId extends string | number> = {
   items: AttributeItem<TId>[];
   onRemove: (id: TId) => void;
+  disabled?: boolean;
 };
 
 export function SelectedAttributeBadges<TId extends string | number>({
   items,
   onRemove,
+  disabled,
 }: Props<TId>) {
   if (!items.length) return null;
 
@@ -29,9 +31,10 @@ export function SelectedAttributeBadges<TId extends string | number>({
           {item.name}
           <button
             type="button"
+            disabled={disabled}
             onClick={() => onRemove(item.id)}
             aria-label={`Usuń ${item.name}`}
-            className="rounded-sm transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="rounded-sm transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             <X className="size-3" />
           </button>

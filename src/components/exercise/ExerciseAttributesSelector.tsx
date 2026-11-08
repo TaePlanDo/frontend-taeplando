@@ -5,7 +5,7 @@ import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { CustomizedTabs } from "@/components/shared/CustomizedTabs";
 import { useExerciseCatalogs } from "@/hooks/exercises/useExerciseCatalogs";
 
-import { CatalogMultiSelect } from "./CatalogMultiSelect";
+import { CatalogMultiSelect } from "@/components/shared/CatalogMultiSelect";
 
 type Tab = "equipment" | "type" | "segment";
 type Props = {

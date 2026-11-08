@@ -4,6 +4,11 @@ import type { PaginatedResponse } from "@/types/pagination";
 import type { Group, GroupSchemaWrite, GroupWrite } from "@/types/group";
 
 import { apiJson } from "./client";
+import { getAllPages } from "./all-pages";
+
+export function getAllGroupsRequest(): Promise<Group[]> {
+  return getAllPages(getGroupsRequest);
+}
 
 export async function getGroupsRequest(
   page: number,

@@ -1,11 +1,11 @@
 import {
   keepPreviousData,
-  onlineManager,
   useQuery,
   type QueryKey,
 } from "@tanstack/react-query";
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState } from "react";
 
+import { useOnlineState } from "@/hooks/useOnlineState";
 import type { PaginatedResponse } from "@/types/pagination";
 import { getPaginatedListState } from "./listState";
 
@@ -36,14 +36,6 @@ function isControlledPagination<TItem>(
   options: UsePaginatedListOptions<TItem>,
 ): options is PaginatedListBaseOptions<TItem> & ControlledPagination {
   return options.page !== undefined;
-}
-
-function useOnlineState() {
-  return useSyncExternalStore(
-    (onStoreChange) => onlineManager.subscribe(onStoreChange),
-    () => onlineManager.isOnline(),
-    () => true,
-  );
 }
 
 export function usePaginatedList<TItem>(

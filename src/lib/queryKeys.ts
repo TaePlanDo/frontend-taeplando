@@ -5,6 +5,7 @@ export const queryKeys = {
   },
   groups: {
     all: ["groups"] as const,
+    options: () => [...queryKeys.groups.all, "options"] as const,
     lists: () => [...queryKeys.groups.all, "list"] as const,
   },
   trainingSegments: {
@@ -18,7 +19,12 @@ export const queryKeys = {
   },
   equipment: {
     all: ["equipment"] as const,
+    options: () => [...queryKeys.equipment.all, "options"] as const,
     lists: () => [...queryKeys.equipment.all, "list"] as const,
+  },
+  trainingTypes: {
+    all: ["training-types"] as const,
+    options: () => [...queryKeys.trainingTypes.all, "options"] as const,
   },
   plans: {
     all: ["plans"] as const,

@@ -1,6 +1,32 @@
 import { describe, expect, it } from "vitest";
 
-import { formatExerciseCount, formatGroupCount } from "./plural";
+import {
+  formatExerciseCount,
+  formatGroupCount,
+  formatParticipantCount,
+} from "./plural";
+
+describe("formatParticipantCount", () => {
+  it("uses Polish forms including teens and counts ending in 1", () => {
+    const cases: [number, string][] = [
+      [0, "0 osób"],
+      [1, "1 osoba"],
+      [2, "2 osoby"],
+      [4, "4 osoby"],
+      [5, "5 osób"],
+      [12, "12 osób"],
+      [14, "14 osób"],
+      [20, "20 osób"],
+      [21, "21 osób"],
+      [22, "22 osoby"],
+      [24, "24 osoby"],
+      [50, "50 osób"],
+    ];
+    for (const [count, expected] of cases) {
+      expect(formatParticipantCount(count)).toBe(expected);
+    }
+  });
+});
 
 describe("formatGroupCount", () => {
   it("uses singular for one", () => {
