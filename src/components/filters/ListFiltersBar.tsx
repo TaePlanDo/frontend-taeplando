@@ -3,7 +3,6 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { SelectedAttributeBadges } from "@/components/shared/SelectedAttributeBadges";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { SEARCH_DEBOUNCE_MS } from "@/lib/constants/search";
 
 type ListFiltersBarProps = {
   name?: string;
@@ -36,7 +35,7 @@ export function ListFiltersBar({
     const handle = window.setTimeout(() => {
       const next = searchValue.trim();
       if (next !== (name?.trim() ?? "")) onNameChangeRef.current(next);
-    }, SEARCH_DEBOUNCE_MS);
+    }, 300);
     return () => window.clearTimeout(handle);
   }, [searchValue, name]);
 

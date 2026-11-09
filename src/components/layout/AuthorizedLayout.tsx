@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 
 import { Navbar } from "@/components/layout/Navbar";
-import { useSheetOffset } from "@/components/shared/SheetOffset";
+import { useSheetOffset } from "@/hooks/useSheetOffset";
 
 export function AuthorizedLayout() {
   const { offset } = useSheetOffset();

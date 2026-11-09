@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useState,
   type Dispatch,
   type ReactNode,
@@ -48,13 +49,14 @@ export function ListFiltersSheet<F extends Record<string, unknown>>({
   const [draft, setDraft] = useState(filters);
   const isDesktop = useIsDesktop();
 
+  useEffect(() => {
+    if (open) setDraft(filters);
+  }, [open, filters]);
+
   return (
     <CustomizedSheet
       open={open}
-      onOpenChange={(next) => {
-        if (next) setDraft(filters);
-        setOpen(next);
-      }}
+      onOpenChange={setOpen}
       title={title}
       trigger={
         <CustomizedButton
@@ -146,7 +148,7 @@ export function ListFiltersSheet<F extends Record<string, unknown>>({
             variant="primary"
             className="w-full"
             onClick={() => {
-              onApply({ ...draft, name: filters.name });
+              onApply(draft);
               if (!isDesktop) setOpen(false);
             }}
           >

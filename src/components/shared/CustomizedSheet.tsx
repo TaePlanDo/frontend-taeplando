@@ -1,6 +1,5 @@
 import { useEffect, type ReactNode } from "react";
 
-import { SHEET_WIDTH, useSheetOffset } from "@/components/shared/SheetOffset";
 import {
   Sheet,
   SheetContent,
@@ -9,6 +8,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useIsDesktop } from "@/hooks/useIsDesktop";
+import { SHEET_WIDTH, useSheetOffset } from "@/hooks/useSheetOffset";
 import { cn } from "cn";
 
 type CustomizedSheetProps = {

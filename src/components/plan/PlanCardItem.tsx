@@ -1,10 +1,11 @@
-import { Clock, Trash2, Users } from "lucide-react";
+import { Clock, Tag, Trash2, Users } from "lucide-react";
 
 import { CardItemActionButton } from "@/components/shared/CardItemActionButton";
 import { CardItemBadge } from "@/components/shared/CardItemBadge";
 import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
 import {
   Card,
+  CardAction,
   CardContent,
   CardFooter,
   CardHeader,
@@ -36,15 +37,18 @@ export function PlanCardItem({ plan, onOpen, onDelete }: PlanCardItemProps) {
         }
       }}
     >
-      <CardHeader className="flex-row items-center justify-between gap-2 space-y-0 px-5">
+      <CardHeader className="gap-0 px-5">
         {trainingType ? (
-          <CardItemBadge className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-foreground/80">
+          <CardItemBadge
+            icon={<Tag className="size-3" />}
+            className="border border-primary/50 bg-primary/10 text-primary"
+          >
             {trainingType}
           </CardItemBadge>
         ) : null}
-        <span className="ml-auto shrink-0 text-xs text-foreground/60">
+        <CardAction className="text-xs text-foreground/80">
           Utworzono {formatRelativeTime(plan.generated_at)}
-        </span>
+        </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-2 px-5">
         <h3 className="line-clamp-2 text-lg font-semibold">{plan.name}</h3>
@@ -57,16 +61,10 @@ export function PlanCardItem({ plan, onOpen, onDelete }: PlanCardItemProps) {
       </CardContent>
       <CardFooter className="items-center justify-between gap-2 px-5">
         <div className="flex flex-wrap gap-2">
-          <CardItemBadge
-            icon={<Clock className="size-4" />}
-            className="rounded-md border border-border px-2.5 py-1 text-xs text-foreground"
-          >
+          <CardItemBadge icon={<Clock className="h-5 w-5" />}>
             {formatDuration(plan.training_duration_snapshot)}
           </CardItemBadge>
-          <CardItemBadge
-            icon={<Users className="size-4" />}
-            className="rounded-md border border-border px-2.5 py-1 text-xs text-foreground"
-          >
+          <CardItemBadge icon={<Users className="h-5 w-5" />}>
             {formatParticipantCount(plan.participant_count)}
           </CardItemBadge>
         </div>
