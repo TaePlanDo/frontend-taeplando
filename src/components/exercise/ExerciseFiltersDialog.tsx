@@ -3,9 +3,10 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CatalogMultiSelect } from "@/components/shared/CatalogMultiSelect";
 import { DualRangeField } from "@/components/shared/DualRangeField";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
-import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
+import { CustomizedSheet } from "@/components/shared/CustomizedSheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useExerciseCatalogs } from "@/hooks/exercises/useExerciseCatalogs";
+import { useIsDesktop } from "@/hooks/useIsDesktop";
 import {
   draftToFilters,
   emptyFilterDraft,
@@ -37,6 +38,7 @@ export function ExerciseFiltersDialog({
     filtersToDraft(filters),
   );
   const wasOpenRef = useRef(open);
+  const isDesktop = useIsDesktop();
   const { data, isLoading, isError, refetch } = useExerciseCatalogs();
 
   useEffect(() => {
@@ -47,12 +49,11 @@ export function ExerciseFiltersDialog({
   }, [open, filters]);
 
   return (
-    <CustomizedDialog
+    <CustomizedSheet
       open={open}
       onOpenChange={onOpenChange}
       title="Filtry ćwiczeń"
       trigger={trigger}
-      className="grid-rows-[auto_minmax(0,1fr)] max-h-[calc(100dvh-2rem)] gap-5 overflow-hidden p-4 sm:!top-8 sm:!bottom-8 sm:!h-auto sm:!translate-y-0 sm:max-w-150 sm:p-6"
     >
       <div className="flex min-h-0 flex-1 flex-col">
         <ScrollArea className="min-h-0 flex-1 pr-3">
@@ -126,28 +127,28 @@ export function ExerciseFiltersDialog({
             />
           </div>
         </ScrollArea>
-        <div className="-mx-4 flex shrink-0 flex-col-reverse gap-3 border-t bg-background px-4 pt-4 pb-2 sm:-mx-6 sm:flex-row sm:justify-end sm:px-6">
-          <CustomizedButton
-            type="button"
-            variant="outline"
-            className="w-full sm:w-32"
-            onClick={() => setDraft(emptyFilterDraft())}
-          >
-            Wyczyść
-          </CustomizedButton>
+        <div className="-mx-6 mt-auto flex shrink-0 flex-col gap-3 border-t bg-background px-6 pt-4">
           <CustomizedButton
             type="button"
             variant="primary"
-            className="w-full sm:w-54"
+            className="w-full"
             onClick={() => {
               onApply(draftToFilters(draft, filters.name));
-              onOpenChange(false);
+              if (!isDesktop) onOpenChange(false);
             }}
           >
             Zastosuj filtry
           </CustomizedButton>
+          <CustomizedButton
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() => setDraft(emptyFilterDraft())}
+          >
+            Wyczyść
+          </CustomizedButton>
         </div>
       </div>
-    </CustomizedDialog>
+    </CustomizedSheet>
   );
 }

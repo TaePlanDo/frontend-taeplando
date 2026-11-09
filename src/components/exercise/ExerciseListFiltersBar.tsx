@@ -7,14 +7,13 @@ import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useExerciseCatalogs } from "@/hooks/exercises/useExerciseCatalogs";
+import { SEARCH_DEBOUNCE_MS } from "@/lib/constants/search";
 import { buildActiveFilterChips } from "@/lib/exercises/exercise-list-filter-chips";
 import { formatExerciseCount } from "@/lib/format/plural";
 import type {
   ActiveFilterDimension,
   ExerciseListFilters,
 } from "@/types/exercise-list-filters";
-
-const SEARCH_DEBOUNCE_MS = 300;
 
 type ExerciseListFiltersBarProps = {
   filters: ExerciseListFilters;

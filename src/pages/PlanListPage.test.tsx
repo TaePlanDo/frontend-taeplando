@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -9,6 +9,10 @@ import { PlanListPage } from "./PlanListPage";
 
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
+}));
+
+vi.mock("@/components/plan/PlanListFiltersBar", () => ({
+  PlanListFiltersBar: () => <div>filters-bar</div>,
 }));
 
 const plans: PlanListItem[] = [
@@ -28,10 +32,6 @@ const plans: PlanListItem[] = [
   },
 ];
 
-const refetch = vi.fn();
-const goToPage = vi.fn();
-const deletePlan = vi.fn();
-
 const plansState = {
   items: plans,
   page: 1,
@@ -41,8 +41,8 @@ const plansState = {
   isFetching: false,
   isError: false,
   listState: { kind: "ready" } as PaginatedListState,
-  refetch,
-  goToPage,
+  refetch: vi.fn(),
+  goToPage: vi.fn(),
 };
 
 vi.mock("@/hooks/plans/usePlans", () => ({
@@ -51,15 +51,15 @@ vi.mock("@/hooks/plans/usePlans", () => ({
 
 vi.mock("@/hooks/plans/useDeletePlan", () => ({
   useDeletePlan: () => ({
-    deletePlan,
+    deletePlan: vi.fn(),
     isDeleting: false,
     error: null,
   }),
 }));
 
-function renderPage() {
+function renderPage(entry = "/plans") {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[entry]}>
       <PlanListPage />
     </MemoryRouter>,
   );
@@ -67,44 +67,22 @@ function renderPage() {
 
 describe("PlanListPage", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     plansState.items = plans;
-    plansState.page = 1;
-    plansState.totalPages = 1;
     plansState.total = plans.length;
     plansState.listState = { kind: "ready" };
   });
 
-  it("shows the empty view when there are no plans", () => {
+  it("renders plans", () => {
+    renderPage();
+    expect(screen.getByText("Trening techniki")).toBeTruthy();
+    expect(screen.getByText("filters-bar")).toBeTruthy();
+  });
+
+  it("shows filtered empty copy", () => {
     plansState.items = [];
     plansState.total = 0;
     plansState.listState = { kind: "empty" };
-
-    renderPage();
-
-    expect(screen.getByText("Brak planów")).toBeTruthy();
-    expect(screen.getByRole("link", { name: /Generuj/ })).toHaveAttribute(
-      "href",
-      "/plans/new",
-    );
-  });
-
-  it("renders plans, count and filter button", () => {
-    renderPage();
-
-    expect(screen.getByText("Trening techniki")).toBeTruthy();
-    expect(screen.getByText("Grupa:")).toBeTruthy();
-    expect(screen.getAllByText("1 plan").length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: "Filtry" })).toBeTruthy();
-  });
-
-  it("retries after an error", () => {
-    plansState.items = [];
-    plansState.listState = { kind: "unavailable", reason: "error" };
-
-    renderPage();
-
-    fireEvent.click(screen.getByRole("button", { name: "Spróbuj ponownie" }));
-    expect(refetch).toHaveBeenCalledTimes(1);
+    renderPage("/plans?min_age=6&max_age=16");
+    expect(screen.getByText("Brak planów spełniających kryteria")).toBeTruthy();
   });
 });

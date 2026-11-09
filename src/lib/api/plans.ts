@@ -1,4 +1,6 @@
 import { apiUrl } from "@/config/env";
+import { appendPlanListFilters } from "@/lib/plans/plan-list-filters";
+import type { PlanListFilters } from "@/types/plan-list-filters";
 import type { PlanDetail, PlanListItem } from "@/types/plan";
 import type { PaginatedResponse } from "@/types/pagination";
 
@@ -7,14 +9,12 @@ import { apiJson } from "./client";
 export function getPlansRequest(
   page: number,
   pageSize: number,
-  name = "",
+  filters: PlanListFilters = {},
 ): Promise<PaginatedResponse<PlanListItem>> {
-  const params = new URLSearchParams({
-    page: String(page),
-    page_size: String(pageSize),
-  });
-  const trimmed = name.trim();
-  if (trimmed) params.set("name", trimmed);
+  const params = new URLSearchParams();
+  appendPlanListFilters(params, filters);
+  params.set("page", String(page));
+  params.set("page_size", String(pageSize));
 
   return apiJson<PaginatedResponse<PlanListItem>>(
     apiUrl(`/training-plans?${params.toString()}`),

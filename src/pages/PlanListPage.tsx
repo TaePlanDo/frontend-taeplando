@@ -1,16 +1,16 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ListFilter, PlusIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { PlanCardItem } from "@/components/plan/PlanCardItem";
+import { PlanListFiltersBar } from "@/components/plan/PlanListFiltersBar";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
 import { ListStateView } from "@/components/shared/ListStateView";
 import { ManagementPageLayout } from "@/components/shared/ManagementPageLayout";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { useDeletePlan } from "@/hooks/plans/useDeletePlan";
+import { usePlanListSearchParams } from "@/hooks/plans/usePlanListSearchParams";
 import { usePlans } from "@/hooks/plans/usePlans";
 import { hasDisplayableListData } from "@/hooks/pagination/listState";
 import { formatPlanCount } from "@/lib/format/plural";
@@ -18,7 +18,16 @@ import type { PlanListItem } from "@/types/plan";
 
 export function PlanListPage() {
   const navigate = useNavigate();
-  const [name, setName] = useState("");
+  const {
+    filters,
+    page: pageFromUrl,
+    dialogFilterCount,
+    hasActiveFilters,
+    setFilters,
+    setPage,
+    setName,
+    clearDimension,
+  } = usePlanListSearchParams();
   const {
     items: plans,
     page,
@@ -28,9 +37,14 @@ export function PlanListPage() {
     listState,
     refetch,
     goToPage,
-  } = usePlans(name);
+  } = usePlans({
+    filters,
+    page: pageFromUrl,
+    onPageChange: setPage,
+  });
   const { deletePlan } = useDeletePlan();
   const showListMetadata = hasDisplayableListData(listState);
+  const isListUnavailable = listState.kind === "unavailable";
 
   async function handleDelete(plan: PlanListItem) {
     try {
@@ -57,34 +71,15 @@ export function PlanListPage() {
         ) : null
       }
       toolbar={
-        listState.kind === "unavailable" ? null : (
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Wyszukaj plan po nazwie..."
-              aria-label="Wyszukaj plan po nazwie"
-              className="h-11 flex-1 rounded-xl"
-            />
-            <div className="flex shrink-0 items-center gap-2">
-              <CustomizedButton
-                type="button"
-                variant="outline"
-                className="w-full gap-2 sm:w-auto"
-              >
-                <ListFilter className="size-4" />
-                Filtry
-              </CustomizedButton>
-              {showListMetadata ? (
-                <Badge
-                  variant="ghost"
-                  className="hidden h-10 rounded-full border border-border bg-transparent px-6 text-sm font-medium text-foreground lg:flex"
-                >
-                  {formatPlanCount(total)}
-                </Badge>
-              ) : null}
-            </div>
-          </div>
+        isListUnavailable ? null : (
+          <PlanListFiltersBar
+            filters={filters}
+            dialogFilterCount={dialogFilterCount}
+            total={total}
+            onNameChange={setName}
+            onFiltersApply={setFilters}
+            onClearDimension={clearDimension}
+          />
         )
       }
       action={
@@ -115,8 +110,16 @@ export function PlanListPage() {
         errorMessage="Sprawdź połączenie i spróbuj ponownie"
         onRetry={() => void refetch()}
         isRetrying={isFetching}
-        emptyTitle="Brak planów"
-        emptyMessage="Kliknij generuj nowy plan, aby utworzyć swój pierwszy plan treningowy"
+        emptyTitle={
+          hasActiveFilters
+            ? "Brak planów spełniających kryteria"
+            : "Brak planów"
+        }
+        emptyMessage={
+          hasActiveFilters
+            ? "Zmień filtry parametrów lub wybierz inne grupy"
+            : "Kliknij generuj nowy plan, aby utworzyć swój pierwszy plan treningowy"
+        }
       >
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {plans.map((plan) => (

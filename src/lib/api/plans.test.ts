@@ -9,16 +9,21 @@ function response(status: number, body: unknown) {
 describe("plans API", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("lists plans with pagination and optional name", async () => {
+  it("lists plans with pagination and filters", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValue(response(200, { items: [], total: 0, page: 1 }));
     vi.stubGlobal("fetch", fetchMock);
 
-    await getPlansRequest(2, 6, "kata");
+    await getPlansRequest(2, 6, {
+      name: "kata",
+      min_age: 6,
+      max_age: 16,
+      training_group_ids: ["8f20d653-dc8b-4b76-bdb4-b225c7d420a6"],
+    });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/training-plans?page=2&page_size=6&name=kata",
+      "/api/training-plans?name=kata&min_age=6&max_age=16&training_group_ids=8f20d653-dc8b-4b76-bdb4-b225c7d420a6&page=2&page_size=6",
       expect.objectContaining({ method: "GET" }),
     );
   });
