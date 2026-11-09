@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 
+import { SHEET_WIDTH, useSheetOffset } from "@/components/shared/SheetOffset";
 import {
   Sheet,
   SheetContent,
@@ -28,20 +29,12 @@ export function CustomizedSheet({
   children,
 }: CustomizedSheetProps) {
   const isDesktop = useIsDesktop();
+  const { setOffset } = useSheetOffset();
 
   useEffect(() => {
-    if (!open || !isDesktop) {
-      document.documentElement.style.removeProperty("--filter-sheet-offset");
-      return;
-    }
-    document.documentElement.style.setProperty(
-      "--filter-sheet-offset",
-      "420px",
-    );
-    return () => {
-      document.documentElement.style.removeProperty("--filter-sheet-offset");
-    };
-  }, [open, isDesktop]);
+    setOffset(open && isDesktop ? SHEET_WIDTH : 0);
+    return () => setOffset(0);
+  }, [open, isDesktop, setOffset]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange} modal={!isDesktop}>
@@ -51,10 +44,8 @@ export function CustomizedSheet({
         overlayClassName="lg:hidden"
         onPointerDownOutside={(event) => event.preventDefault()}
         onInteractOutside={(event) => event.preventDefault()}
-        className={cn(
-          "w-[min(100%,420px)] gap-0 overflow-hidden p-0 sm:max-w-[420px]",
-          className,
-        )}
+        style={{ width: `min(100%, ${SHEET_WIDTH}px)` }}
+        className={cn("gap-0 overflow-hidden p-0", className)}
       >
         <SheetHeader className="shrink-0 border-b border-border px-6 py-4 text-left">
           <SheetTitle>{title}</SheetTitle>

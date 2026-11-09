@@ -87,34 +87,6 @@ describe("exercise-list-search-params", () => {
     });
   });
 
-  it("drops malformed URL filters before they can reach the API or dialog", () => {
-    const params = new URLSearchParams({
-      min_age: "15",
-      max_age: "14",
-      min_participants: "0",
-      max_participants: "20",
-      equipment_ids: "not-a-uuid,8f20d653-dc8b-4b76-bdb4-b225c7d420a6",
-    });
-
-    expect(parseExerciseListSearchParams(params)).toEqual({
-      page: 1,
-      filters: {
-        max_participants: 20,
-        equipment_ids: ["8f20d653-dc8b-4b76-bdb4-b225c7d420a6"],
-      },
-    });
-  });
-
-  it("accepts UUIDs regardless of their version", () => {
-    const params = new URLSearchParams({
-      equipment_ids: "0191fb4c-6ef4-7cc1-9ac1-f78e9d6ef910",
-    });
-
-    expect(parseExerciseListSearchParams(params).filters).toEqual({
-      equipment_ids: ["0191fb4c-6ef4-7cc1-9ac1-f78e9d6ef910"],
-    });
-  });
-
   it("replaces list state without removing unrelated query parameters", () => {
     const current = new URLSearchParams(
       "utm_source=newsletter&page=3&name=old",

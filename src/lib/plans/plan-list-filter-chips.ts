@@ -1,111 +1,62 @@
-import { normalizeFilters } from "./plan-list-filters";
+import {
+  buildActiveFilterChips as buildChips,
+  countActiveFilters as countChips,
+  namesFor,
+  withoutFilterDimension as withoutChips,
+  type DimensionSpec,
+  type FilterCatalogs,
+} from "@/lib/filters/chips";
 import type {
   PlanActiveFilterDimension,
   PlanListFilters,
 } from "@/types/plan-list-filters";
 
-type FilterCatalogItem = { id: string | number; name: string };
-
-export type PlanFilterCatalogLookup = {
-  equipment: FilterCatalogItem[];
-  trainingTypes: FilterCatalogItem[];
-  groups: FilterCatalogItem[];
-};
+import { normalizeFilters } from "./plan-list-filters";
 
 export type PlanActiveFilterChip = {
   key: PlanActiveFilterDimension;
   label: string;
 };
 
-type FilterDimension = {
-  key: PlanActiveFilterDimension;
-  isActive: (filters: PlanListFilters) => boolean;
-  clear: (filters: PlanListFilters) => PlanListFilters;
-  label: (
-    filters: PlanListFilters,
-    catalogs: PlanFilterCatalogLookup,
-  ) => string;
-};
-
-function namesFor(
-  ids: Array<string | number> | undefined,
-  catalog: FilterCatalogItem[],
-): string {
-  return (ids ?? [])
-    .map(
-      (id) =>
-        catalog.find((item) => String(item.id) === String(id))?.name ??
-        String(id),
-    )
-    .join(", ");
-}
-
-function hasValues(value: unknown): boolean {
-  return Array.isArray(value)
-    ? value.length > 0
-    : value != null && value !== "";
-}
-
-function clearFields(
-  filters: PlanListFilters,
-  fields: Array<keyof PlanListFilters>,
-): PlanListFilters {
-  const next = { ...filters };
-  for (const field of fields) delete next[field];
-  return next;
-}
-
-const FILTER_DIMENSIONS: FilterDimension[] = [
+const DIMENSIONS: DimensionSpec<PlanListFilters>[] = [
   {
     key: "name",
-    isActive: (filters) => hasValues(filters.name),
-    clear: (filters) => clearFields(filters, ["name"]),
+    fields: ["name"],
     label: (filters) => `Nazwa: ${filters.name}`,
   },
   {
     key: "age",
-    isActive: (filters) =>
-      hasValues(filters.min_age) || hasValues(filters.max_age),
-    clear: (filters) => clearFields(filters, ["min_age", "max_age"]),
+    fields: ["min_age", "max_age"],
     label: (filters) =>
       `Wiek ${filters.min_age ?? "…"}–${filters.max_age ?? "…"}`,
   },
   {
     key: "participants",
-    isActive: (filters) =>
-      hasValues(filters.min_participants) ||
-      hasValues(filters.max_participants),
-    clear: (filters) =>
-      clearFields(filters, ["min_participants", "max_participants"]),
+    fields: ["min_participants", "max_participants"],
     label: (filters) =>
       `Uczestnicy: ${filters.min_participants ?? "…"}–${filters.max_participants ?? "…"}`,
   },
   {
     key: "duration",
-    isActive: (filters) =>
-      hasValues(filters.min_duration) || hasValues(filters.max_duration),
-    clear: (filters) => clearFields(filters, ["min_duration", "max_duration"]),
+    fields: ["min_duration", "max_duration"],
     label: (filters) =>
       `Czas: ${filters.min_duration ?? "…"}-${filters.max_duration ?? "…"} min`,
   },
   {
     key: "equipment",
-    isActive: (filters) => hasValues(filters.equipment_ids),
-    clear: (filters) => clearFields(filters, ["equipment_ids"]),
+    fields: ["equipment_ids"],
     label: (filters, catalogs) =>
       namesFor(filters.equipment_ids, catalogs.equipment),
   },
   {
     key: "training_types",
-    isActive: (filters) => hasValues(filters.training_type_ids),
-    clear: (filters) => clearFields(filters, ["training_type_ids"]),
+    fields: ["training_type_ids"],
     label: (filters, catalogs) =>
       namesFor(filters.training_type_ids, catalogs.trainingTypes),
   },
   {
     key: "groups",
-    isActive: (filters) => hasValues(filters.training_group_ids),
-    clear: (filters) => clearFields(filters, ["training_group_ids"]),
+    fields: ["training_group_ids"],
     label: (filters, catalogs) =>
       namesFor(filters.training_group_ids, catalogs.groups),
   },
@@ -113,36 +64,25 @@ const FILTER_DIMENSIONS: FilterDimension[] = [
 
 export function withoutFilterDimension(
   filters: PlanListFilters,
-  dimension: PlanActiveFilterDimension,
+  dimension: string,
 ): PlanListFilters {
-  return (
-    FILTER_DIMENSIONS.find((entry) => entry.key === dimension)?.clear(
-      filters,
-    ) ?? filters
-  );
+  return withoutChips(normalizeFilters(filters), DIMENSIONS, dimension);
 }
 
 export function countActiveFilters(
   filters: PlanListFilters,
-  options?: { exclude?: PlanActiveFilterDimension[] },
+  options?: { exclude?: string[] },
 ): number {
-  const normalized = normalizeFilters(filters);
-  const excluded = new Set(options?.exclude ?? []);
-  return FILTER_DIMENSIONS.filter(
-    (dimension) =>
-      !excluded.has(dimension.key) && dimension.isActive(normalized),
-  ).length;
+  return countChips(normalizeFilters(filters), DIMENSIONS, options);
 }
 
 export function buildActiveFilterChips(
   filters: PlanListFilters,
-  catalogs: PlanFilterCatalogLookup,
+  catalogs: FilterCatalogs,
 ): PlanActiveFilterChip[] {
-  const normalized = normalizeFilters(filters);
-  return FILTER_DIMENSIONS.filter((dimension) =>
-    dimension.isActive(normalized),
-  ).map((dimension) => ({
-    key: dimension.key,
-    label: dimension.label(normalized, catalogs),
-  }));
+  return buildChips(
+    normalizeFilters(filters),
+    DIMENSIONS,
+    catalogs,
+  ) as PlanActiveFilterChip[];
 }

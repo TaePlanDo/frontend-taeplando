@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AuthorizedLayout } from "@/components/layout/AuthorizedLayout";
+import { SheetOffsetProvider } from "@/components/shared/SheetOffset";
 import { Toaster } from "@/components/ui/sonner";
 import { AccountPage } from "@/pages/AccountPage";
 import { EquipmentListPage } from "@/pages/EquipmentListPage";
@@ -18,7 +19,7 @@ import { RequireAuth } from "@/routes/RequireAuth";
 
 export function App() {
   return (
-    <>
+    <SheetOffsetProvider>
       <Routes>
         <Route path="/register" element={<RegisterPage />} />
         <Route
@@ -52,6 +53,6 @@ export function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster theme="dark" />
-    </>
+    </SheetOffsetProvider>
   );
 }
