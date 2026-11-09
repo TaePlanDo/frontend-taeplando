@@ -1,10 +1,17 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Exercise } from "@/types/exercise";
 import type { PaginatedListState } from "@/hooks/pagination/listState";
 import { ExerciseListPage } from "./ExerciseListPage";
+import { toast } from "sonner";
 
 function renderPage(initialEntry = "/exercises") {
   return render(
@@ -50,6 +57,12 @@ vi.mock("@/hooks/exercises/useDeleteExercise", () => ({
   }),
 }));
 
+const setExclusion = vi.fn();
+let exclusionPending = false;
+vi.mock("@/hooks/exercises/useExerciseExclusion", () => ({
+  useExerciseExclusion: () => ({ setExclusion, isPending: exclusionPending }),
+}));
+
 const exercise: Exercise = {
   id: "1",
   owner_user_id: "owner",
@@ -93,6 +106,7 @@ vi.mock("@/hooks/exercises/useExercises", () => ({
 describe("ExerciseListPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    exclusionPending = false;
     useExercisesMock.mockImplementation(() => state);
     Object.assign(state, {
       items: [exercise],
@@ -244,5 +258,51 @@ describe("ExerciseListPage", () => {
     const dialog = await screen.findByRole("dialog");
     fireEvent.click(within(dialog).getByRole("button", { name: "Zamknij" }));
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("updates the preview after excluding and restoring an exercise", async () => {
+    setExclusion.mockResolvedValue(undefined);
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    const toggle = screen.getByRole("switch", { name: "Wyklucz ćwiczenie" });
+    expect(toggle).toHaveAttribute("aria-checked", "false");
+
+    fireEvent.click(toggle);
+    await waitFor(() => expect(toggle).toHaveAttribute("aria-checked", "true"));
+    expect(setExclusion).toHaveBeenCalledWith({ id: "1", excluded: true });
+
+    fireEvent.click(toggle);
+    await waitFor(() =>
+      expect(toggle).toHaveAttribute("aria-checked", "false"),
+    );
+    expect(setExclusion).toHaveBeenCalledWith({ id: "1", excluded: false });
+  });
+
+  it("keeps the previous state and reports an exclusion error", async () => {
+    setExclusion.mockRejectedValueOnce(new Error("Ćwiczenie jest niedostępne"));
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    const toggle = screen.getByRole("switch", { name: "Wyklucz ćwiczenie" });
+
+    fireEvent.click(toggle);
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("Ćwiczenie jest niedostępne"),
+    );
+    expect(toggle).toHaveAttribute("aria-checked", "false");
+  });
+
+  it("disables the switch while the exclusion request is pending", () => {
+    exclusionPending = true;
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    expect(
+      screen.getByRole("switch", { name: "Wyklucz ćwiczenie" }),
+    ).toBeDisabled();
   });
 });

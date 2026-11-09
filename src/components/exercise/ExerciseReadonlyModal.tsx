@@ -1,4 +1,5 @@
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
+import { CustomizedSwitch } from "@/components/shared/CustomizedSwitch";
 import { ExerciseImage } from "@/components/shared/ExerciseImage";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -11,12 +12,16 @@ type ExerciseReadonlyModalProps = {
   exercise: Exercise | null;
   onEdit: () => void;
   onClose: () => void;
+  onExclusionChange: (excluded: boolean) => void;
+  exclusionDisabled?: boolean;
 };
 
 export function ExerciseReadonlyModal({
   exercise,
   onEdit,
   onClose,
+  onExclusionChange,
+  exclusionDisabled = false,
 }: ExerciseReadonlyModalProps) {
   if (!exercise) return null;
 
@@ -41,9 +46,17 @@ export function ExerciseReadonlyModal({
               className="size-28 shrink-0 self-start rounded-2xl bg-muted object-cover sm:size-32"
             />
             <div className="flex min-w-0 flex-1 flex-col">
-              <h1 className="text-2xl font-semibold text-foreground">
-                {exercise.name}
-              </h1>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <h1 className="text-2xl font-semibold text-foreground">
+                  {exercise.name}
+                </h1>
+                <CustomizedSwitch
+                  label="Wyklucz ćwiczenie"
+                  checked={exercise.status === "SUSPENDED"}
+                  onCheckedChange={onExclusionChange}
+                  disabled={exclusionDisabled}
+                />
+              </div>
               <p className="mt-2 text-sm break-words pr-4 text-muted-foreground">
                 {exercise.description}
               </p>

@@ -14,6 +14,7 @@ import { ManagementPageLayout } from "@/components/shared/ManagementPageLayout";
 import { Badge } from "@/components/ui/badge";
 import { useDeleteExercise } from "@/hooks/exercises/useDeleteExercise";
 import { useExerciseListSearchParams } from "@/hooks/exercises/useExerciseListSearchParams";
+import { useExerciseExclusion } from "@/hooks/exercises/useExerciseExclusion";
 import { useExercises } from "@/hooks/exercises/useExercises";
 import { hasDisplayableListData } from "@/hooks/pagination/listState";
 import { formatExerciseCount } from "@/lib/format/plural";
@@ -49,6 +50,8 @@ export function ExerciseListPage() {
     onPageChange: setPage,
   });
   const { deleteExercise } = useDeleteExercise();
+  const { setExclusion, isPending: isExclusionPending } =
+    useExerciseExclusion();
   const showListMetadata = hasDisplayableListData(listState);
   const isListUnavailable = listState.kind === "unavailable";
 
@@ -56,6 +59,21 @@ export function ExerciseListPage() {
     try {
       await deleteExercise(id);
       toast.success("Ćwiczenie zostało usunięte");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  async function handleExclusionChange(excluded: boolean) {
+    if (!editingExercise || isExclusionPending || isOffline) return;
+    const id = editingExercise.id;
+    try {
+      await setExclusion({ id, excluded });
+      setEditingExercise((current) =>
+        current?.id === id
+          ? { ...current, status: excluded ? "SUSPENDED" : "ACTIVE" }
+          : current,
+      );
     } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error));
     }
@@ -120,6 +138,10 @@ export function ExerciseListPage() {
           >
             <ExerciseReadonlyModal
               exercise={editingExercise}
+              onExclusionChange={(excluded) =>
+                void handleExclusionChange(excluded)
+              }
+              exclusionDisabled={isExclusionPending || isOffline}
               onClose={() => setDialogReadonlyOpen(false)}
               onEdit={() => {
                 setDialogReadonlyOpen(false);
