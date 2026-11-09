@@ -166,8 +166,25 @@ describe("ExerciseListPage", () => {
     renderPage();
     expect(screen.getAllByText("1 ćwiczenie")).toHaveLength(2);
     expect(screen.getByText("Ap chagi")).toBeTruthy();
+    expect(screen.getByText("Ap chagi")).not.toHaveClass("line-through");
+    expect(screen.queryByText("Wykluczone ćwiczenie:")).toBeNull();
     expect(screen.getByText("Technika")).toBeTruthy();
     expect(screen.getByText("Rozgrzewka")).toBeTruthy();
+  });
+
+  it("marks an excluded exercise while keeping its actions available", () => {
+    state.items = [{ ...exercise, status: "SUSPENDED" }];
+    renderPage();
+
+    const heading = screen.getByRole("heading", {
+      name: "Wykluczone ćwiczenie: Ap chagi",
+    });
+    expect(within(heading).getByText("Ap chagi")).toHaveClass("line-through");
+    expect(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Edytuj" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Usuń" })).toBeEnabled();
   });
   it("passes URL filters and page into useExercises", () => {
     renderPage(

@@ -1,4 +1,5 @@
-import { Dumbbell, Eye, Layers3, Pencil, Tag, Trash2 } from "lucide-react";
+import { Ban, Dumbbell, Eye, Layers3, Pencil, Tag, Trash2 } from "lucide-react";
+import { cn } from "cn";
 
 import { Card } from "@/components/ui/card";
 import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
@@ -26,6 +27,7 @@ export function ExerciseCardItem({
   const types = exercise.training_types.map(({ name }) => name);
   const segments = exercise.segments.map(({ name }) => name);
   const equipment = exercise.equipment.map(({ name }) => name);
+  const isExcluded = exercise.status === "SUSPENDED";
 
   return (
     <Card className="flex-row gap-4 rounded-2xl bg-transparent p-4 shadow-none">
@@ -36,7 +38,25 @@ export function ExerciseCardItem({
       />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="truncate text-lg font-semibold">{exercise.name}</h3>
+          <h3 className="flex min-w-0 items-center gap-2 text-lg font-semibold">
+            {isExcluded ? (
+              <>
+                <Ban
+                  className="size-5 shrink-0 text-muted-foreground"
+                  aria-hidden
+                />
+                <span className="sr-only">Wykluczone ćwiczenie: </span>
+              </>
+            ) : null}
+            <span
+              className={cn(
+                "truncate",
+                isExcluded && "text-muted-foreground line-through",
+              )}
+            >
+              {exercise.name}
+            </span>
+          </h3>
           <button
             type="button"
             className="flex shrink-0 items-center gap-1 text-xs text-secondary"
