@@ -3,7 +3,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createExerciseRequest,
   deleteExerciseRequest,
+  excludeExerciseRequest,
   getExercisesRequest,
+  reactivateExerciseRequest,
   updateExerciseRequest,
 } from "./exercise";
 import { ApiError } from "./errors";
@@ -33,6 +35,20 @@ function response(status: number, body: unknown) {
 
 describe("exercise API", () => {
   afterEach(() => vi.unstubAllGlobals());
+
+  it.each([
+    ["excludes", excludeExerciseRequest, "PUT"],
+    ["reactivates", reactivateExerciseRequest, "DELETE"],
+  ])("%s an exercise", async (_name, request, method) => {
+    const fetchMock = vi.fn().mockResolvedValue(response(204, undefined));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(request("id")).resolves.toBeUndefined();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/exercises/id/exclusion",
+      expect.objectContaining({ method }),
+    );
+  });
 
   it("gets a requested page", async () => {
     const fetchMock = vi.fn().mockResolvedValue(response(200, { items: [] }));

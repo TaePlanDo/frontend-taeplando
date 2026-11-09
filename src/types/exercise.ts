@@ -45,4 +45,4 @@ export type ExerciseWrite = {
 
 export type ExerciseScope = "PRIVATE" | "GLOBAL";
 
-export type TrainerExerciseStatus = "ACTIVE" | "INACTIVE" | "HIDDEN";
+export type TrainerExerciseStatus = "ACTIVE" | "SUSPENDED" | "INACTIVE";

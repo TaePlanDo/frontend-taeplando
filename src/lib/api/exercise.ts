@@ -31,6 +31,16 @@ export async function deleteExerciseRequest(id: string): Promise<void> {
   });
 }
 
+export async function excludeExerciseRequest(id: string): Promise<void> {
+  return apiJson<void>(apiUrl(`/exercises/${id}/exclusion`), { method: "PUT" });
+}
+
+export async function reactivateExerciseRequest(id: string): Promise<void> {
+  return apiJson<void>(apiUrl(`/exercises/${id}/exclusion`), {
+    method: "DELETE",
+  });
+}
+
 export async function createExerciseRequest(
   payload: ExerciseWrite,
 ): Promise<Exercise> {
