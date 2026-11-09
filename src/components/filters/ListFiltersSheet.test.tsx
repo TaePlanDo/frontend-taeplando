@@ -14,7 +14,11 @@ const catalogs = {
 
 function renderSheet(
   filters: ExerciseListFilters,
-  props: { onApply?: () => void; isError?: boolean; onRetry?: () => void } = {},
+  props: {
+    onChange?: () => void;
+    isError?: boolean;
+    onRetry?: () => void;
+  } = {},
 ) {
   render(
     <ListFiltersSheet
@@ -22,7 +26,7 @@ function renderSheet(
       buttonLabel="Filtruj"
       filterCount={0}
       filters={filters}
-      onApply={props.onApply ?? vi.fn()}
+      onChange={props.onChange ?? vi.fn()}
       dimensions={exerciseFilters}
       catalogs={catalogs}
       isError={props.isError}
@@ -33,42 +37,34 @@ function renderSheet(
 }
 
 describe("ListFiltersSheet", () => {
-  it("applies changed range and catalog filters", async () => {
-    const onApply = vi.fn();
-    renderSheet({ name: "chagi" }, { onApply });
+  it("reports range and catalog changes immediately", async () => {
+    const onChange = vi.fn();
+    renderSheet({ name: "chagi" }, { onChange });
 
-    const sliders = screen.getAllByRole("slider");
-    fireEvent.keyDown(sliders[0], { key: "ArrowRight" });
-    fireEvent.keyDown(sliders[2], { key: "ArrowRight" });
-    fireEvent.click(screen.getByRole("combobox", { name: "Sprzęt" }));
-    fireEvent.click(await screen.findByRole("option", { name: "Mata" }));
-    fireEvent.click(screen.getByRole("combobox", { name: "Schematy" }));
-    fireEvent.click(
-      await screen.findByRole("option", { name: "Część główna" }),
-    );
-    fireEvent.click(screen.getByRole("button", { name: "Zastosuj filtry" }));
-
-    expect(onApply).toHaveBeenCalledWith({
+    fireEvent.keyDown(screen.getAllByRole("slider")[0], { key: "ArrowRight" });
+    expect(onChange).toHaveBeenLastCalledWith({
       name: "chagi",
       min_age: 1,
       max_age: 99,
-      min_participants: 2,
-      max_participants: 99,
+    });
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Sprzęt" }));
+    fireEvent.click(await screen.findByRole("option", { name: "Mata" }));
+    expect(onChange).toHaveBeenLastCalledWith({
+      name: "chagi",
       equipment_ids: ["eq-1"],
-      segment_ids: [3],
     });
   });
 
-  it("clears the draft but keeps the name", () => {
-    const onApply = vi.fn();
+  it("clears the filters but keeps the name", () => {
+    const onChange = vi.fn();
     renderSheet(
       { name: "chagi", min_age: 7, max_age: 14, equipment_ids: ["eq-1"] },
-      { onApply },
+      { onChange },
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Wyczyść" }));
-    fireEvent.click(screen.getByRole("button", { name: "Zastosuj filtry" }));
-    expect(onApply).toHaveBeenCalledWith({ name: "chagi" });
+    expect(onChange).toHaveBeenCalledWith({ name: "chagi" });
   });
 
   it("offers a retry when catalogs fail to load", () => {

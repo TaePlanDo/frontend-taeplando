@@ -1,4 +1,4 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState } from "react";
 import { Check } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -7,25 +7,25 @@ import type { PlanListFilters } from "@/types/plan-list-filters";
 import { cn } from "cn";
 
 type PlanGroupsFilterProps = {
-  draft: PlanListFilters;
-  setDraft: Dispatch<SetStateAction<PlanListFilters>>;
+  filters: PlanListFilters;
+  onChange: (filters: PlanListFilters) => void;
 };
 
-export function PlanGroupsFilter({ draft, setDraft }: PlanGroupsFilterProps) {
+export function PlanGroupsFilter({ filters, onChange }: PlanGroupsFilterProps) {
   const [query, setQuery] = useState("");
   const { data = [], isLoading } = useGroupOptions();
-  const selected = draft.training_group_ids ?? [];
+  const selected = filters.training_group_ids ?? [];
   const groups = data.filter((group) =>
     group.name.toLowerCase().includes(query.trim().toLowerCase()),
   );
 
   function toggleGroup(id: string) {
-    setDraft((current) => ({
-      ...current,
+    onChange({
+      ...filters,
       training_group_ids: selected.includes(id)
         ? selected.filter((groupId) => groupId !== id)
         : [...selected, id],
-    }));
+    });
   }
 
   return (

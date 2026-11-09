@@ -97,7 +97,7 @@ export function PlanListPage() {
               buttonLabel="Filtry"
               filterCount={dialogFilterCount}
               filters={filters}
-              onApply={setFilters}
+              onChange={setFilters}
               dimensions={planFilters}
               catalogs={catalogs}
               isLoading={options.state.kind === "loading"}
@@ -114,9 +114,7 @@ export function PlanListPage() {
                 </div>
               }
             >
-              {(draft, setDraft) => (
-                <PlanGroupsFilter draft={draft} setDraft={setDraft} />
-              )}
+              <PlanGroupsFilter filters={filters} onChange={setFilters} />
             </ListFiltersSheet>
           </ListFiltersBar>
         )

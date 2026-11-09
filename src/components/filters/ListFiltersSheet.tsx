@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useState,
-  type Dispatch,
-  type ReactNode,
-  type SetStateAction,
-} from "react";
+import { useState, type ReactNode } from "react";
 import { ListFilter } from "lucide-react";
 
 import { CatalogMultiSelect } from "@/components/shared/CatalogMultiSelect";
@@ -13,7 +7,6 @@ import { CustomizedSheet } from "@/components/shared/CustomizedSheet";
 import { DualRangeField } from "@/components/shared/DualRangeField";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useIsDesktop } from "@/hooks/useIsDesktop";
 import type { FilterCatalogs, FilterDimension } from "@/lib/filters/definition";
 
 type ListFiltersSheetProps<F extends Record<string, unknown>> = {
@@ -21,14 +14,14 @@ type ListFiltersSheetProps<F extends Record<string, unknown>> = {
   buttonLabel: string;
   filterCount: number;
   filters: F;
-  onApply: (filters: F) => void;
+  onChange: (filters: F) => void;
   dimensions: FilterDimension<F>[];
   catalogs: FilterCatalogs;
   isLoading?: boolean;
   isError?: boolean;
   onRetry: () => void;
   header?: ReactNode;
-  children?: (draft: F, setDraft: Dispatch<SetStateAction<F>>) => ReactNode;
+  children?: ReactNode;
 };
 
 export function ListFiltersSheet<F extends Record<string, unknown>>({
@@ -36,7 +29,7 @@ export function ListFiltersSheet<F extends Record<string, unknown>>({
   buttonLabel,
   filterCount,
   filters,
-  onApply,
+  onChange,
   dimensions,
   catalogs,
   isLoading,
@@ -46,12 +39,6 @@ export function ListFiltersSheet<F extends Record<string, unknown>>({
   children,
 }: ListFiltersSheetProps<F>) {
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState(filters);
-  const isDesktop = useIsDesktop();
-
-  useEffect(() => {
-    if (open) setDraft(filters);
-  }, [open, filters]);
 
   return (
     <CustomizedSheet
@@ -92,15 +79,15 @@ export function ListFiltersSheet<F extends Record<string, unknown>>({
                     min={range.min}
                     max={range.max}
                     value={[
-                      (draft[first.key] as number) ?? range.min,
-                      (draft[last.key] as number) ?? range.max,
+                      (filters[first.key] as number) ?? range.min,
+                      (filters[last.key] as number) ?? range.max,
                     ]}
-                    onValueChange={([min, max]) =>
-                      setDraft((current) => ({
-                        ...current,
+                    onValueCommit={([min, max]) =>
+                      onChange({
+                        ...filters,
                         [first.key]: min,
                         [last.key]: max,
-                      }))
+                      })
                     }
                   />
                 );
@@ -110,15 +97,15 @@ export function ListFiltersSheet<F extends Record<string, unknown>>({
                   key={key}
                   label={label}
                   items={catalogs[key] ?? []}
-                  selectedIds={((draft[first.key] as unknown[]) ?? []).map(
+                  selectedIds={((filters[first.key] as unknown[]) ?? []).map(
                     String,
                   )}
                   onSelectedIdsChange={(ids) =>
-                    setDraft((current) => ({
-                      ...current,
+                    onChange({
+                      ...filters,
                       [first.key]:
                         first.kind === "intCsv" ? ids.map(Number) : ids,
-                    }))
+                    })
                   }
                   isLoading={isLoading}
                   unavailableMessage={
@@ -139,27 +126,24 @@ export function ListFiltersSheet<F extends Record<string, unknown>>({
                 </button>
               </div>
             ) : null}
-            {children?.(draft, setDraft)}
+            {children}
           </div>
         </ScrollArea>
         <div className="-mx-6 mt-auto flex shrink-0 flex-col gap-3 border-t bg-background px-6 pt-4">
           <CustomizedButton
             type="button"
             variant="primary"
-            className="w-full"
-            onClick={() => {
-              onApply(draft);
-              if (!isDesktop) setOpen(false);
-            }}
+            className="w-full lg:hidden"
+            onClick={() => setOpen(false)}
           >
-            Zastosuj filtry
+            Pokaż wyniki
           </CustomizedButton>
           <CustomizedButton
             type="button"
             variant="outline"
             className="w-full"
             onClick={() =>
-              setDraft(
+              onChange(
                 Object.fromEntries(
                   Object.entries(filters).filter(([key]) => key === "name"),
                 ) as F,

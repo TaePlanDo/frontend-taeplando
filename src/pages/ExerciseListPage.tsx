@@ -107,7 +107,7 @@ export function ExerciseListPage() {
               buttonLabel="Filtruj"
               filterCount={dialogFilterCount}
               filters={filters}
-              onApply={setFilters}
+              onChange={setFilters}
               dimensions={exerciseFilters}
               catalogs={catalogs}
               isLoading={isLoading}
