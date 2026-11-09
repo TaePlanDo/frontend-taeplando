@@ -4,8 +4,9 @@ import { toast } from "sonner";
 
 import { ExerciseCardItem } from "@/components/exercise/ExerciseCardItem";
 import { ExerciseForm } from "@/components/exercise/ExerciseForm";
-import { ExerciseListFiltersBar } from "@/components/exercise/ExerciseListFiltersBar";
 import { ExerciseReadonlyModal } from "@/components/exercise/ExerciseReadonlyModal";
+import { ListFiltersBar } from "@/components/filters/ListFiltersBar";
+import { ListFiltersSheet } from "@/components/filters/ListFiltersSheet";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
 import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
@@ -13,9 +14,12 @@ import { ListStateView } from "@/components/shared/ListStateView";
 import { ManagementPageLayout } from "@/components/shared/ManagementPageLayout";
 import { Badge } from "@/components/ui/badge";
 import { useDeleteExercise } from "@/hooks/exercises/useDeleteExercise";
-import { useExerciseListSearchParams } from "@/hooks/exercises/useExerciseListSearchParams";
+import { useExerciseCatalogs } from "@/hooks/exercises/useExerciseCatalogs";
 import { useExercises } from "@/hooks/exercises/useExercises";
+import { useListSearchParams } from "@/hooks/filters/useListSearchParams";
 import { hasDisplayableListData } from "@/hooks/pagination/listState";
+import { exerciseFilters } from "@/lib/exercises/exercise-filter-list";
+import { activeChips } from "@/lib/filters/definition";
 import { formatExerciseCount } from "@/lib/format/plural";
 import type { Exercise } from "@/types/exercise";
 
@@ -30,9 +34,8 @@ export function ExerciseListPage() {
     hasActiveFilters,
     setFilters,
     setPage,
-    setName,
     clearDimension,
-  } = useExerciseListSearchParams();
+  } = useListSearchParams(exerciseFilters);
   const {
     items: exercises,
     page,
@@ -49,6 +52,17 @@ export function ExerciseListPage() {
     onPageChange: setPage,
   });
   const { deleteExercise } = useDeleteExercise();
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch: refetchCatalogs,
+  } = useExerciseCatalogs();
+  const catalogs = {
+    equipment: data?.equipment ?? [],
+    trainingTypes: data?.trainingTypes ?? [],
+    segments: data?.segments ?? [],
+  };
   const showListMetadata = hasDisplayableListData(listState);
   const isListUnavailable = listState.kind === "unavailable";
 
@@ -78,14 +92,29 @@ export function ExerciseListPage() {
       }
       toolbar={
         isListUnavailable ? null : (
-          <ExerciseListFiltersBar
-            filters={filters}
-            dialogFilterCount={dialogFilterCount}
-            total={total}
-            onNameChange={setName}
-            onFiltersApply={setFilters}
+          <ListFiltersBar
+            name={filters.name}
+            onNameChange={(name) =>
+              setFilters({ ...filters, name: name || undefined })
+            }
+            placeholder="Wyszukaj ćwiczenie"
+            totalLabel={formatExerciseCount(total)}
+            chips={activeChips(filters, exerciseFilters, catalogs)}
             onClearDimension={clearDimension}
-          />
+          >
+            <ListFiltersSheet
+              title="Filtry ćwiczeń"
+              buttonLabel="Filtruj"
+              filterCount={dialogFilterCount}
+              filters={filters}
+              onApply={setFilters}
+              dimensions={exerciseFilters}
+              catalogs={catalogs}
+              isLoading={isLoading}
+              isError={isError}
+              onRetry={() => void refetchCatalogs()}
+            />
+          </ListFiltersBar>
         )
       }
       action={

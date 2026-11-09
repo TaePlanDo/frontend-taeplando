@@ -214,6 +214,7 @@ export class ExercisesPage {
     await this.filtersDialog
       .getByRole("button", { name: "Zastosuj filtry" })
       .click();
+    await this.filtersDialog.getByRole("button", { name: "Close" }).click();
     await expect(this.filtersDialog).toHaveCount(0);
   }
 

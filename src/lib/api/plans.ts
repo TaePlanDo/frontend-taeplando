@@ -1,5 +1,6 @@
 import { apiUrl } from "@/config/env";
-import { appendPlanListFilters } from "@/lib/plans/plan-list-filters";
+import { appendFilters } from "@/lib/filters/definition";
+import { planFilters } from "@/lib/plans/plan-filter-list";
 import type { PlanListFilters } from "@/types/plan-list-filters";
 import type { PlanDetail, PlanListItem } from "@/types/plan";
 import type { PaginatedResponse } from "@/types/pagination";
@@ -12,7 +13,7 @@ export function getPlansRequest(
   filters: PlanListFilters = {},
 ): Promise<PaginatedResponse<PlanListItem>> {
   const params = new URLSearchParams();
-  appendPlanListFilters(params, filters);
+  appendFilters(params, filters, planFilters);
   params.set("page", String(page));
   params.set("page_size", String(pageSize));
 

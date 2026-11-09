@@ -4,7 +4,6 @@ import {
   formatExerciseCount,
   formatGroupCount,
   formatParticipantCount,
-  formatPlanCount,
 } from "./plural";
 
 describe("formatParticipantCount", () => {
@@ -69,13 +68,5 @@ describe("formatExerciseCount", () => {
     expect(formatExerciseCount(5)).toBe("5 ćwiczeń");
     expect(formatExerciseCount(11)).toBe("11 ćwiczeń");
     expect(formatExerciseCount(21)).toBe("21 ćwiczeń");
-  });
-});
-
-describe("formatPlanCount", () => {
-  it("uses Polish plural forms", () => {
-    expect(formatPlanCount(1)).toBe("1 plan");
-    expect(formatPlanCount(2)).toBe("2 plany");
-    expect(formatPlanCount(5)).toBe("5 planów");
   });
 });

@@ -2,18 +2,23 @@ import { Link, useNavigate } from "react-router-dom";
 import { PlusIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import { ListFiltersBar } from "@/components/filters/ListFiltersBar";
+import { ListFiltersSheet } from "@/components/filters/ListFiltersSheet";
 import { PlanCardItem } from "@/components/plan/PlanCardItem";
-import { PlanListFiltersBar } from "@/components/plan/PlanListFiltersBar";
+import { PlanGroupsFilter } from "@/components/plan/PlanGroupsFilter";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
 import { ListStateView } from "@/components/shared/ListStateView";
 import { ManagementPageLayout } from "@/components/shared/ManagementPageLayout";
 import { Badge } from "@/components/ui/badge";
+import { useListSearchParams } from "@/hooks/filters/useListSearchParams";
 import { useDeletePlan } from "@/hooks/plans/useDeletePlan";
-import { usePlanListSearchParams } from "@/hooks/plans/usePlanListSearchParams";
+import { usePlanGenerationOptions } from "@/hooks/plans/usePlanGenerationOptions";
 import { usePlans } from "@/hooks/plans/usePlans";
 import { hasDisplayableListData } from "@/hooks/pagination/listState";
+import { activeChips } from "@/lib/filters/definition";
 import { formatPlanCount } from "@/lib/format/plural";
+import { planFilters } from "@/lib/plans/plan-filter-list";
 import type { PlanListItem } from "@/types/plan";
 
 export function PlanListPage() {
@@ -25,9 +30,8 @@ export function PlanListPage() {
     hasActiveFilters,
     setFilters,
     setPage,
-    setName,
     clearDimension,
-  } = usePlanListSearchParams();
+  } = useListSearchParams(planFilters);
   const {
     items: plans,
     page,
@@ -43,6 +47,12 @@ export function PlanListPage() {
     onPageChange: setPage,
   });
   const { deletePlan } = useDeletePlan();
+  const options = usePlanGenerationOptions();
+  const catalogs = {
+    equipment: options.equipment.items,
+    trainingTypes: options.trainingTypes.items,
+    groups: options.groups.items,
+  };
   const showListMetadata = hasDisplayableListData(listState);
   const isListUnavailable = listState.kind === "unavailable";
 
@@ -72,14 +82,43 @@ export function PlanListPage() {
       }
       toolbar={
         isListUnavailable ? null : (
-          <PlanListFiltersBar
-            filters={filters}
-            dialogFilterCount={dialogFilterCount}
-            total={total}
-            onNameChange={setName}
-            onFiltersApply={setFilters}
+          <ListFiltersBar
+            name={filters.name}
+            onNameChange={(name) =>
+              setFilters({ ...filters, name: name || undefined })
+            }
+            placeholder="Wyszukaj plan po nazwie..."
+            totalLabel={formatPlanCount(total)}
+            chips={activeChips(filters, planFilters, catalogs)}
             onClearDimension={clearDimension}
-          />
+          >
+            <ListFiltersSheet
+              title="Filtry planów"
+              buttonLabel="Filtry"
+              filterCount={dialogFilterCount}
+              filters={filters}
+              onApply={setFilters}
+              dimensions={planFilters}
+              catalogs={catalogs}
+              isLoading={options.state.kind === "loading"}
+              isError={options.state.kind === "error"}
+              onRetry={() => void options.retry()}
+              header={
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-semibold text-primary">
+                    1. Filtry parametrów
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Szukaj po cechach planu, niezależnie od grupy
+                  </p>
+                </div>
+              }
+            >
+              {(draft, setDraft) => (
+                <PlanGroupsFilter draft={draft} setDraft={setDraft} />
+              )}
+            </ListFiltersSheet>
+          </ListFiltersBar>
         )
       }
       action={

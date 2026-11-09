@@ -1,84 +1,73 @@
 import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 
-export type ListSearchState<Filters> = { filters: Filters; page: number };
+import {
+  activeDimensions,
+  normalizeFilters,
+  parseListSearchParams,
+  replaceListSearchParams,
+  withoutDimension,
+  type FilterDimension,
+  type ListSearchState,
+} from "@/lib/filters/definition";
 
-type ListSearchParamsApi<Filters extends { name?: string }> = {
-  parse: (params: URLSearchParams) => ListSearchState<Filters>;
-  replace: (
-    current: URLSearchParams,
-    state: ListSearchState<Filters>,
-  ) => URLSearchParams;
-  normalize: (filters: Filters) => Filters;
-  without: (filters: Filters, dimension: string) => Filters;
-  count: (filters: Filters, options?: { exclude?: string[] }) => number;
-};
-
-export function useListSearchParams<Filters extends { name?: string }>({
-  parse,
-  replace,
-  normalize,
-  without,
-  count,
-}: ListSearchParamsApi<Filters>) {
+export function useListSearchParams<F extends Record<string, unknown>>(
+  dimensions: FilterDimension<F>[],
+) {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const state = useMemo(() => parse(searchParams), [parse, searchParams]);
+  const state = useMemo(
+    () => parseListSearchParams(searchParams, dimensions),
+    [searchParams, dimensions],
+  );
 
   const commit = useCallback(
-    (
-      update: (current: ListSearchState<Filters>) => ListSearchState<Filters>,
-    ) => {
-      setSearchParams((prev) => replace(prev, update(parse(prev))), {
-        replace: true,
-      });
+    (update: (current: ListSearchState<F>) => ListSearchState<F>) => {
+      setSearchParams(
+        (prev) =>
+          replaceListSearchParams(
+            prev,
+            update(parseListSearchParams(prev, dimensions)),
+            dimensions,
+          ),
+        { replace: true },
+      );
     },
-    [setSearchParams, parse, replace],
+    [setSearchParams, dimensions],
   );
 
   const setFilters = useCallback(
-    (filters: Filters) => {
-      commit(() => ({ filters: normalize(filters), page: 1 }));
-    },
-    [commit, normalize],
+    (filters: F) =>
+      commit(() => ({
+        filters: normalizeFilters(filters, dimensions),
+        page: 1,
+      })),
+    [commit, dimensions],
   );
 
   const setPage = useCallback(
-    (page: number) => {
-      commit((current) => ({ ...current, page }));
-    },
+    (page: number) => commit((current) => ({ ...current, page })),
     [commit],
   );
 
-  const setName = useCallback(
-    (name: string) => {
-      const trimmed = name.trim();
+  const clearDimension = useCallback(
+    (dimension: string) =>
       commit((current) => ({
-        filters: normalize({ ...current.filters, name: trimmed || undefined }),
+        filters: withoutDimension(current.filters, dimension, dimensions),
         page: 1,
-      }));
-    },
-    [commit, normalize],
+      })),
+    [commit, dimensions],
   );
 
-  const clearDimension = useCallback(
-    (dimension: string) => {
-      commit((current) => ({
-        filters: without(current.filters, dimension),
-        page: 1,
-      }));
-    },
-    [commit, without],
-  );
+  const active = activeDimensions(state.filters, dimensions);
 
   return {
     filters: state.filters,
     page: state.page,
-    dialogFilterCount: count(state.filters, { exclude: ["name"] }),
-    hasActiveFilters: count(state.filters) > 0,
+    dialogFilterCount: active.filter(({ key }) => key !== "name").length,
+    hasActiveFilters: active.length > 0,
     setFilters,
     setPage,
-    setName,
     clearDimension,
   };
 }
