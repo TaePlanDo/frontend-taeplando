@@ -1,13 +1,24 @@
+import { useEffect, useState } from "react";
+
 import { Slider } from "@/components/ui/slider";
+
+type RangeHandler = (value: [number, number]) => void;
 
 type DualRangeFieldProps = {
   label: string;
   min: number;
   max: number;
   value: [number, number];
-  onValueChange: (value: [number, number]) => void;
+  onValueChange?: RangeHandler;
+  onValueCommit?: RangeHandler;
   disabled?: boolean;
 };
+
+function pairHandler(handler?: RangeHandler) {
+  return ([low, high]: number[]) => {
+    if (low != null && high != null) handler?.([low, high]);
+  };
+}
 
 export function DualRangeField({
   label,
@@ -15,27 +26,35 @@ export function DualRangeField({
   max,
   value,
   onValueChange,
+  onValueCommit,
   disabled,
 }: DualRangeFieldProps) {
+  const [low, high] = value;
+  const [current, setCurrent] = useState<number[]>(value);
+
+  useEffect(() => {
+    setCurrent([low, high]);
+  }, [low, high]);
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
         <span className="text-sm font-medium text-foreground">{label}</span>
         <span className="text-sm text-muted-foreground">
-          {value[0]} – {value[1]}
+          {current[0]} – {current[1]}
         </span>
       </div>
       <Slider
         min={min}
         max={max}
         step={1}
-        value={value}
+        value={current}
         disabled={disabled}
         onValueChange={(next) => {
-          const [low, high] = next;
-          if (low == null || high == null) return;
-          onValueChange([low, high]);
+          setCurrent(next);
+          pairHandler(onValueChange)(next);
         }}
+        onValueCommit={pairHandler(onValueCommit)}
         aria-label={label}
       />
     </div>

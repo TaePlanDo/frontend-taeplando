@@ -9,17 +9,8 @@ export type ExerciseListFilters = {
   segment_ids?: number[];
 } & Partial<Record<PlanningFilterBound, number>>;
 
-export type PlanningFilterDimension = (typeof PLANNING_FILTERS)[number]["key"];
 export type PlanningFilterBound = (typeof PLANNING_FILTERS)[number][
   "min" | "max"];
-export type ActiveFilterDimension =
-  | "name"
-  | "age"
-  | "participants"
-  | "equipment"
-  | "training_types"
-  | "segments"
-  | PlanningFilterDimension;
 
 export const PLANNING_FILTERS = [
   {
