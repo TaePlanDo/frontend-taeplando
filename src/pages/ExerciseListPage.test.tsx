@@ -239,8 +239,20 @@ describe("ExerciseListPage", () => {
       await screen.findByRole("heading", { name: "Edytuj ćwiczenie" }),
     ).toBeTruthy();
     expect(
+      screen.queryByRole("heading", { name: "Podgląd ćwiczenia" }),
+    ).toBeNull();
+    expect(
       (screen.getByLabelText("Nazwa ćwiczenia") as HTMLInputElement).value,
     ).toBe("Ap chagi");
+  });
+
+  it("opens the delete confirmation without opening the preview", () => {
+    renderPage();
+    fireEvent.click(screen.getByRole("button", { name: "Usuń" }));
+    expect(screen.getByRole("alertdialog")).toBeTruthy();
+    expect(
+      screen.queryByRole("heading", { name: "Podgląd ćwiczenia" }),
+    ).toBeNull();
   });
 
   it("does not offer editing from a global exercise preview", async () => {
