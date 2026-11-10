@@ -13,6 +13,7 @@ describe("exercise-list-search-params", () => {
       page: 3,
       filters: {
         name: "chagi",
+        status: "SUSPENDED" as const,
         min_age: 7,
         max_age: 14,
         min_participants: 2,
@@ -35,6 +36,7 @@ describe("exercise-list-search-params", () => {
     const params = toExerciseListSearchParams(state);
     expect(Object.fromEntries(params.entries())).toEqual({
       name: "chagi",
+      status: "SUSPENDED",
       min_age: "7",
       max_age: "14",
       min_participants: "2",
@@ -57,6 +59,18 @@ describe("exercise-list-search-params", () => {
   it("omits empty filters and page 1", () => {
     const params = toExerciseListSearchParams({ filters: {}, page: 1 });
     expect([...params.keys()]).toEqual([]);
+  });
+
+  it("drops unsupported status values and removes the status when cleared", () => {
+    expect(
+      parseExerciseListSearchParams(new URLSearchParams("status=ACTIVE"))
+        .filters,
+    ).toEqual({});
+    const params = replaceExerciseListSearchParams(
+      new URLSearchParams("status=SUSPENDED&page=2"),
+      { filters: {}, page: 1 },
+    );
+    expect(params.toString()).toBe("");
   });
 
   it("omits full default age and participants ranges", () => {

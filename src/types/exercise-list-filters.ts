@@ -4,6 +4,7 @@ export type ExerciseListFilters = {
   max_age?: number;
   min_participants?: number;
   max_participants?: number;
+  status?: "SUSPENDED";
   equipment_ids?: string[];
   training_type_ids?: string[];
   segment_ids?: number[];
@@ -16,6 +17,7 @@ export type ActiveFilterDimension =
   | "name"
   | "age"
   | "participants"
+  | "status"
   | "equipment"
   | "training_types"
   | "segments"

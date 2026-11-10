@@ -7,6 +7,18 @@ import {
 } from "./exercise-list-filter-chips";
 
 describe("filter-dimensions", () => {
+  it("counts and clears the excluded exercise filter independently", () => {
+    const filters = { status: "SUSPENDED" as const, name: "a" };
+    expect(countActiveFilters(filters, { exclude: ["name"] })).toBe(1);
+    expect(
+      buildActiveFilterChips(filters, {
+        equipment: [],
+        trainingTypes: [],
+        segments: [],
+      })[0],
+    ).toEqual({ key: "status", label: "Wykluczone ćwiczenia" });
+    expect(withoutFilterDimension(filters, "status")).toEqual({ name: "a" });
+  });
   it("builds one chip per active dimension with catalog labels", () => {
     const chips = buildActiveFilterChips(
       {

@@ -4,6 +4,7 @@ import { CatalogMultiSelect } from "@/components/shared/CatalogMultiSelect";
 import { DualRangeField } from "@/components/shared/DualRangeField";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
+import { CustomizedSwitch } from "@/components/shared/CustomizedSwitch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useExerciseCatalogs } from "@/hooks/exercises/useExerciseCatalogs";
 import {
@@ -141,6 +142,13 @@ export function ExerciseFiltersDialog({
               }
               isLoading={isLoading}
               unavailableMessage={isError ? "Katalog niedostępny" : undefined}
+            />
+            <CustomizedSwitch
+              label="Wykluczone ćwiczenia"
+              checked={draft.excludedOnly}
+              onCheckedChange={(excludedOnly) =>
+                setDraft((current) => ({ ...current, excludedOnly }))
+              }
             />
           </div>
         </ScrollArea>

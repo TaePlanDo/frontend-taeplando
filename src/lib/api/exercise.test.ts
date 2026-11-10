@@ -65,6 +65,7 @@ describe("exercise API", () => {
     vi.stubGlobal("fetch", fetchMock);
     await getExercisesRequest(1, 6, {
       name: "chagi",
+      status: "SUSPENDED",
       min_age: 7,
       max_age: 14,
       min_core_load: 2,
@@ -74,7 +75,7 @@ describe("exercise API", () => {
       segment_ids: [3],
     });
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/exercises?name=chagi&min_age=7&max_age=14&min_core_load=2&max_core_load=4&equipment_ids=eq-1&training_type_ids=type-1&segment_ids=3&page=1&page_size=6",
+      "/api/exercises?name=chagi&status=SUSPENDED&min_age=7&max_age=14&min_core_load=2&max_core_load=4&equipment_ids=eq-1&training_type_ids=type-1&segment_ids=3&page=1&page_size=6",
       expect.objectContaining({ method: "GET" }),
     );
   });

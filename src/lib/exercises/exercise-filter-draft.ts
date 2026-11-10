@@ -14,6 +14,7 @@ export type ExerciseFilterDraft = Record<PlanningFilterBound, number> & {
   max_age: number;
   min_participants: number;
   max_participants: number;
+  excludedOnly: boolean;
   equipment_ids: string[];
   training_type_ids: string[];
   segment_ids: number[];
@@ -47,6 +48,7 @@ export function filtersToDraft(
       filters.min_participants ?? PARTICIPANTS_FILTER_BOUNDS.min,
     max_participants:
       filters.max_participants ?? PARTICIPANTS_FILTER_BOUNDS.max,
+    excludedOnly: filters.status === "SUSPENDED",
     equipment_ids: filters.equipment_ids ?? [],
     training_type_ids: filters.training_type_ids ?? [],
     segment_ids: filters.segment_ids ?? [],
@@ -61,5 +63,10 @@ export function draftToFilters(
   draft: ExerciseFilterDraft,
   name?: string,
 ): ExerciseListFilters {
-  return normalizeFilters({ ...draft, name });
+  const { excludedOnly, ...otherFilters } = draft;
+  return normalizeFilters({
+    ...otherFilters,
+    name,
+    status: excludedOnly ? "SUSPENDED" : undefined,
+  });
 }

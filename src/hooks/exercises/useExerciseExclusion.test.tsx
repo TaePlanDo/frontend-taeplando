@@ -56,3 +56,31 @@ it("reports an unavailable exercise without invalidating queries", async () => {
   });
   expect(invalidate).not.toHaveBeenCalled();
 });
+
+it("leaves filtered pages for the server to recalculate after restoring", async () => {
+  const { client, result } = setup();
+  const allKey = [...queryKeys.exercises.lists(), {}, { page: 1, pageSize: 6 }];
+  const excludedKey = [
+    ...queryKeys.exercises.lists(),
+    { status: "SUSPENDED" },
+    { page: 1, pageSize: 6 },
+  ];
+  const page = {
+    items: [{ id: "1", status: "SUSPENDED" }],
+    total: 1,
+    page: 1,
+    page_size: 6,
+    total_pages: 1,
+  };
+  client.setQueryData(allKey, page);
+  client.setQueryData(excludedKey, page);
+
+  await act(() => result.current.setExclusion({ id: "1", excluded: false }));
+
+  expect(client.getQueryData(allKey)).toEqual({
+    ...page,
+    items: [{ id: "1", status: "ACTIVE" }],
+  });
+  expect(client.getQueryData(excludedKey)).toEqual(page);
+  expect(client.getQueryState(excludedKey)?.isInvalidated).toBe(true);
+});

@@ -80,15 +80,44 @@ describe("ExerciseFiltersDialog", () => {
           min_core_load: 2,
           max_core_load: 4,
           equipment_ids: ["eq-1"],
+          status: "SUSPENDED",
         }}
         onApply={onApply}
         trigger={<button type="button">Filtruj</button>}
       />,
     );
 
+    expect(
+      screen.getByRole("switch", { name: "Wykluczone ćwiczenia" }),
+    ).toHaveAttribute("aria-checked", "true");
     fireEvent.click(screen.getByRole("button", { name: "Wyczyść" }));
+    expect(
+      screen.getByRole("switch", { name: "Wykluczone ćwiczenia" }),
+    ).toHaveAttribute("aria-checked", "false");
     fireEvent.click(screen.getByRole("button", { name: "Zastosuj filtry" }));
     expect(onApply).toHaveBeenCalledWith({ name: "chagi" });
+  });
+
+  it("applies the exclusion filter with other criteria", () => {
+    const onApply = vi.fn();
+    render(
+      <ExerciseFiltersDialog
+        open
+        onOpenChange={vi.fn()}
+        filters={{ min_age: 7 }}
+        onApply={onApply}
+        trigger={<button type="button">Filtruj</button>}
+      />,
+    );
+    fireEvent.click(
+      screen.getByRole("switch", { name: "Wykluczone ćwiczenia" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Zastosuj filtry" }));
+    expect(onApply).toHaveBeenCalledWith({
+      min_age: 7,
+      max_age: 99,
+      status: "SUSPENDED",
+    });
   });
 
   it("preserves planning filters when applying the current dialog", () => {

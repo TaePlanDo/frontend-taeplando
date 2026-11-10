@@ -58,6 +58,12 @@ function clearFields(
 
 const FILTER_DIMENSIONS: FilterDimension[] = [
   {
+    key: "status",
+    isActive: (filters) => filters.status === "SUSPENDED",
+    clear: (filters) => clearFields(filters, ["status"]),
+    label: () => "Wykluczone ćwiczenia",
+  },
+  {
     key: "name",
     isActive: (filters) => hasValues(filters.name),
     clear: (filters) => clearFields(filters, ["name"]),

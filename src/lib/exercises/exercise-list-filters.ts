@@ -10,6 +10,7 @@ type RangeBounds = { min: number; max: number };
 
 type FilterQueryField =
   | { key: "name"; kind: "string" }
+  | { key: "status"; kind: "status" }
   | {
       key:
         | "min_age"
@@ -27,6 +28,7 @@ const UUID_PATTERN =
 
 const FILTER_QUERY_FIELDS: FilterQueryField[] = [
   { key: "name", kind: "string" },
+  { key: "status", kind: "status" },
   { key: "min_age", kind: "int" },
   { key: "max_age", kind: "int" },
   { key: "min_participants", kind: "int" },
@@ -120,6 +122,7 @@ export function normalizeFilters(
   const next: ExerciseListFilters = {};
   const name = filters.name?.trim();
   if (name) next.name = name;
+  if (filters.status === "SUSPENDED") next.status = filters.status;
 
   const age = normalizeRange(
     filters.min_age === 0 ? AGE_FILTER_BOUNDS.min : filters.min_age,
@@ -179,6 +182,10 @@ export function appendExerciseListFilters(
   const normalized = normalizeFilters(filters);
 
   for (const field of FILTER_QUERY_FIELDS) {
+    if (field.kind === "status") {
+      if (normalized.status) params.set(field.key, normalized.status);
+      continue;
+    }
     if (field.kind === "string") {
       const value = normalized[field.key];
       if (value) params.set(field.key, value);
@@ -205,6 +212,10 @@ export function parseExerciseListFilters(
   const parsed: ExerciseListFilters = {};
 
   for (const field of FILTER_QUERY_FIELDS) {
+    if (field.kind === "status") {
+      if (params.get(field.key) === "SUSPENDED") parsed.status = "SUSPENDED";
+      continue;
+    }
     if (field.kind === "string") {
       const value = params.get(field.key)?.trim() || undefined;
       if (value) parsed[field.key] = value;

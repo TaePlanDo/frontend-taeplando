@@ -7,6 +7,7 @@ import {
 import { queryKeys } from "@/lib/queryKeys";
 import type { Exercise } from "@/types/exercise";
 import type { PaginatedResponse } from "@/types/pagination";
+import type { ExerciseListFilters } from "@/types/exercise-list-filters";
 
 import { useExerciseMutation } from "./useExerciseMutation";
 
@@ -24,7 +25,14 @@ export function useExerciseExclusion() {
     setExclusion: async (variables: { id: string; excluded: boolean }) => {
       await result.mutate(variables);
       queryClient.setQueriesData<PaginatedResponse<Exercise>>(
-        { queryKey: queryKeys.exercises.lists() },
+        {
+          queryKey: queryKeys.exercises.lists(),
+          predicate: (query) => {
+            const filters = query.queryKey[2] as
+              ExerciseListFilters | undefined;
+            return filters?.status !== "SUSPENDED";
+          },
+        },
         (page) =>
           page && {
             ...page,

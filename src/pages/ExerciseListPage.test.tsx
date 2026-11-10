@@ -201,6 +201,32 @@ describe("ExerciseListPage", () => {
       }),
     );
   });
+
+  it("applies the exclusion filter, resets the page and removes its chip", async () => {
+    renderPage("/exercises?name=chagi&page=2");
+    fireEvent.click(screen.getByRole("button", { name: "Filtruj" }));
+    fireEvent.click(
+      screen.getByRole("switch", { name: "Wykluczone ćwiczenia" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Zastosuj filtry" }));
+    await waitFor(() =>
+      expect(useExercisesMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          filters: { name: "chagi", status: "SUSPENDED" },
+          page: 1,
+        }),
+      ),
+    );
+    expect(screen.getByText("Wykluczone ćwiczenia")).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("button", { name: /Wykluczone ćwiczenia/ }),
+    );
+    await waitFor(() =>
+      expect(useExercisesMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({ filters: { name: "chagi" }, page: 1 }),
+      ),
+    );
+  });
   it("opens create and prefilled edit dialogs", async () => {
     renderPage();
     fireEvent.click(screen.getByRole("button", { name: /Dodaj ćwiczenie/ }));
