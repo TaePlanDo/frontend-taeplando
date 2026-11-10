@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { PlanDetailHeader } from "@/components/plan/PlanDetailHeader";
@@ -20,6 +20,7 @@ import { groupPlanPhases } from "@/lib/plan/phaseGrouping";
 export function PlanDetailPage() {
   const { planId } = useParams<{ planId: string }>();
   const navigate = useNavigate();
+  const backTo: string = useLocation().state?.backTo ?? "/plans";
   const { plan, isLoading, isError, refetch } = usePlan(planId);
   const { deletePlan } = useDeletePlan();
   const [regenerateOpen, setRegenerateOpen] = useState(false);
@@ -32,7 +33,7 @@ export function PlanDetailPage() {
     try {
       await deletePlan(plan.id);
       toast.success("Plan został usunięty");
-      navigate("/plans");
+      navigate(backTo);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error));
     }
@@ -69,7 +70,7 @@ export function PlanDetailPage() {
       <div className="mb-12 flex w-full max-w-96 flex-col gap-8 lg:max-w-220">
         <PlanDetailHeader
           plan={plan}
-          onBack={() => navigate("/plans")}
+          onBack={() => navigate(backTo)}
           onRegenerate={() => setRegenerateOpen(true)}
           onDelete={handleDelete}
         />

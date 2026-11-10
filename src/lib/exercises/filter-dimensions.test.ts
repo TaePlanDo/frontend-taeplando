@@ -1,26 +1,27 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  buildActiveFilterChips,
-  countActiveFilters,
-  withoutFilterDimension,
-} from "./exercise-list-filter-chips";
+  activeChips,
+  activeDimensions,
+  withoutDimension,
+} from "@/lib/filters/definition";
+
+import { exerciseFilters } from "./exercise-filter-list";
 
 describe("filter-dimensions", () => {
   it("counts and clears the excluded exercise filter independently", () => {
     const filters = { status: "SUSPENDED" as const, name: "a" };
-    expect(countActiveFilters(filters, { exclude: ["name"] })).toBe(1);
-    expect(
-      buildActiveFilterChips(filters, {
-        equipment: [],
-        trainingTypes: [],
-        segments: [],
-      })[0],
-    ).toEqual({ key: "status", label: "Wykluczone ćwiczenia" });
-    expect(withoutFilterDimension(filters, "status")).toEqual({ name: "a" });
+    expect(activeDimensions(filters, exerciseFilters)).toHaveLength(2);
+    expect(activeChips(filters, exerciseFilters, {})).toContainEqual({
+      id: "status",
+      name: "Wykluczone ćwiczenia",
+    });
+    expect(withoutDimension(filters, "status", exerciseFilters)).toEqual({
+      name: "a",
+    });
   });
   it("builds one chip per active dimension with catalog labels", () => {
-    const chips = buildActiveFilterChips(
+    const chips = activeChips(
       {
         name: "Ap",
         min_age: 7,
@@ -29,6 +30,7 @@ describe("filter-dimensions", () => {
         training_type_ids: ["type-1"],
         segment_ids: [3],
       },
+      exerciseFilters,
       {
         equipment: [{ id: "eq-1", name: "Mata" }],
         trainingTypes: [{ id: "type-1", name: "Technika" }],
@@ -36,7 +38,7 @@ describe("filter-dimensions", () => {
       },
     );
 
-    expect(chips.map((chip) => chip.label)).toEqual([
+    expect(chips.map((chip) => chip.name)).toEqual([
       "Nazwa: Ap",
       "Wiek: 7–14",
       "Sprzęt: Mata",
@@ -45,23 +47,18 @@ describe("filter-dimensions", () => {
     ]);
   });
 
-  it("counts active filter dimensions with optional exclusions", () => {
-    const filters = {
-      name: "a",
-      min_age: 7,
-      equipment_ids: ["1"],
-      segment_ids: [3],
-    };
-    expect(countActiveFilters({})).toBe(0);
-    expect(countActiveFilters(filters)).toBe(4);
-    expect(countActiveFilters(filters, { exclude: ["name"] })).toBe(3);
+  it("counts active dimensions", () => {
+    const filters = { name: "a", min_age: 7, equipment_ids: ["1"] };
+    expect(activeDimensions({}, exerciseFilters)).toHaveLength(0);
+    expect(activeDimensions(filters, exerciseFilters)).toHaveLength(3);
   });
 
   it("clears one filter dimension", () => {
     expect(
-      withoutFilterDimension(
+      withoutDimension(
         { name: "a", min_age: 7, max_age: 14, equipment_ids: ["1"] },
         "age",
+        exerciseFilters,
       ),
     ).toEqual({ name: "a", equipment_ids: ["1"] });
   });
@@ -72,17 +69,10 @@ describe("filter-dimensions", () => {
       max_core_load: 4,
       min_physical_difficulty: 3,
     };
-    const chips = buildActiveFilterChips(filters, {
-      equipment: [],
-      trainingTypes: [],
-      segments: [],
-    });
-    expect(chips.map((chip) => chip.label)).toEqual([
-      "Intensywność fizyczna: 3–…",
-      "Zaangażowanie partii core: 2–4",
-    ]);
-    expect(countActiveFilters(filters)).toBe(2);
-    expect(withoutFilterDimension(filters, "core_load")).toEqual({
+    expect(
+      activeChips(filters, exerciseFilters, {}).map((chip) => chip.name),
+    ).toEqual(["Intensywność fizyczna: 3–…", "Zaangażowanie partii core: 2–4"]);
+    expect(withoutDimension(filters, "core_load", exerciseFilters)).toEqual({
       min_physical_difficulty: 3,
     });
   });

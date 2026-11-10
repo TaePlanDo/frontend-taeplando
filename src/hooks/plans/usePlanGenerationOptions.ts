@@ -1,11 +1,11 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 
+import { useGroupOptions } from "@/hooks/groups/useGroupOptions";
 import { useOnlineState } from "@/hooks/useOnlineState";
 import {
   getEquipmentRequest,
   getTrainingTypesRequest,
 } from "@/lib/api/catalogs";
-import { getAllGroupsRequest } from "@/lib/api/group";
 import { queryKeys } from "@/lib/queryKeys";
 
 type OptionsStatus = "loading" | "offline" | "error" | "ready";
@@ -23,10 +23,7 @@ function catalogOptions<T>(query: UseQueryResult<T[]>, offline: boolean) {
 
 export function usePlanGenerationOptions() {
   const isOnline = useOnlineState();
-  const groups = useQuery({
-    queryKey: queryKeys.groups.options(),
-    queryFn: getAllGroupsRequest,
-  });
+  const groups = useGroupOptions();
   const equipment = useQuery({
     queryKey: queryKeys.equipment.options(),
     queryFn: getEquipmentRequest,

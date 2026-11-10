@@ -1,5 +1,6 @@
 import { apiUrl } from "@/config/env";
-import { appendExerciseListFilters } from "@/lib/exercises/exercise-list-filters";
+import { exerciseFilters } from "@/lib/exercises/exercise-filter-list";
+import { appendFilters } from "@/lib/filters/definition";
 import type { Exercise, ExerciseWrite } from "@/types/exercise";
 import type { ExerciseListFilters } from "@/types/exercise-list-filters";
 import type { PaginatedResponse } from "@/types/pagination";
@@ -12,7 +13,7 @@ export async function getExercisesRequest(
   filters: ExerciseListFilters = {},
 ): Promise<PaginatedResponse<Exercise>> {
   const params = new URLSearchParams();
-  appendExerciseListFilters(params, filters);
+  appendFilters(params, filters, exerciseFilters);
   params.set("page", String(page));
   params.set("page_size", String(pageSize));
 

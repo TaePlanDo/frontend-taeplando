@@ -208,7 +208,6 @@ describe("ExerciseListPage", () => {
     fireEvent.click(
       screen.getByRole("switch", { name: "Wykluczone ćwiczenia" }),
     );
-    fireEvent.click(screen.getByRole("button", { name: "Zastosuj filtry" }));
     await waitFor(() =>
       expect(useExercisesMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -217,6 +216,7 @@ describe("ExerciseListPage", () => {
         }),
       ),
     );
+    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
     expect(screen.getByText("Wykluczone ćwiczenia")).toBeTruthy();
     fireEvent.click(
       screen.getByRole("button", { name: /Wykluczone ćwiczenia/ }),
