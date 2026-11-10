@@ -1,4 +1,4 @@
-﻿import { expect, test, type Locator, type Page } from "@playwright/test";
+﻿import { expect, test, type Locator, type Page } from "./playwright";
 
 import { planFixture } from "../src/test/planFixture";
 import { mockGoogleAccount } from "./helpers/mockGoogleAccount";
@@ -17,11 +17,9 @@ const plan = {
   ),
 };
 
-async function scrollToPhaseOffset(page: Page, phase: Locator, offset: number) {
-  await phase.evaluate((element, distance) => {
-    const top = element.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo(0, top + distance);
-  }, offset);
+async function scrollIntoPhase(page: Page, header: Locator) {
+  await header.scrollIntoViewIfNeeded();
+  await page.mouse.wheel(0, 900);
 }
 
 for (const viewport of [
@@ -46,8 +44,6 @@ for (const viewport of [
     const secondHeader = page.getByRole("button", {
       name: /Cz\u0119\u015b\u0107 g\u0142\u00f3wna/,
     });
-    const firstPhase = firstHeader.locator("..");
-    const secondPhase = secondHeader.locator("..");
     await expect(firstHeader).toBeVisible();
     await expect(secondHeader).toBeAttached();
 
@@ -78,11 +74,10 @@ for (const viewport of [
       ).toBeLessThanOrEqual(2);
     }
 
-    const navbarBottom = await page
-      .locator("header")
-      .first()
-      .evaluate((header) => header.getBoundingClientRect().bottom);
-    await scrollToPhaseOffset(page, firstPhase, 300);
+    const navbar = await page.locator("header").first().boundingBox();
+    expect(navbar).not.toBeNull();
+    const navbarBottom = navbar!.y + navbar!.height;
+    await scrollIntoPhase(page, firstHeader);
     await expect
       .poll(async () =>
         Math.abs((await firstHeader.boundingBox())!.y - navbarBottom),
@@ -90,7 +85,7 @@ for (const viewport of [
       .toBeLessThanOrEqual(1.5);
     await expect(firstHeader).toBeInViewport();
 
-    await scrollToPhaseOffset(page, secondPhase, 300);
+    await scrollIntoPhase(page, secondHeader);
     await expect
       .poll(async () =>
         Math.abs((await secondHeader.boundingBox())!.y - navbarBottom),

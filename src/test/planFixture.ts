@@ -1,4 +1,4 @@
-import type { PlanDetail } from "@/types/plan";
+import type { PlanDetail } from "../types/plan";
 
 export const planFixture: PlanDetail = {
   id: "plan-1",
