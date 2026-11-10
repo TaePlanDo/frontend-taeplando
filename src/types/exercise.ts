@@ -10,6 +10,11 @@ export type Exercise = {
   min_participants: number;
   max_participants: number;
   duration_minutes: number;
+  physical_difficulty: number;
+  technical_difficulty: number;
+  upper_body_load: number;
+  lower_body_load: number;
+  core_load: number;
   status: TrainerExerciseStatus;
   equipment: CatalogReference[];
   training_types: CatalogReference[];
@@ -28,6 +33,11 @@ export type ExerciseWrite = {
   min_participants: number;
   max_participants: number;
   duration_minutes: number;
+  physical_difficulty: number;
+  technical_difficulty: number;
+  upper_body_load: number;
+  lower_body_load: number;
+  core_load: number;
   equipment_ids: string[];
   training_type_ids: string[];
   segment_ids: number[];

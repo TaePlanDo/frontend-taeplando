@@ -17,6 +17,12 @@ describe("exercise-list-search-params", () => {
         max_age: 14,
         min_participants: 2,
         max_participants: 20,
+        min_physical_difficulty: 2,
+        max_physical_difficulty: 4,
+        min_technical_difficulty: 3,
+        max_upper_body_load: 4,
+        min_lower_body_load: 2,
+        max_core_load: 3,
         equipment_ids: [
           "8f20d653-dc8b-4b76-bdb4-b225c7d420a6",
           "de318877-45d8-4b56-b1c4-5ddaa5caa46a",
@@ -33,6 +39,12 @@ describe("exercise-list-search-params", () => {
       max_age: "14",
       min_participants: "2",
       max_participants: "20",
+      min_physical_difficulty: "2",
+      max_physical_difficulty: "4",
+      min_technical_difficulty: "3",
+      max_upper_body_load: "4",
+      min_lower_body_load: "2",
+      max_core_load: "3",
       equipment_ids:
         "8f20d653-dc8b-4b76-bdb4-b225c7d420a6,de318877-45d8-4b56-b1c4-5ddaa5caa46a",
       training_type_ids: "0b83db1d-f555-44f0-ac0b-6d1b93a4d368",
@@ -71,6 +83,21 @@ describe("exercise-list-search-params", () => {
         equipment_ids: [],
       }),
     ).toEqual({ name: "x" });
+  });
+
+  it("normalizes old age bounds and rejects invalid planning ranges", () => {
+    expect(
+      normalizeFilters({
+        min_age: 0,
+        max_age: 14,
+        min_core_load: 5,
+        max_core_load: 2,
+        min_upper_body_load: 0,
+        max_upper_body_load: 4,
+        min_physical_difficulty: 1,
+        max_physical_difficulty: 5,
+      }),
+    ).toEqual({ min_age: 1, max_age: 14, max_upper_body_load: 4 });
   });
 
   it("canonicalizes duplicate catalog ids", () => {

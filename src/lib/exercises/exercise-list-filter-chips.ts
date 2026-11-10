@@ -1,4 +1,5 @@
 import { normalizeFilters } from "./exercise-list-filters";
+import { PLANNING_FILTERS } from "@/types/exercise-list-filters";
 import type {
   ActiveFilterDimension,
   ExerciseListFilters,
@@ -80,6 +81,13 @@ const FILTER_DIMENSIONS: FilterDimension[] = [
     label: (filters) =>
       `Liczba uczestników: ${filters.min_participants ?? "…"}–${filters.max_participants ?? "…"}`,
   },
+  ...PLANNING_FILTERS.map(({ key, min, max, label }): FilterDimension => ({
+    key,
+    isActive: (filters) => hasValues(filters[min]) || hasValues(filters[max]),
+    clear: (filters) => clearFields(filters, [min, max]),
+    label: (filters) =>
+      `${label}: ${filters[min] ?? "…"}–${filters[max] ?? "…"}`,
+  })),
   {
     key: "equipment",
     isActive: (filters) => hasValues(filters.equipment_ids),

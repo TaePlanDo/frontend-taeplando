@@ -16,6 +16,8 @@ import type { ExerciseListFilters } from "@/types/exercise-list-filters";
 import {
   AGE_FILTER_BOUNDS,
   PARTICIPANTS_FILTER_BOUNDS,
+  PLANNING_FILTER_BOUNDS,
+  PLANNING_FILTERS,
 } from "@/types/exercise-list-filters";
 
 type ExerciseFiltersDialogProps = {
@@ -79,6 +81,22 @@ export function ExerciseFiltersDialog({
                 }))
               }
             />
+            {PLANNING_FILTERS.map(({ key, min, max, label }) => (
+              <DualRangeField
+                key={key}
+                label={label}
+                min={PLANNING_FILTER_BOUNDS.min}
+                max={PLANNING_FILTER_BOUNDS.max}
+                value={[draft[min], draft[max]]}
+                onValueChange={([lower, upper]) =>
+                  setDraft((current) => ({
+                    ...current,
+                    [min]: lower,
+                    [max]: upper,
+                  }))
+                }
+              />
+            ))}
             {isError ? (
               <div className="text-sm text-destructive" role="alert">
                 Nie udało się pobrać dostępnych filtrów.{" "}
