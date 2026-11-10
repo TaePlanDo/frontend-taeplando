@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -80,7 +86,24 @@ describe("PlanDetailPage", () => {
     expect(screen.getByText("Bieg")).toBeTruthy();
     expect(screen.getByText("Sparing")).toBeTruthy();
     expect(screen.getAllByText("Tarcza").length).toBeGreaterThan(0);
-    expect(screen.queryByText("Intensywność")).toBeNull();
+    const phaseHeader = screen.getByRole("button", { name: /Rozgrzewka/ });
+    expect(phaseHeader).toHaveClass("sticky");
+    expect(
+      within(phaseHeader)
+        .getAllByText("Intensywność")[0]
+        .closest("[data-slot=badge]"),
+    ).toHaveClass("text-emerald-400");
+    expect(
+      within(phaseHeader)
+        .getAllByText("Trudność")[0]
+        .closest("[data-slot=badge]"),
+    ).toHaveClass("text-violet-300");
+    const row = screen.getByRole("button", { name: /Bieg/ });
+    expect(within(row).getByText("2+")).toBeTruthy();
+    expect(within(row).getAllByRole("meter")).toHaveLength(5);
+    expect(
+      within(row).getByRole("meter", { name: "Intensywność" }),
+    ).toHaveAttribute("aria-valuenow", "2");
     expect(screen.getByText("1")).toBeTruthy();
   });
 
@@ -93,9 +116,13 @@ describe("PlanDetailPage", () => {
       screen.getByText(planFixture.exercises[0].description_snapshot),
     ).toBeTruthy();
     expect(screen.getByText("Liczba uczestników")).toBeTruthy();
-    expect(screen.getAllByRole("meter")).toHaveLength(5);
     expect(
-      screen.getByRole("meter", { name: "Intensywno\u015b\u0107" }),
+      within(screen.getByRole("dialog")).getAllByRole("meter"),
+    ).toHaveLength(5);
+    expect(
+      within(screen.getByRole("dialog")).getByRole("meter", {
+        name: "Intensywno\u015b\u0107",
+      }),
     ).toHaveAttribute(
       "aria-valuenow",
       String(planFixture.exercises[0].physical_difficulty_snapshot),

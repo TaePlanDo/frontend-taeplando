@@ -1,6 +1,8 @@
 import { ChevronDown, Clock3 } from "lucide-react";
 import { useState } from "react";
 
+import { EXERCISE_RATING_COLUMNS } from "@/components/exercise/exerciseRatings";
+import { Badge } from "@/components/ui/badge";
 import { CardItemBadge } from "@/components/shared/CardItemBadge";
 import { Card } from "@/components/ui/card";
 import { cn } from "cn";
@@ -23,45 +25,70 @@ export function PlanPhaseSection({
   const panelId = `phase-${phase.schema.position}`;
 
   return (
-    <Card className="gap-0 overflow-hidden rounded-2xl border-border bg-card/30 py-0 shadow-none">
+    <Card className="gap-0 rounded-2xl border-border bg-card/30 py-0 shadow-none">
       <button
         type="button"
-        className="flex w-full items-center gap-3 px-4 py-4 text-left sm:gap-4 sm:px-5"
+        className={cn(
+          "sticky top-16 z-20 flex w-full flex-wrap items-center gap-3 bg-background px-4 py-4 text-left sm:gap-4 sm:px-7 lg:flex-nowrap",
+          open ? "rounded-t-2xl" : "rounded-2xl",
+        )}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((current) => !current)}
       >
-        <ChevronDown
-          className={cn(
-            "size-5 shrink-0 text-muted-foreground transition-transform",
-            open && "rotate-180",
-          )}
-          aria-hidden
-        />
+        <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-4">
+          <ChevronDown
+            className={cn(
+              "size-5 shrink-0 text-muted-foreground transition-transform",
+              open && "rotate-180",
+            )}
+            aria-hidden
+          />
 
-        <div className="min-w-0 shrink-0">
-          <h3 className="text-lg font-semibold leading-tight text-foreground">
-            {phase.schema.name}
-          </h3>
-          <p className="mt-0.5 text-sm leading-tight text-muted-foreground">
-            {formatExerciseCount(phase.exercises.length)}
-          </p>
+          <div className="min-w-0 flex-1 lg:flex-none">
+            <h3 className="text-base font-semibold leading-tight text-foreground sm:text-lg">
+              {phase.schema.name}
+            </h3>
+            <p className="mt-0.5 text-xs leading-tight text-muted-foreground sm:text-sm">
+              {formatExerciseCount(phase.exercises.length)}
+            </p>
+          </div>
+
+          <CardItemBadge
+            icon={<Clock3 className="size-4 text-primary" aria-hidden />}
+            className="h-7 gap-1 border border-border px-2 text-xs font-medium text-foreground sm:h-8 sm:px-3 sm:text-sm"
+          >
+            {phase.actualMinutes} / {phase.plannedMinutes} min
+          </CardItemBadge>
+          <DeltaMinutesBadge
+            deltaMinutes={phase.deltaMinutes}
+            className="h-7 px-2 text-xs sm:h-8 sm:px-3 sm:text-sm"
+          />
         </div>
-
-        <CardItemBadge
-          icon={<Clock3 className="size-4 text-primary" aria-hidden />}
-          className="h-8 border border-border px-3 text-sm font-medium text-foreground"
-        >
-          {phase.actualMinutes} / {phase.plannedMinutes} min
-        </CardItemBadge>
-        <DeltaMinutesBadge
-          deltaMinutes={phase.deltaMinutes}
-          className="h-8 px-3 text-sm"
-        />
+        {open && phase.exercises.length > 0 ? (
+          <div className="grid w-full grid-cols-5 gap-1.5 lg:w-[24rem] lg:shrink-0">
+            {EXERCISE_RATING_COLUMNS.map((column) => (
+              <Badge
+                key={column.key}
+                variant="outline"
+                className={cn(
+                  "h-auto min-h-8 w-full min-w-0 whitespace-normal rounded-md px-0.5 py-1 text-center text-[0.6875rem] leading-tight tracking-tight [overflow-wrap:anywhere]",
+                  column.headerClass,
+                )}
+              >
+                <span className="sm:hidden" aria-hidden>
+                  {column.shortLabel}
+                </span>
+                <span className="hidden sm:inline">{column.label}</span>
+                <span className="sr-only sm:hidden">{column.label}</span>
+              </Badge>
+            ))}
+          </div>
+        ) : null}
       </button>
 
       {open ? (
-        <div id={panelId} className="border-t border-border px-4 sm:px-5">
+        <div id={panelId} className="border-t border-border">
           {phase.exercises.length ? (
             phase.exercises.map((exercise, index) => (
               <PlanExerciseRow
@@ -71,7 +98,7 @@ export function PlanPhaseSection({
               />
             ))
           ) : (
-            <p className="py-4 text-sm text-muted-foreground">
+            <p className="px-4 py-4 text-sm text-muted-foreground sm:px-5">
               Brak ćwiczeń w tej fazie
             </p>
           )}

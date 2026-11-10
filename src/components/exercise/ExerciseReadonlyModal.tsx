@@ -10,25 +10,26 @@ import { ExerciseStatBlock } from "./ExerciseStatBlock";
 import { EXERCISE_RATING_COLUMNS } from "./exerciseRatings";
 import { RatingMeter } from "./RatingMeter";
 
-type ExerciseReadonlyModalProps = {
-  exercise:
-    | (Omit<Exercise, "id" | "owner_user_id" | "scope" | "status"> &
-        Partial<Pick<Exercise, "scope" | "status">>)
-    | null;
-  onEdit?: () => void;
-  onClose: () => void;
-  onExclusionChange?: (excluded: boolean) => void;
-  exclusionDisabled?: boolean;
-};
+type ExerciseDetails = Omit<
+  Exercise,
+  "id" | "owner_user_id" | "scope" | "status"
+>;
 
-export function ExerciseReadonlyModal({
-  exercise,
-  onEdit,
-  onClose,
-  onExclusionChange,
-  exclusionDisabled = false,
-}: ExerciseReadonlyModalProps) {
-  if (!exercise) return null;
+type ExerciseReadonlyModalProps = {
+  onClose: () => void;
+} & (
+  | { kind: "snapshot"; exercise: ExerciseDetails }
+  | {
+      kind: "editable";
+      exercise: Exercise;
+      onEdit: () => void;
+      onExclusionChange: (excluded: boolean) => void;
+      exclusionDisabled: boolean;
+    }
+);
+
+export function ExerciseReadonlyModal(props: ExerciseReadonlyModalProps) {
+  const { exercise, onClose } = props;
 
   const equipment = exercise.equipment.map(({ name }) => name);
   const trainingTypes = exercise.training_types.map(({ name }) => name);
@@ -55,12 +56,12 @@ export function ExerciseReadonlyModal({
                 <h1 className="text-2xl font-semibold text-foreground">
                   {exercise.name}
                 </h1>
-                {onExclusionChange && (
+                {props.kind === "editable" && (
                   <CustomizedSwitch
                     label="Wyklucz ćwiczenie"
-                    checked={exercise.status === "SUSPENDED"}
-                    onCheckedChange={onExclusionChange}
-                    disabled={exclusionDisabled}
+                    checked={props.exercise.status === "SUSPENDED"}
+                    onCheckedChange={props.onExclusionChange}
+                    disabled={props.exclusionDisabled}
                   />
                 )}
               </div>
@@ -130,11 +131,11 @@ export function ExerciseReadonlyModal({
         >
           Zamknij
         </CustomizedButton>
-        {exercise.scope === "PRIVATE" && onEdit ? (
+        {props.kind === "editable" && props.exercise.scope === "PRIVATE" ? (
           <CustomizedButton
             variant="primary"
             className="w-full sm:w-54"
-            onClick={onEdit}
+            onClick={props.onEdit}
           >
             Edytuj ćwiczenie
           </CustomizedButton>

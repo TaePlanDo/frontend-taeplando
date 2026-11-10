@@ -186,18 +186,21 @@ export function ExerciseListPage() {
             className="grid-rows-[auto_minmax(0,1fr)] max-h-[calc(100dvh-2rem)] gap-5 overflow-hidden p-4 sm:!top-8 sm:!bottom-8 sm:!h-auto sm:!translate-y-0 sm:max-w-190 sm:p-6"
             title="Podgląd ćwiczenia"
           >
-            <ExerciseReadonlyModal
-              exercise={editingExercise}
-              onExclusionChange={(excluded) =>
-                void handleExclusionChange(excluded)
-              }
-              exclusionDisabled={isExclusionPending || isOffline}
-              onClose={() => setDialogReadonlyOpen(false)}
-              onEdit={() => {
-                setDialogReadonlyOpen(false);
-                setDialogOpen(true);
-              }}
-            />
+            {editingExercise && (
+              <ExerciseReadonlyModal
+                kind="editable"
+                exercise={editingExercise}
+                onExclusionChange={(excluded) =>
+                  void handleExclusionChange(excluded)
+                }
+                exclusionDisabled={isExclusionPending || isOffline}
+                onClose={() => setDialogReadonlyOpen(false)}
+                onEdit={() => {
+                  setDialogReadonlyOpen(false);
+                  setDialogOpen(true);
+                }}
+              />
+            )}
           </CustomizedDialog>
         </>
       }
