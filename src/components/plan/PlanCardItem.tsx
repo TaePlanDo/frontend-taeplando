@@ -15,13 +15,20 @@ import { formatParticipantCount } from "@/lib/format/plural";
 import { formatDuration } from "@/lib/format/time";
 import type { PlanListItem } from "@/types/plan";
 
-type PlanCardItemProps = {
+type PlanCardItemBase = {
   plan: PlanListItem;
   onOpen: () => void;
-  onDelete: () => void | Promise<void>;
 };
 
-export function PlanCardItem({ plan, onOpen, onDelete }: PlanCardItemProps) {
+type PlanCardItemProps = PlanCardItemBase &
+  (
+    | { variant?: "list"; onDelete: () => void | Promise<void> }
+    | { variant: "choice"; onDelete?: never }
+  );
+
+export function PlanCardItem(props: PlanCardItemProps) {
+  const { plan, onOpen } = props;
+  const isChoice = props.variant === "choice";
   const trainingType = plan.training_types_snapshot[0]?.name;
 
   return (
@@ -52,12 +59,14 @@ export function PlanCardItem({ plan, onOpen, onDelete }: PlanCardItemProps) {
       </CardHeader>
       <CardContent className="flex flex-col gap-2 px-5">
         <h3 className="line-clamp-2 text-lg font-semibold">{plan.name}</h3>
-        <p className="text-sm text-foreground/60">
-          Grupa:{" "}
-          <span className="font-medium text-foreground/80">
-            {plan.group_name_snapshot}
-          </span>
-        </p>
+        {isChoice ? null : (
+          <p className="text-sm text-foreground/60">
+            Grupa:{" "}
+            <span className="font-medium text-foreground/80">
+              {plan.group_name_snapshot}
+            </span>
+          </p>
+        )}
       </CardContent>
       <CardFooter className="items-center justify-between gap-2 px-5">
         <div className="flex flex-wrap gap-2">
@@ -68,24 +77,28 @@ export function PlanCardItem({ plan, onOpen, onDelete }: PlanCardItemProps) {
             {formatParticipantCount(plan.participant_count)}
           </CardItemBadge>
         </div>
-        <div
-          onClick={(event) => event.stopPropagation()}
-          onKeyDown={(event) => event.stopPropagation()}
-        >
-          <CustomizedAlertDialog
-            trigger={
-              <CardItemActionButton
-                icon={<Trash2 className="size-4" />}
-                className="text-primary hover:bg-primary/10"
-              >
-                Usuń
-              </CardItemActionButton>
-            }
-            title="Usuwanie planu"
-            message={`Czy na pewno chcesz usunąć „${plan.name}”? Tej operacji nie da się cofnąć.`}
-            onSubmit={onDelete}
-          />
-        </div>
+        {isChoice ? (
+          <span className="text-sm font-medium text-primary">Otwórz &gt;</span>
+        ) : (
+          <div
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+          >
+            <CustomizedAlertDialog
+              trigger={
+                <CardItemActionButton
+                  icon={<Trash2 className="size-4" />}
+                  className="text-primary hover:bg-primary/10"
+                >
+                  Usuń
+                </CardItemActionButton>
+              }
+              title="Usuwanie planu"
+              message={`Czy na pewno chcesz usunąć „${plan.name}”? Tej operacji nie da się cofnąć.`}
+              onSubmit={props.onDelete}
+            />
+          </div>
+        )}
       </CardFooter>
     </Card>
   );

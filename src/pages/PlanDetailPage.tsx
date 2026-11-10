@@ -70,6 +70,7 @@ export function PlanDetailPage() {
       <div className="mb-12 flex w-full max-w-96 flex-col gap-8 lg:max-w-220">
         <PlanDetailHeader
           plan={plan}
+          backTo={backTo}
           onBack={() => navigate(backTo)}
           onRegenerate={() => setRegenerateOpen(true)}
           onDelete={handleDelete}

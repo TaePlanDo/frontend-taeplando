@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import type { Group } from "@/types/group";
 
-import { normalizeGroup, toFormValues, toGroupWrite } from "./group";
+import {
+  normalizeGroup,
+  toFormValues,
+  toGroupWrite,
+  toPlanSchemaSnapshot,
+} from "./group";
 
 const group: Group = {
   id: "0ac590e1-2a46-4cb7-8944-803e364cc46b",
@@ -90,5 +95,17 @@ describe("group mappers", () => {
         minutes: Number(values.minutes),
       }).duration_minutes,
     ).toBe(745);
+  });
+
+  it("maps group schema items into plan schema snapshot fields", () => {
+    expect(toPlanSchemaSnapshot(group.schema)).toEqual([
+      {
+        position: 1,
+        segment_id: 3,
+        code: "MAIN",
+        name: "Część główna",
+        percentage: 100,
+      },
+    ]);
   });
 });

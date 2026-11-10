@@ -36,9 +36,20 @@ vi.mock("@/hooks/plans/useDeletePlan", () => ({
   }),
 }));
 
-function renderPage() {
+function renderPage(
+  initialEntry: string | { pathname: string; state?: object } = "/plans/plan-1",
+) {
   return render(
-    <MemoryRouter initialEntries={["/plans/plan-1"]}>
+    <MemoryRouter
+      initialEntries={[
+        typeof initialEntry === "string"
+          ? initialEntry
+          : {
+              pathname: initialEntry.pathname,
+              state: initialEntry.state,
+            },
+      ]}
+    >
       <Routes>
         <Route path="/plans/:planId" element={<PlanDetailPage />} />
         <Route
@@ -46,6 +57,7 @@ function renderPage() {
           element={<div>Generation job</div>}
         />
         <Route path="/plans" element={<div>Plans list</div>} />
+        <Route path="/plans/new" element={<div>Plan new</div>} />
         <Route path="/" element={<div>Home</div>} />
       </Routes>
     </MemoryRouter>,
@@ -82,6 +94,30 @@ describe("PlanDetailPage", () => {
     expect(screen.getAllByText("Tarcza").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Intensywność").length).toBeGreaterThan(0);
     expect(screen.getByText("1")).toBeTruthy();
+  });
+
+  it("labels back navigation toward the generation form", () => {
+    renderPage({
+      pathname: "/plans/plan-1",
+      state: { backTo: "/plans/new?group=group-1&participants=20" },
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Wróć do generowania" }),
+    ).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Wróć do generowania" }),
+    );
+    expect(screen.getByText("Plan new")).toBeTruthy();
+  });
+
+  it("keeps list back label for list origins", () => {
+    renderPage({
+      pathname: "/plans/plan-1",
+      state: { backTo: "/plans?name=kata" },
+    });
+
+    expect(screen.getByRole("button", { name: "Wróć do listy" })).toBeTruthy();
   });
 
   it("opens regenerate dialog with prefilled participant count", async () => {
