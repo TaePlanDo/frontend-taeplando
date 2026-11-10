@@ -7,12 +7,17 @@ import type { Exercise } from "@/types/exercise";
 
 import { AttributeRow } from "./AttributeRow";
 import { ExerciseStatBlock } from "./ExerciseStatBlock";
+import { EXERCISE_RATING_COLUMNS } from "./exerciseRatings";
+import { RatingMeter } from "./RatingMeter";
 
 type ExerciseReadonlyModalProps = {
-  exercise: Exercise | null;
-  onEdit: () => void;
+  exercise:
+    | (Omit<Exercise, "id" | "owner_user_id" | "scope" | "status"> &
+        Partial<Pick<Exercise, "scope" | "status">>)
+    | null;
+  onEdit?: () => void;
   onClose: () => void;
-  onExclusionChange: (excluded: boolean) => void;
+  onExclusionChange?: (excluded: boolean) => void;
   exclusionDisabled?: boolean;
 };
 
@@ -50,12 +55,14 @@ export function ExerciseReadonlyModal({
                 <h1 className="text-2xl font-semibold text-foreground">
                   {exercise.name}
                 </h1>
-                <CustomizedSwitch
-                  label="Wyklucz ćwiczenie"
-                  checked={exercise.status === "SUSPENDED"}
-                  onCheckedChange={onExclusionChange}
-                  disabled={exclusionDisabled}
-                />
+                {onExclusionChange && (
+                  <CustomizedSwitch
+                    label="Wyklucz ćwiczenie"
+                    checked={exercise.status === "SUSPENDED"}
+                    onCheckedChange={onExclusionChange}
+                    disabled={exclusionDisabled}
+                  />
+                )}
               </div>
               <p className="mt-2 text-sm break-words pr-4 text-muted-foreground">
                 {exercise.description}
@@ -70,27 +77,22 @@ export function ExerciseReadonlyModal({
             />
             <ExerciseStatBlock label="Czas trwania" value={duration} />
           </div>
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-3 [&>div]:w-[calc((100%-1rem)/3)] sm:[&>div]:w-[calc((100%-1.5rem)/3)] lg:[&>div]:w-[calc((100%-3rem)/5)]">
-            <ExerciseStatBlock
-              label="Zaangażowanie górnych partii"
-              value={String(exercise.upper_body_load)}
-            />
-            <ExerciseStatBlock
-              label="Zaangażowanie dolnych partii"
-              value={String(exercise.lower_body_load)}
-            />
-            <ExerciseStatBlock
-              label="Zaangażowanie partii core"
-              value={String(exercise.core_load)}
-            />
-            <ExerciseStatBlock
-              label="Intensywność fizyczna"
-              value={String(exercise.physical_difficulty)}
-            />
-            <ExerciseStatBlock
-              label="Trudność techniczna"
-              value={String(exercise.technical_difficulty)}
-            />
+          <div className="grid grid-cols-2 gap-4 rounded-2xl border-2 p-4 sm:gap-6">
+            {[
+              EXERCISE_RATING_COLUMNS.slice(0, 2),
+              EXERCISE_RATING_COLUMNS.slice(2),
+            ].map((columns, index) => (
+              <div key={index} className="flex min-w-0 flex-col gap-4">
+                {columns.map((column) => (
+                  <RatingMeter
+                    key={column.key}
+                    label={column.label}
+                    value={exercise[column.key]}
+                    fillClass={column.fillClass}
+                  />
+                ))}
+              </div>
+            ))}
           </div>
 
           <div className="flex flex-col gap-2 mt-4">
@@ -128,7 +130,7 @@ export function ExerciseReadonlyModal({
         >
           Zamknij
         </CustomizedButton>
-        {exercise.scope === "PRIVATE" ? (
+        {exercise.scope === "PRIVATE" && onEdit ? (
           <CustomizedButton
             variant="primary"
             className="w-full sm:w-54"

@@ -1,12 +1,11 @@
-import { CalendarDays, Clock3, Dumbbell, Users } from "lucide-react";
+﻿import { Clock3, Dumbbell } from "lucide-react";
+import { useState } from "react";
 
+import { ExerciseReadonlyModal } from "@/components/exercise/ExerciseReadonlyModal";
 import { CardItemBadge } from "@/components/shared/CardItemBadge";
+import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
 import { ExerciseImage } from "@/components/shared/ExerciseImage";
-import { cn } from "cn";
 import type { PlanExercise } from "@/types/plan";
-
-import { PLAN_RATING_COLUMNS, PLAN_RATING_COLUMNS_CLASS } from "./planRatings";
-import { RatingMeter } from "./RatingMeter";
 
 type PlanExerciseRowProps = {
   exercise: PlanExercise;
@@ -14,12 +13,33 @@ type PlanExerciseRowProps = {
 };
 
 export function PlanExerciseRow({ exercise, number }: PlanExerciseRowProps) {
-  const equipment = exercise.equipment_snapshot;
-  const trainingTypes = exercise.training_types_snapshot;
+  const [open, setOpen] = useState(false);
+  const snapshot = {
+    name: exercise.name_snapshot,
+    description: exercise.description_snapshot,
+    image_url: exercise.image_url_snapshot,
+    min_age: exercise.min_age_snapshot,
+    max_age: exercise.max_age_snapshot,
+    min_participants: exercise.min_participants_snapshot,
+    max_participants: exercise.max_participants_snapshot,
+    duration_minutes: exercise.duration_minutes_snapshot,
+    physical_difficulty: exercise.physical_difficulty_snapshot,
+    technical_difficulty: exercise.technical_difficulty_snapshot,
+    upper_body_load: exercise.upper_body_load_snapshot,
+    lower_body_load: exercise.lower_body_load_snapshot,
+    core_load: exercise.core_load_snapshot,
+    equipment: exercise.equipment_snapshot,
+    training_types: exercise.training_types_snapshot,
+    segments: exercise.segments_snapshot,
+  };
 
   return (
-    <article className="flex flex-col gap-4 border-b border-border py-4 last:border-b-0 lg:flex-row lg:items-center lg:gap-6">
-      <div className="flex min-w-0 flex-1 gap-3 sm:gap-4">
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex w-full cursor-pointer items-center gap-3 rounded-xl border border-transparent border-b-border px-2 py-4 text-left transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-4"
+      >
         <div className="relative shrink-0">
           <ExerciseImage
             src={exercise.image_url_snapshot}
@@ -29,65 +49,44 @@ export function PlanExerciseRow({ exercise, number }: PlanExerciseRowProps) {
             {number}
           </span>
         </div>
-
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <h4 className="text-base font-semibold text-foreground sm:text-lg">
+          <h4 className="break-words text-lg font-semibold text-foreground sm:text-xl">
             {exercise.name_snapshot}
           </h4>
-          <ul className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-            <li className="inline-flex items-center gap-1.5">
-              <Clock3 className="size-3.5 text-primary" aria-hidden />
-              {exercise.duration_minutes_snapshot} min
-            </li>
-            <li className="inline-flex items-center gap-1.5">
-              <Users className="size-3.5 text-primary" aria-hidden />
-              {exercise.min_participants_snapshot}–
-              {exercise.max_participants_snapshot} os.
-            </li>
-            <li className="inline-flex items-center gap-1.5">
-              <CalendarDays className="size-3.5 text-primary" aria-hidden />
-              {exercise.min_age_snapshot}–{exercise.max_age_snapshot} lat
-            </li>
-          </ul>
           <div className="flex flex-wrap gap-1.5">
-            {trainingTypes.map((type) => (
-              <CardItemBadge
-                key={type.id}
-                className="border border-foreground/25 bg-transparent px-2.5 py-0.5 text-foreground/80"
-              >
-                {type.name}
-              </CardItemBadge>
-            ))}
-            {equipment.length ? (
-              equipment.map((item) => (
+            {exercise.equipment_snapshot.length ? (
+              exercise.equipment_snapshot.map((item) => (
                 <CardItemBadge
                   key={item.id}
-                  icon={<Dumbbell className="size-3" aria-hidden />}
-                  className="border border-primary/60 bg-transparent px-2.5 py-0.5 text-primary"
+                  icon={<Dumbbell className="size-4" aria-hidden />}
+                  className="border border-primary/60 bg-transparent px-3 py-1 text-sm text-primary"
                 >
                   {item.name}
                 </CardItemBadge>
               ))
             ) : (
-              <CardItemBadge className="border border-foreground/20 bg-transparent px-2.5 py-0.5 text-muted-foreground">
+              <CardItemBadge className="border border-foreground/20 bg-transparent px-3 py-1 text-sm text-muted-foreground">
                 Brak sprzętu
               </CardItemBadge>
             )}
           </div>
         </div>
-      </div>
-
-      <div className={cn(PLAN_RATING_COLUMNS_CLASS, "lg:shrink-0")}>
-        {PLAN_RATING_COLUMNS.map((column) => (
-          <RatingMeter
-            key={column.key}
-            label={column.label}
-            value={exercise[column.key]}
-            fillClass={column.fillClass}
-            showLabel={false}
-          />
-        ))}
-      </div>
-    </article>
+        <span className="inline-flex shrink-0 items-center gap-1.5 self-start text-base font-semibold text-foreground sm:text-lg">
+          <Clock3 className="size-4 text-primary" aria-hidden />
+          {exercise.duration_minutes_snapshot} min
+        </span>
+      </button>
+      <CustomizedDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Podgląd ćwiczenia"
+        className="grid-rows-[auto_minmax(0,1fr)] max-h-[calc(100dvh-2rem)] gap-5 overflow-hidden p-4 sm:!top-8 sm:!bottom-8 sm:!h-auto sm:!translate-y-0 sm:max-w-190 sm:p-6"
+      >
+        <ExerciseReadonlyModal
+          exercise={snapshot}
+          onClose={() => setOpen(false)}
+        />
+      </CustomizedDialog>
+    </>
   );
 }

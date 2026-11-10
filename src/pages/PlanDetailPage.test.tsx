@@ -80,8 +80,28 @@ describe("PlanDetailPage", () => {
     expect(screen.getByText("Bieg")).toBeTruthy();
     expect(screen.getByText("Sparing")).toBeTruthy();
     expect(screen.getAllByText("Tarcza").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Intensywność").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Intensywność")).toBeNull();
     expect(screen.getByText("1")).toBeTruthy();
+  });
+
+  it("opens exercise snapshot details from a plan row", () => {
+    renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: /Bieg/ }));
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(
+      screen.getByText(planFixture.exercises[0].description_snapshot),
+    ).toBeTruthy();
+    expect(screen.getByText("Liczba uczestników")).toBeTruthy();
+    expect(screen.getAllByRole("meter")).toHaveLength(5);
+    expect(
+      screen.getByRole("meter", { name: "Intensywno\u015b\u0107" }),
+    ).toHaveAttribute(
+      "aria-valuenow",
+      String(planFixture.exercises[0].physical_difficulty_snapshot),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Zamknij" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 
   it("opens regenerate dialog with prefilled participant count", async () => {

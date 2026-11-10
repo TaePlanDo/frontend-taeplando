@@ -2,7 +2,6 @@ import { ChevronDown, Clock3 } from "lucide-react";
 import { useState } from "react";
 
 import { CardItemBadge } from "@/components/shared/CardItemBadge";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "cn";
 import { formatExerciseCount } from "@/lib/format/plural";
@@ -10,31 +9,11 @@ import { type PlanPhase } from "@/lib/plan/phaseGrouping";
 
 import { DeltaMinutesBadge } from "./DeltaMinutesBadge";
 import { PlanExerciseRow } from "./PlanExerciseRow";
-import { PLAN_RATING_COLUMNS, PLAN_RATING_COLUMNS_CLASS } from "./planRatings";
 
 type PlanPhaseSectionProps = {
   phase: PlanPhase;
   defaultOpen?: boolean;
 };
-
-function RatingColumnHeaders({ className }: { className?: string }) {
-  return (
-    <div className={cn(PLAN_RATING_COLUMNS_CLASS, className)}>
-      {PLAN_RATING_COLUMNS.map((column) => (
-        <Badge
-          key={column.key}
-          variant="outline"
-          className={cn(
-            "flex h-7 w-full min-w-0 items-center justify-center rounded-md px-1 text-center text-[10px] font-medium leading-none",
-            column.headerClass,
-          )}
-        >
-          {column.label}
-        </Badge>
-      ))}
-    </div>
-  );
-}
 
 export function PlanPhaseSection({
   phase,
@@ -79,15 +58,10 @@ export function PlanPhaseSection({
           deltaMinutes={phase.deltaMinutes}
           className="h-8 px-3 text-sm"
         />
-
-        {open ? (
-          <RatingColumnHeaders className="ml-auto hidden lg:grid" />
-        ) : null}
       </button>
 
       {open ? (
         <div id={panelId} className="border-t border-border px-4 sm:px-5">
-          <RatingColumnHeaders className="pt-3 lg:hidden" />
           {phase.exercises.length ? (
             phase.exercises.map((exercise, index) => (
               <PlanExerciseRow

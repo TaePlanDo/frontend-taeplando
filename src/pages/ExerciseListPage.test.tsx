@@ -288,14 +288,15 @@ describe("ExerciseListPage", () => {
     );
     const dialog = await screen.findByRole("dialog");
     for (const [label, value] of [
-      ["Intensywność fizyczna", "1"],
-      ["Trudność techniczna", "2"],
-      ["Zaangażowanie górnych partii", "3"],
-      ["Zaangażowanie dolnych partii", "4"],
-      ["Zaangażowanie partii core", "5"],
+      ["Intensywność", "1"],
+      ["Trudność", "2"],
+      ["Górne partie", "3"],
+      ["Dolne partie", "4"],
+      ["Core", "5"],
     ]) {
-      const block = within(dialog).getByText(label).parentElement!;
-      expect(within(block).getByText(value)).toBeTruthy();
+      expect(
+        within(dialog).getByRole("meter", { name: label }),
+      ).toHaveAttribute("aria-valuenow", value);
     }
     fireEvent.click(
       within(dialog).getByRole("button", { name: "Edytuj ćwiczenie" }),
