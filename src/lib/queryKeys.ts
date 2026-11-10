@@ -15,6 +15,8 @@ export const queryKeys = {
   exercises: {
     all: ["exercises"] as const,
     lists: () => [...queryKeys.exercises.all, "list"] as const,
+    listsByStatus: (status?: "SUSPENDED") =>
+      [...queryKeys.exercises.lists(), status ?? "ALL"] as const,
     catalogs: () => [...queryKeys.exercises.all, "catalogs"] as const,
   },
   equipment: {

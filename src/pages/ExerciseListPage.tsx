@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlusIcon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -54,6 +54,15 @@ export function ExerciseListPage() {
     useExerciseExclusion();
   const showListMetadata = hasDisplayableListData(listState);
   const isListUnavailable = listState.kind === "unavailable";
+
+  useEffect(() => {
+    setEditingExercise((current) => {
+      if (!current) return current;
+      return (
+        exercises.find((exercise) => exercise.id === current.id) ?? current
+      );
+    });
+  }, [exercises]);
 
   async function handleDelete(id: string) {
     try {

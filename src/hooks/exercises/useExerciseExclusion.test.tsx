@@ -59,11 +59,20 @@ it("reports an unavailable exercise without invalidating queries", async () => {
 
 it("leaves filtered pages for the server to recalculate after restoring", async () => {
   const { client, result } = setup();
-  const allKey = [...queryKeys.exercises.lists(), {}, { page: 1, pageSize: 6 }];
+  const allKey = [
+    ...queryKeys.exercises.listsByStatus(),
+    {},
+    { page: 1, pageSize: 6 },
+  ];
   const excludedKey = [
-    ...queryKeys.exercises.lists(),
+    ...queryKeys.exercises.listsByStatus("SUSPENDED"),
     { status: "SUSPENDED" },
     { page: 1, pageSize: 6 },
+  ];
+  const otherKey = [
+    ...queryKeys.exercises.listsByStatus(),
+    {},
+    { page: 2, pageSize: 6 },
   ];
   const page = {
     items: [{ id: "1", status: "SUSPENDED" }],
@@ -74,6 +83,9 @@ it("leaves filtered pages for the server to recalculate after restoring", async 
   };
   client.setQueryData(allKey, page);
   client.setQueryData(excludedKey, page);
+  const otherPage = { ...page, items: [{ id: "2", status: "ACTIVE" }] };
+  client.setQueryData(otherKey, otherPage);
+  const otherUpdates = client.getQueryState(otherKey)?.dataUpdateCount;
 
   await act(() => result.current.setExclusion({ id: "1", excluded: false }));
 
@@ -82,5 +94,8 @@ it("leaves filtered pages for the server to recalculate after restoring", async 
     items: [{ id: "1", status: "ACTIVE" }],
   });
   expect(client.getQueryData(excludedKey)).toEqual(page);
+  expect(client.getQueryState(allKey)?.isInvalidated).toBe(true);
   expect(client.getQueryState(excludedKey)?.isInvalidated).toBe(true);
+  expect(client.getQueryState(otherKey)?.isInvalidated).toBe(true);
+  expect(client.getQueryState(otherKey)?.dataUpdateCount).toBe(otherUpdates);
 });

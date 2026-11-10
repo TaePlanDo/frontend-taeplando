@@ -335,6 +335,55 @@ describe("ExerciseListPage", () => {
     expect(setExclusion).toHaveBeenCalledWith({ id: "1", excluded: false });
   });
 
+  it("synchronizes an open preview with a refreshed list", async () => {
+    const { rerender } = renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    state.items = [
+      { ...exercise, status: "SUSPENDED", description: "Nowy opis" },
+    ];
+    rerender(
+      <MemoryRouter initialEntries={["/exercises"]}>
+        <ExerciseListPage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("switch", { name: "Wyklucz ćwiczenie" }),
+      ).toHaveAttribute("aria-checked", "true"),
+    );
+    expect(screen.getByText("Nowy opis")).toBeTruthy();
+  });
+
+  it("keeps the restored exercise in the preview when it leaves filtered results", async () => {
+    state.items = [{ ...exercise, status: "SUSPENDED" }];
+    setExclusion.mockResolvedValue(undefined);
+    const { rerender } = renderPage("/exercises?status=SUSPENDED");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    fireEvent.click(screen.getByRole("switch", { name: "Wyklucz ćwiczenie" }));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("switch", { name: "Wyklucz ćwiczenie" }),
+      ).toHaveAttribute("aria-checked", "false"),
+    );
+
+    state.items = [];
+    state.listState = { kind: "empty" };
+    rerender(
+      <MemoryRouter initialEntries={["/exercises?status=SUSPENDED"]}>
+        <ExerciseListPage />
+      </MemoryRouter>,
+    );
+    expect(
+      screen.getByRole("switch", { name: "Wyklucz ćwiczenie" }),
+    ).toHaveAttribute("aria-checked", "false");
+    expect(screen.getByRole("heading", { name: "Ap chagi" })).toBeTruthy();
+  });
+
   it("keeps the previous state and reports an exclusion error", async () => {
     setExclusion.mockRejectedValueOnce(new Error("Ćwiczenie jest niedostępne"));
     renderPage();
