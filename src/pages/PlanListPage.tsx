@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { PlusIcon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,6 +23,7 @@ import type { PlanListItem } from "@/types/plan";
 
 export function PlanListPage() {
   const navigate = useNavigate();
+  const { pathname, search } = useLocation();
   const {
     filters,
     page: pageFromUrl,
@@ -163,7 +164,11 @@ export function PlanListPage() {
             <PlanCardItem
               key={plan.id}
               plan={plan}
-              onOpen={() => navigate(`/plans/${plan.id}`)}
+              onOpen={() =>
+                navigate(`/plans/${plan.id}`, {
+                  state: { backTo: pathname + search },
+                })
+              }
               onDelete={() => handleDelete(plan)}
             />
           ))}

@@ -47,7 +47,7 @@ export function CustomizedSheet({
         style={{ width: `min(100%, ${SHEET_WIDTH}px)` }}
         className={cn("gap-0 overflow-hidden p-0", className)}
       >
-        <SheetHeader className="shrink-0 border-b border-border px-6 py-4 text-left">
+        <SheetHeader className="box-content h-16 shrink-0 justify-center border-b border-foreground/10 px-6 py-0 text-left">
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-6 pt-4 pb-4">

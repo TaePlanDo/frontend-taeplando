@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 
-export const SHEET_WIDTH = 420;
+export const SHEET_WIDTH = 380;
 
 type SheetOffsetContextValue = {
   offset: number;
