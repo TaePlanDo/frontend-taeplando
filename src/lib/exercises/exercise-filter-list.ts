@@ -45,7 +45,7 @@ export const exerciseFilters: FilterDimension<ExerciseListFilters>[] = [
       ],
       range: PLANNING_FILTER_BOUNDS,
       chip: (filters) =>
-        `${label}: ${filters[min] ?? "…"}-${filters[max] ?? "…"}`,
+        `${label}: ${filters[min] ?? "…"}–${filters[max] ?? "…"}`,
     }),
   ),
   {

@@ -60,7 +60,7 @@ describe("filter-dimensions", () => {
     };
     expect(
       activeChips(filters, exerciseFilters, {}).map((chip) => chip.name),
-    ).toEqual(["Intensywność fizyczna: 3-…", "Zaangażowanie partii core: 2–4"]);
+    ).toEqual(["Intensywność fizyczna: 3–…", "Zaangażowanie partii core: 2–4"]);
     expect(withoutDimension(filters, "core_load", exerciseFilters)).toEqual({
       min_physical_difficulty: 3,
     });
