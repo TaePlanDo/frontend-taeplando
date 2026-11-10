@@ -149,6 +149,7 @@ export function ExerciseListPage() {
           >
             <ExerciseReadonlyModal
               exercise={editingExercise}
+              onClose={() => setDialogReadonlyOpen(false)}
               onEdit={() => {
                 setDialogReadonlyOpen(false);
                 setDialogOpen(true);

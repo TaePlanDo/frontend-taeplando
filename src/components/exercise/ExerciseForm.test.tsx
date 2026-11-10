@@ -85,22 +85,28 @@ describe("ExerciseForm", () => {
       screen.getByPlaceholderText("Opisz ćwiczenie, zasady, wariant..."),
       { target: { value: "Opis" } },
     );
-    [
-      ["minAge", "7"],
-      ["maxAge", "14"],
-      ["minParticipants", "1"],
-      ["maxParticipants", "20"],
-      ["durationMinutes", "10"],
-    ].forEach(([id, value]) => {
-      fireEvent.change(document.getElementById(id) as HTMLInputElement, {
-        target: { value },
-      });
+    fireEvent.change(screen.getByLabelText("Czas trwania w minutach"), {
+      target: { value: "10" },
     });
     await addFromList("Typ", "Technika");
     await addFromList("Segment", "Rozgrzewka");
     createExercise.mockResolvedValueOnce({});
     fireEvent.click(screen.getByRole("button", { name: "Stwórz ćwiczenie" }));
-    await waitFor(() => expect(createExercise).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(createExercise).toHaveBeenCalledWith(
+        expect.objectContaining({
+          min_age: 1,
+          max_age: 99,
+          min_participants: 1,
+          max_participants: 99,
+          physical_difficulty: 3,
+          technical_difficulty: 3,
+          upper_body_load: 3,
+          lower_body_load: 3,
+          core_load: 3,
+        }),
+      ),
+    );
     expect(onClose).toHaveBeenCalled();
   });
 
@@ -109,7 +115,7 @@ describe("ExerciseForm", () => {
       id: "1",
       owner_user_id: "owner",
       scope: "PRIVATE",
-      image_url: null,
+      image_url: "https://example.com/image.png",
       name: "Ap chagi",
       description: "Opis",
       min_age: 7,
@@ -117,6 +123,11 @@ describe("ExerciseForm", () => {
       min_participants: 1,
       max_participants: 20,
       duration_minutes: 10,
+      physical_difficulty: 2,
+      technical_difficulty: 4,
+      upper_body_load: 1,
+      lower_body_load: 5,
+      core_load: 3,
       status: "ACTIVE",
       equipment: [],
       training_types: [{ id: "t1", name: "Technika" }],
@@ -130,8 +141,30 @@ describe("ExerciseForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Edytuj ćwiczenie" }));
     await waitFor(() =>
       expect(updateExercise).toHaveBeenCalledWith(
-        expect.objectContaining({ id: "1" }),
+        expect.objectContaining({
+          id: "1",
+          payload: expect.objectContaining({
+            image_url: exercise.image_url,
+            physical_difficulty: 2,
+            technical_difficulty: 4,
+            upper_body_load: 1,
+            lower_body_load: 5,
+            core_load: 3,
+          }),
+        }),
       ),
     );
+  });
+
+  it("rejects planning values outside the allowed range", async () => {
+    renderForm();
+    fireEvent.change(screen.getByLabelText("Intensywność fizyczna"), {
+      target: { value: "6" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Stwórz ćwiczenie" }));
+    expect(
+      await screen.findByText("Intensywność fizyczna musi być w zakresie 1–5"),
+    ).toBeTruthy();
+    expect(createExercise).not.toHaveBeenCalled();
   });
 });

@@ -2,20 +2,30 @@ import { useEffect, useState } from "react";
 
 import { Slider } from "@/components/ui/slider";
 
+type RangeHandler = (value: [number, number]) => void;
+
 type DualRangeFieldProps = {
   label: string;
   min: number;
   max: number;
   value: [number, number];
-  onValueCommit: (value: [number, number]) => void;
+  onValueChange?: RangeHandler;
+  onValueCommit?: RangeHandler;
   disabled?: boolean;
 };
+
+function pairHandler(handler?: RangeHandler) {
+  return ([low, high]: number[]) => {
+    if (low != null && high != null) handler?.([low, high]);
+  };
+}
 
 export function DualRangeField({
   label,
   min,
   max,
   value,
+  onValueChange,
   onValueCommit,
   disabled,
 }: DualRangeFieldProps) {
@@ -31,7 +41,7 @@ export function DualRangeField({
       <div className="flex items-center justify-between gap-2">
         <span className="text-sm font-medium text-foreground">{label}</span>
         <span className="text-sm text-muted-foreground">
-          {current[0]} - {current[1]}
+          {current[0]} – {current[1]}
         </span>
       </div>
       <Slider
@@ -40,12 +50,11 @@ export function DualRangeField({
         step={1}
         value={current}
         disabled={disabled}
-        onValueChange={setCurrent}
-        onValueCommit={([newLow, newHigh]) => {
-          if (newLow != null && newHigh != null) {
-            onValueCommit([newLow, newHigh]);
-          }
+        onValueChange={(next) => {
+          setCurrent(next);
+          pairHandler(onValueChange)(next);
         }}
+        onValueCommit={pairHandler(onValueCommit)}
         aria-label={label}
       />
     </div>

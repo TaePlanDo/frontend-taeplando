@@ -2,6 +2,8 @@ import { namesFor, type FilterDimension } from "@/lib/filters/definition";
 import {
   AGE_FILTER_BOUNDS,
   PARTICIPANTS_FILTER_BOUNDS,
+  PLANNING_FILTER_BOUNDS,
+  PLANNING_FILTERS,
   type ExerciseListFilters,
 } from "@/types/exercise-list-filters";
 
@@ -33,6 +35,19 @@ export const exerciseFilters: FilterDimension<ExerciseListFilters>[] = [
     chip: (filters) =>
       `Liczba uczestników: ${filters.min_participants ?? "…"}–${filters.max_participants ?? "…"}`,
   },
+  ...PLANNING_FILTERS.map(
+    ({ key, min, max, label }): FilterDimension<ExerciseListFilters> => ({
+      key,
+      label,
+      fields: [
+        { key: min, kind: "int" },
+        { key: max, kind: "int" },
+      ],
+      range: PLANNING_FILTER_BOUNDS,
+      chip: (filters) =>
+        `${label}: ${filters[min] ?? "…"}-${filters[max] ?? "…"}`,
+    }),
+  ),
   {
     key: "equipment",
     label: "Sprzęt",

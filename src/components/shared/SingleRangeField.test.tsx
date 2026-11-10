@@ -57,7 +57,7 @@ describe("SingleRangeField", () => {
         min={1}
         max={99}
         value={[10, 30]}
-        onValueCommit={onChange}
+        onValueChange={onChange}
       />,
     );
     const sliders = screen.getAllByRole("slider");

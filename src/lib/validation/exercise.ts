@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { PLANNING_FILTER_BOUNDS } from "@/types/exercise-list-filters";
+
 const positiveInteger = (label: string) =>
   z
     .string()
@@ -8,6 +10,16 @@ const positiveInteger = (label: string) =>
     .regex(/^\d+$/, `${label} musi być liczbą całkowitą`)
     .transform(Number)
     .pipe(z.number().min(1, `${label} musi być większy od 0`));
+
+const planningValue = (label: string) =>
+  positiveInteger(label).pipe(
+    z
+      .number()
+      .max(
+        PLANNING_FILTER_BOUNDS.max,
+        `${label} musi być w zakresie ${PLANNING_FILTER_BOUNDS.min}–${PLANNING_FILTER_BOUNDS.max}`,
+      ),
+  );
 
 export const exerciseFormSchema = z
   .object({
@@ -22,6 +34,11 @@ export const exerciseFormSchema = z
     minParticipants: positiveInteger("Minimalna liczba uczestników"),
     maxParticipants: positiveInteger("Maksymalna liczba uczestników"),
     durationMinutes: positiveInteger("Czas trwania"),
+    physicalDifficulty: planningValue("Intensywność fizyczna"),
+    technicalDifficulty: planningValue("Trudność techniczna"),
+    upperBodyLoad: planningValue("Zaangażowanie górnych partii"),
+    lowerBodyLoad: planningValue("Zaangażowanie dolnych partii"),
+    coreLoad: planningValue("Zaangażowanie partii core"),
     equipmentIds: z.array(z.string()),
     trainingTypeIds: z
       .array(z.string())

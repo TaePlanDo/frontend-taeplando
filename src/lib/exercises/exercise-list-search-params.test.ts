@@ -19,6 +19,12 @@ describe("exercise-list-search-params", () => {
         max_age: 14,
         min_participants: 2,
         max_participants: 20,
+        min_physical_difficulty: 2,
+        max_physical_difficulty: 4,
+        min_technical_difficulty: 3,
+        max_upper_body_load: 4,
+        min_lower_body_load: 2,
+        max_core_load: 3,
         equipment_ids: [
           "8f20d653-dc8b-4b76-bdb4-b225c7d420a6",
           "de318877-45d8-4b56-b1c4-5ddaa5caa46a",
@@ -38,7 +44,7 @@ describe("exercise-list-search-params", () => {
       normalizeFilters(
         {
           name: " x ",
-          min_age: 0,
+          min_age: 1,
           max_age: 99,
           min_participants: 1,
           max_participants: 99,
@@ -51,6 +57,22 @@ describe("exercise-list-search-params", () => {
     expect([
       ...toListSearchParams({ filters: {}, page: 1 }, exerciseFilters).keys(),
     ]).toEqual([]);
+  });
+
+  it("drops out-of-range and inverted ranges", () => {
+    expect(
+      normalizeFilters(
+        {
+          min_age: 0,
+          max_age: 14,
+          min_core_load: 5,
+          max_core_load: 2,
+          min_upper_body_load: 0,
+          max_upper_body_load: 4,
+        },
+        exerciseFilters,
+      ),
+    ).toEqual({ max_age: 14, max_upper_body_load: 4 });
   });
 
   it("keeps unrelated query parameters when replacing state", () => {

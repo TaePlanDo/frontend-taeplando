@@ -44,7 +44,7 @@ describe("ListFiltersSheet", () => {
     fireEvent.keyDown(screen.getAllByRole("slider")[0], { key: "ArrowRight" });
     expect(onChange).toHaveBeenLastCalledWith({
       name: "chagi",
-      min_age: 1,
+      min_age: 2,
       max_age: 99,
     });
 

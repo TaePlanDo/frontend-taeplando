@@ -51,4 +51,18 @@ describe("filter-dimensions", () => {
       ),
     ).toEqual({ name: "a", equipment_ids: ["1"] });
   });
+
+  it("counts, labels and clears planning ranges independently", () => {
+    const filters = {
+      min_core_load: 2,
+      max_core_load: 4,
+      min_physical_difficulty: 3,
+    };
+    expect(
+      activeChips(filters, exerciseFilters, {}).map((chip) => chip.name),
+    ).toEqual(["Intensywność fizyczna: 3-…", "Zaangażowanie partii core: 2–4"]);
+    expect(withoutDimension(filters, "core_load", exerciseFilters)).toEqual({
+      min_physical_difficulty: 3,
+    });
+  });
 });
