@@ -293,6 +293,16 @@ it("navigates to a matching plan and restores form draft on back", async () => {
     );
   }
 
+  function PlanNewWithLocation() {
+    const { pathname, search } = useLocation();
+    return (
+      <>
+        <div data-testid="location">{`${pathname}${search}`}</div>
+        <PlanNewPage />
+      </>
+    );
+  }
+
   render(
     <QueryClientProvider
       client={
@@ -303,7 +313,7 @@ it("navigates to a matching plan and restores form draft on back", async () => {
     >
       <MemoryRouter initialEntries={["/plans/new"]}>
         <Routes>
-          <Route path="/plans/new" element={<PlanNewPage />} />
+          <Route path="/plans/new" element={<PlanNewWithLocation />} />
           <Route path="/plans/:planId" element={<PlanDetailBack />} />
         </Routes>
       </MemoryRouter>
@@ -327,4 +337,8 @@ it("navigates to a matching plan and restores form draft on back", async () => {
   expect(
     screen.getByRole("combobox", { name: "Typ treningu" }),
   ).toHaveTextContent("Technika");
+  await waitFor(() => {
+    expect(screen.getByTestId("location")).toHaveTextContent("/plans/new");
+    expect(screen.getByTestId("location").textContent).not.toContain("?");
+  });
 });

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -66,6 +66,11 @@ export function PlanGenerationForm({
   const busy =
     isStarting || isSubmitting || choiceSession.status === "checking";
   const noGroups = groups.status === "ready" && groups.items.length === 0;
+
+  useEffect(() => {
+    if (!search) return;
+    navigate({ pathname: "/plans/new", search: "" }, { replace: true });
+  }, [navigate, search]);
 
   async function startGeneration(values: PlanGenerationFormOutput) {
     reset();
