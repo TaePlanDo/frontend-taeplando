@@ -17,7 +17,7 @@ export class PlanNewPage {
   async goto(): Promise<void> {
     await this.page.goto("/plans/new");
     await expect(this.heading).toBeVisible();
-    await expect(this.groupSelect).toBeEnabled({ timeout: 15_000 });
+    await expect(this.groupSelect).toBeEnabled();
   }
 
   async selectGroup(groupName: string): Promise<void> {

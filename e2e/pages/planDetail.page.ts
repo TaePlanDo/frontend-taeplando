@@ -29,7 +29,7 @@ export class PlanDetailPage {
       this.page.getByRole("heading", {
         name: new RegExp(`Plan treningowy.*${groupName}`),
       }),
-    ).toBeVisible({ timeout: 15_000 });
+    ).toBeVisible();
     await expect(
       this.page.getByRole("heading", { level: 4 }).first(),
     ).toBeVisible();
