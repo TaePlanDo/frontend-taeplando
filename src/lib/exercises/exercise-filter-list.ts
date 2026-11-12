@@ -10,16 +10,21 @@ import {
 export const exerciseFilters: FilterDimension<ExerciseListFilters>[] = [
   {
     key: "name",
+    kind: "text",
     fields: [{ key: "name", kind: "string" }],
     chip: (filters) => `Nazwa: ${filters.name}`,
   },
   {
     key: "status",
-    fields: [{ key: "status", kind: "string", allowedValues: ["SUSPENDED"] }],
+    kind: "switch",
+    label: "Wykluczone ćwiczenia",
+    fields: [{ key: "status", kind: "string" }],
+    value: "SUSPENDED",
     chip: () => "Wykluczone ćwiczenia",
   },
   {
     key: "age",
+    kind: "range",
     label: "Wiek",
     fields: [
       { key: "min_age", kind: "int" },
@@ -31,6 +36,7 @@ export const exerciseFilters: FilterDimension<ExerciseListFilters>[] = [
   },
   {
     key: "participants",
+    kind: "range",
     label: "Liczba uczestników",
     fields: [
       { key: "min_participants", kind: "int" },
@@ -43,6 +49,7 @@ export const exerciseFilters: FilterDimension<ExerciseListFilters>[] = [
   ...PLANNING_FILTERS.map(
     ({ key, min, max, label }): FilterDimension<ExerciseListFilters> => ({
       key,
+      kind: "range",
       label,
       fields: [
         { key: min, kind: "int" },
@@ -55,6 +62,7 @@ export const exerciseFilters: FilterDimension<ExerciseListFilters>[] = [
   ),
   {
     key: "equipment",
+    kind: "catalog",
     label: "Sprzęt",
     fields: [{ key: "equipment_ids", kind: "stringCsv" }],
     chip: (filters, catalogs) =>
@@ -62,6 +70,7 @@ export const exerciseFilters: FilterDimension<ExerciseListFilters>[] = [
   },
   {
     key: "trainingTypes",
+    kind: "catalog",
     label: "Kategorie",
     fields: [{ key: "training_type_ids", kind: "stringCsv" }],
     chip: (filters, catalogs) =>
@@ -69,6 +78,7 @@ export const exerciseFilters: FilterDimension<ExerciseListFilters>[] = [
   },
   {
     key: "segments",
+    kind: "catalog",
     label: "Schematy",
     fields: [{ key: "segment_ids", kind: "intCsv" }],
     chip: (filters, catalogs) =>

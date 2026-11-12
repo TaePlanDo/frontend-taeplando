@@ -6,17 +6,60 @@ export type CatalogItem = { id: string | number; name: string };
 
 export type FilterCatalogs = Record<string, CatalogItem[]>;
 
+type KeysOfType<F extends Filters, T> = {
+  [K in keyof F]-?: NonNullable<F[K]> extends T ? K : never;
+}[keyof F] &
+  string;
+
+type Field<
+  F extends Filters,
+  K extends "string" | "int" | "stringCsv" | "intCsv",
+> = {
+  [Kind in K]: {
+    key: KeysOfType<
+      F,
+      Kind extends "string"
+        ? string
+        : Kind extends "int"
+          ? number
+          : Kind extends "stringCsv"
+            ? string[]
+            : number[]
+    >;
+    kind: Kind;
+  };
+}[K];
+type StringKey<F extends Filters> = {
+  [K in keyof F]-?: NonNullable<F[K]> extends string ? K : never;
+}[keyof F] &
+  string;
+type SwitchDimension<F extends Filters> = {
+  [K in StringKey<F>]: {
+    kind: "switch";
+    label: string;
+    fields: [{ key: K; kind: "string" }];
+    value: NonNullable<F[K]>;
+  };
+}[StringKey<F>];
+
 export type FilterDimension<F extends Filters> = {
   key: string;
-  label?: string;
-  fields: {
-    key: keyof F & string;
-    kind: "string" | "int" | "stringCsv" | "intCsv";
-    allowedValues?: readonly string[];
-  }[];
-  range?: Bounds;
   chip: (filters: F, catalogs: FilterCatalogs) => string;
-};
+} & (
+  | { kind: "text"; fields: [Field<F, "string">] }
+  | {
+      kind: "range";
+      label: string;
+      fields: [Field<F, "int">, Field<F, "int">];
+      range: Bounds;
+    }
+  | {
+      kind: "catalog";
+      label?: string;
+      fields: [Field<F, "stringCsv" | "intCsv">];
+    }
+  | SwitchDimension<F>
+);
 
 export type ListSearchState<F> = { filters: F; page: number };
 
@@ -33,7 +76,10 @@ function parseCsv(raw: string | null) {
 }
 
 function fieldsOf<F extends Filters>(dimensions: FilterDimension<F>[]) {
-  return dimensions.flatMap((dimension) => dimension.fields);
+  return dimensions.flatMap<{
+    key: keyof F & string;
+    kind: "string" | "int" | "stringCsv" | "intCsv";
+  }>((dimension) => dimension.fields);
 }
 
 export function normalizeFilters<F extends Filters>(
@@ -42,8 +88,10 @@ export function normalizeFilters<F extends Filters>(
 ): F {
   const next: Filters = {};
 
-  for (const { fields, range } of dimensions) {
-    if (range) {
+  for (const dimension of dimensions) {
+    const { fields } = dimension;
+    if (dimension.kind === "range") {
+      const { range } = dimension;
       const [minKey, maxKey] = fields.map((field) => field.key);
       const pick = (key: string) => {
         const value = filters[key];
@@ -65,12 +113,17 @@ export function normalizeFilters<F extends Filters>(
       continue;
     }
 
-    for (const { key, kind, allowedValues } of fields) {
+    if (dimension.kind === "switch") {
+      const key = dimension.fields[0].key;
+      if (filters[key] === dimension.value) next[key] = dimension.value;
+      continue;
+    }
+
+    for (const { key, kind } of fields) {
       const value = filters[key];
       if (kind === "string") {
         const text = typeof value === "string" ? value.trim() : "";
-        if (text && (!allowedValues || allowedValues.includes(text)))
-          next[key] = text;
+        if (text) next[key] = text;
       } else if (Array.isArray(value) && value.length) {
         next[key] = [...new Set(value)];
       }
@@ -118,7 +171,7 @@ export function parseListSearchParams<F extends Filters>(
 }
 
 export function toListSearchParams<F extends Filters>(
-  { filters, page }: ListSearchState<F>,
+  { filters, page }: ListSearchState<NoInfer<F>>,
   dimensions: FilterDimension<F>[],
 ) {
   const params = new URLSearchParams();
@@ -154,7 +207,7 @@ export function namesFor(
 }
 
 export function activeDimensions<F extends Filters>(
-  filters: F,
+  filters: NoInfer<F>,
   dimensions: FilterDimension<F>[],
 ) {
   return dimensions.filter(({ fields }) =>
@@ -168,7 +221,7 @@ export function activeDimensions<F extends Filters>(
 }
 
 export function activeChips<F extends Filters>(
-  filters: F,
+  filters: NoInfer<F>,
   dimensions: FilterDimension<F>[],
   catalogs: FilterCatalogs,
 ) {
@@ -179,7 +232,7 @@ export function activeChips<F extends Filters>(
 }
 
 export function withoutDimension<F extends Filters>(
-  filters: F,
+  filters: NoInfer<F>,
   dimensionKey: string,
   dimensions: FilterDimension<F>[],
 ): F {

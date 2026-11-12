@@ -7,6 +7,7 @@ import { ExerciseReadonlyModal } from "@/components/exercise/ExerciseReadonlyMod
 import { CardItemBadge } from "@/components/shared/CardItemBadge";
 import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
 import { ExerciseImage } from "@/components/shared/ExerciseImage";
+import { mapPlanExerciseToSnapshot } from "@/lib/mappers/plan";
 import type { PlanExercise } from "@/types/plan";
 
 type PlanExerciseRowProps = {
@@ -16,24 +17,7 @@ type PlanExerciseRowProps = {
 
 export function PlanExerciseRow({ exercise, number }: PlanExerciseRowProps) {
   const [open, setOpen] = useState(false);
-  const snapshot = {
-    name: exercise.name_snapshot,
-    description: exercise.description_snapshot,
-    image_url: exercise.image_url_snapshot,
-    min_age: exercise.min_age_snapshot,
-    max_age: exercise.max_age_snapshot,
-    min_participants: exercise.min_participants_snapshot,
-    max_participants: exercise.max_participants_snapshot,
-    duration_minutes: exercise.duration_minutes_snapshot,
-    physical_difficulty: exercise.physical_difficulty_snapshot,
-    technical_difficulty: exercise.technical_difficulty_snapshot,
-    upper_body_load: exercise.upper_body_load_snapshot,
-    lower_body_load: exercise.lower_body_load_snapshot,
-    core_load: exercise.core_load_snapshot,
-    equipment: exercise.equipment_snapshot,
-    training_types: exercise.training_types_snapshot,
-    segments: exercise.segments_snapshot,
-  };
+  const snapshot = mapPlanExerciseToSnapshot(exercise);
 
   return (
     <>

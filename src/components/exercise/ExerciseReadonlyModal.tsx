@@ -3,17 +3,12 @@ import { CustomizedSwitch } from "@/components/shared/CustomizedSwitch";
 import { ExerciseImage } from "@/components/shared/ExerciseImage";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import type { Exercise } from "@/types/exercise";
+import type { Exercise, ExerciseDetails } from "@/types/exercise";
 
 import { AttributeRow } from "./AttributeRow";
 import { ExerciseStatBlock } from "./ExerciseStatBlock";
 import { EXERCISE_RATING_COLUMNS } from "./exerciseRatings";
 import { RatingMeter } from "./RatingMeter";
-
-type ExerciseDetails = Omit<
-  Exercise,
-  "id" | "owner_user_id" | "scope" | "status"
->;
 
 type ExerciseReadonlyModalProps = {
   onClose: () => void;

@@ -21,6 +21,11 @@ export type Exercise = {
   segments: TrainingSegment[];
 };
 
+export type ExerciseDetails = Omit<
+  Exercise,
+  "id" | "owner_user_id" | "scope" | "status"
+>;
+
 export type CatalogReference = { id: string; name: string };
 export type TrainingSegment = { id: number; code: string; name: string };
 

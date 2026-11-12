@@ -10,7 +10,6 @@ import { ListFiltersSheet } from "@/components/filters/ListFiltersSheet";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
 import { CustomizedPagination } from "@/components/shared/CustomizedPagination";
-import { CustomizedSwitch } from "@/components/shared/CustomizedSwitch";
 import { ListStateView } from "@/components/shared/ListStateView";
 import { ManagementPageLayout } from "@/components/shared/ManagementPageLayout";
 import { Badge } from "@/components/ui/badge";
@@ -141,18 +140,7 @@ export function ExerciseListPage() {
               isLoading={isLoading}
               isError={isError}
               onRetry={() => void refetchCatalogs()}
-            >
-              <CustomizedSwitch
-                label="Wykluczone ćwiczenia"
-                checked={filters.status === "SUSPENDED"}
-                onCheckedChange={(excluded) =>
-                  setFilters({
-                    ...filters,
-                    status: excluded ? "SUSPENDED" : undefined,
-                  })
-                }
-              />
-            </ListFiltersSheet>
+            />
           </ListFiltersBar>
         )
       }
