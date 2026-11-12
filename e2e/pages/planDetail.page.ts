@@ -1,6 +1,10 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
+export function planNameForGroup(groupName: string): string {
+  return `Plan treningowy – ${groupName}`;
+}
+
 export class PlanDetailPage {
   readonly page: Page;
   readonly regenerateButton: Locator;
