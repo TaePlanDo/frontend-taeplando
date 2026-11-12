@@ -10,7 +10,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { formatRelativeTime } from "@/lib/format/date-to-text";
+import { formatMediumDate } from "@/lib/format/date-to-text";
 import { formatParticipantCount } from "@/lib/format/plural";
 import { formatDuration } from "@/lib/format/time";
 import type { PlanListItem } from "@/types/plan";
@@ -54,7 +54,7 @@ export function PlanCardItem(props: PlanCardItemProps) {
           </CardItemBadge>
         ) : null}
         <CardAction className="text-xs text-foreground/80">
-          Utworzono {formatRelativeTime(plan.generated_at)}
+          Utworzono {formatMediumDate(plan.generated_at)}
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-2 px-5">
@@ -77,9 +77,7 @@ export function PlanCardItem(props: PlanCardItemProps) {
             {formatParticipantCount(plan.participant_count)}
           </CardItemBadge>
         </div>
-        {isChoice ? (
-          <span className="text-sm font-medium text-primary">Otwórz &gt;</span>
-        ) : (
+        {isChoice ? null : (
           <div
             onClick={(event) => event.stopPropagation()}
             onKeyDown={(event) => event.stopPropagation()}

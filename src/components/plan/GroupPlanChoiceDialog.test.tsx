@@ -79,7 +79,7 @@ describe("GroupPlanChoiceDialog", () => {
       screen.getByRole("heading", { name: "Kata Taegeuk 1–3 – powtórka" }),
     ).toBeVisible();
     expect(screen.queryByRole("button", { name: /Usuń/ })).toBeNull();
-    expect(screen.getByText("Otwórz >")).toBeVisible();
+    expect(screen.queryByText(/Otwórz/)).toBeNull();
 
     fireEvent.click(
       screen.getByRole("link", { name: /Kata Taegeuk 1–3 – powtórka/ }),

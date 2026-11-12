@@ -204,6 +204,69 @@ describe("fetchMatchingPlansForGeneration", () => {
 
     expect(matches).toHaveLength(4);
   });
+
+  it("pages until it finds enough exact matches", async () => {
+    vi.mocked(getPlansRequest)
+      .mockResolvedValueOnce({
+        items: [
+          plan({
+            id: "wrong-equipment",
+            available_equipment_snapshot: [{ id: "eq-other", name: "X" }],
+          }),
+        ],
+        total: 21,
+        page: 1,
+        page_size: 20,
+        total_pages: 2,
+      })
+      .mockResolvedValueOnce({
+        items: [plan({ id: "match-on-page-2" })],
+        total: 21,
+        page: 2,
+        page_size: 20,
+        total_pages: 2,
+      });
+
+    const matches = await fetchMatchingPlansForGeneration({
+      trainingGroupId: "group-1",
+      participantCount: 20,
+      equipmentIds: [],
+      trainingTypeId: null,
+    });
+
+    expect(getPlansRequest).toHaveBeenCalledTimes(2);
+    expect(getPlansRequest).toHaveBeenNthCalledWith(2, 2, 20, {
+      training_group_ids: ["group-1"],
+      min_participants: 20,
+      max_participants: 20,
+    });
+    expect(matches.map(({ id }) => id)).toEqual(["match-on-page-2"]);
+  });
+
+  it("stops after the page cap even when more pages exist", async () => {
+    vi.mocked(getPlansRequest).mockImplementation(async (page) => ({
+      items: [
+        plan({
+          id: `wrong-${page}`,
+          available_equipment_snapshot: [{ id: "eq-other", name: "X" }],
+        }),
+      ],
+      total: 200,
+      page,
+      page_size: 20,
+      total_pages: 10,
+    }));
+
+    const matches = await fetchMatchingPlansForGeneration({
+      trainingGroupId: "group-1",
+      participantCount: 20,
+      equipmentIds: [],
+      trainingTypeId: null,
+    });
+
+    expect(getPlansRequest).toHaveBeenCalledTimes(5);
+    expect(matches).toEqual([]);
+  });
 });
 
 describe("lookupMatchingPlansOrEmpty", () => {

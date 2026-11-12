@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { GroupPlanChoiceDialog } from "@/components/plan/GroupPlanChoiceDialog";
-import { openPlanFromGenerationDraft } from "@/lib/plan/openPlanFromGenerationDraft";
 import { CatalogMultiSelect } from "@/components/shared/CatalogMultiSelect";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedSelect } from "@/components/shared/CustomizedSelect";
@@ -16,6 +15,7 @@ import { PLAN_GENERATION_LIMITS } from "@/lib/constants/planGeneration";
 import { formatParticipantCount } from "@/lib/format/plural";
 import { toPlanGenerationParameters } from "@/lib/plan/buildGenerationParameters";
 import { lookupMatchingPlansOrEmpty } from "@/lib/plan/matchingPlans";
+import { openPlanFromGenerationDraft } from "@/lib/plan/openPlanFromGenerationDraft";
 import { parsePlanGenerationDraft } from "@/lib/plan/planGenerationDraft";
 import {
   planGenerationSchema,
@@ -63,6 +63,7 @@ export function PlanGenerationForm({
   const [choiceSession, setChoiceSession] = useState<ChoiceSession>({
     status: "idle",
   });
+  const submitGenerationRef = useRef(0);
   const busy =
     isStarting || isSubmitting || choiceSession.status === "checking";
   const noGroups = groups.status === "ready" && groups.items.length === 0;
@@ -72,12 +73,22 @@ export function PlanGenerationForm({
     navigate({ pathname: "/plans/new", search: "" }, { replace: true });
   }, [navigate, search]);
 
-  async function startGeneration(values: PlanGenerationFormOutput) {
+  useEffect(() => {
+    return () => {
+      submitGenerationRef.current += 1;
+    };
+  }, []);
+
+  async function startGeneration(
+    values: PlanGenerationFormOutput,
+    submitId: number,
+  ) {
     reset();
     try {
       const accepted = await startPlanGeneration(
         toPlanGenerationParameters(values),
       );
+      if (submitId !== submitGenerationRef.current) return;
       onStarted(accepted.id);
     } catch {
       // The mutation hook exposes the message next to the submit button.
@@ -116,8 +127,11 @@ export function PlanGenerationForm({
     }
     if (invalid || !group) return;
 
+    const submitId = ++submitGenerationRef.current;
     setChoiceSession({ status: "checking" });
     const matches = await lookupMatchingPlansOrEmpty(values);
+    if (submitId !== submitGenerationRef.current) return;
+
     if (matches.length > 0) {
       setChoiceSession({
         status: "choosing",
@@ -129,14 +143,14 @@ export function PlanGenerationForm({
     }
 
     setChoiceSession({ status: "idle" });
-    await startGeneration(values);
+    await startGeneration(values, submitId);
   }
 
   async function handleGenerateNew() {
     if (choiceSession.status !== "choosing") return;
     const { values } = choiceSession;
-    setChoiceSession({ status: "idle" });
-    await startGeneration(values);
+    const submitId = ++submitGenerationRef.current;
+    await startGeneration(values, submitId);
   }
 
   return (
@@ -270,7 +284,9 @@ export function PlanGenerationForm({
         <GroupPlanChoiceDialog
           open
           onOpenChange={(open) => {
-            if (!open) setChoiceSession({ status: "idle" });
+            if (!open && !isStarting) {
+              setChoiceSession({ status: "idle" });
+            }
           }}
           group={choiceSession.group}
           participantCount={choiceSession.values.participantCount}
