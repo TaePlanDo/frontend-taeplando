@@ -163,6 +163,7 @@ export function PlanListPage() {
           {plans.map((plan) => (
             <PlanCardItem
               key={plan.id}
+              variant="list"
               plan={plan}
               onOpen={() =>
                 navigate(`/plans/${plan.id}`, {

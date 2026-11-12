@@ -18,12 +18,16 @@ import {
   getTrainingTypesRequest,
 } from "@/lib/api/catalogs";
 import { getAllGroupsRequest } from "@/lib/api/group";
+import { lookupMatchingPlansOrEmpty } from "@/lib/plan/matchingPlans";
 import { PlanNewPage } from "./PlanNewPage";
 
 vi.mock("@/lib/api/group", () => ({ getAllGroupsRequest: vi.fn() }));
 vi.mock("@/lib/api/catalogs", () => ({
   getEquipmentRequest: vi.fn(),
   getTrainingTypesRequest: vi.fn(),
+}));
+vi.mock("@/lib/plan/matchingPlans", () => ({
+  lookupMatchingPlansOrEmpty: vi.fn(),
 }));
 
 afterEach(() => {
@@ -47,6 +51,7 @@ it("reports an offline start attempt and keeps the form editable without sending
   ]);
   vi.mocked(getEquipmentRequest).mockResolvedValue([]);
   vi.mocked(getTrainingTypesRequest).mockResolvedValue([]);
+  vi.mocked(lookupMatchingPlansOrEmpty).mockResolvedValue([]);
   const fetchMock = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
   vi.stubGlobal("fetch", fetchMock);
   const client = new QueryClient({

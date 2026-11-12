@@ -1,15 +1,26 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter, Route, Routes, useParams } from "react-router-dom";
+import {
+  MemoryRouter,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { beforeEach, expect, it, vi } from "vitest";
 
 import { startPlanGenerationRequest } from "@/lib/api/plan-generation";
+import { lookupMatchingPlansOrEmpty } from "@/lib/plan/matchingPlans";
 import { PlanNewPage } from "./PlanNewPage";
 
 const { useOptions } = vi.hoisted(() => ({ useOptions: vi.fn() }));
 
 vi.mock("@/lib/api/plan-generation", () => ({
   startPlanGenerationRequest: vi.fn(),
+}));
+vi.mock("@/lib/plan/matchingPlans", () => ({
+  lookupMatchingPlansOrEmpty: vi.fn(),
 }));
 vi.mock("@/hooks/plans/usePlanGenerationOptions", () => ({
   usePlanGenerationOptions: useOptions,
@@ -46,7 +57,26 @@ function select(label: string, option: string) {
 function loadedOptions() {
   return {
     groups: {
-      items: [{ id: "group-1", name: "Grupa dzieci" }],
+      items: [
+        {
+          id: "group-1",
+          name: "Grupa dzieci",
+          min_age: 7,
+          max_age: 14,
+          duration_minutes: 90,
+          created_at: "2026-11-01T12:00:00Z",
+          updated_at: "2026-11-01T12:00:00Z",
+          schema: [
+            {
+              segment_id: 3,
+              segment_code: "MAIN",
+              segment_name: "Część główna",
+              percentage: 100,
+              position: 1,
+            },
+          ],
+        },
+      ],
       status: "ready",
     },
     equipment: {
@@ -65,6 +95,7 @@ function loadedOptions() {
 beforeEach(() => {
   vi.resetAllMocks();
   useOptions.mockReturnValue(loadedOptions());
+  vi.mocked(lookupMatchingPlansOrEmpty).mockResolvedValue([]);
 });
 
 it("keeps the form visible without groups and links to group creation", () => {
@@ -194,4 +225,120 @@ it("keeps selections on a server error and allows another attempt", async () => 
   expect(screen.getByRole("button", { name: "Usuń Tarcze" })).toBeEnabled();
   fireEvent.click(screen.getByRole("button", { name: "Generuj plan" }));
   expect(await screen.findByText("Zadanie: job-2")).toBeVisible();
+});
+
+it("opens the choice dialog when matching plans exist and generates only after confirm", async () => {
+  vi.mocked(lookupMatchingPlansOrEmpty).mockResolvedValue([
+    {
+      id: "plan-1",
+      training_group_id: "group-1",
+      name: "Istniejący plan",
+      participant_count: 20,
+      group_name_snapshot: "Grupa dzieci",
+      group_min_age_snapshot: 7,
+      group_max_age_snapshot: 14,
+      training_duration_snapshot: 90,
+      available_equipment_snapshot: [],
+      training_types_snapshot: [],
+      schema_snapshot: [],
+      generated_at: "2026-11-06T12:00:00Z",
+    },
+  ]);
+  vi.mocked(startPlanGenerationRequest).mockResolvedValue({
+    id: "job-9",
+    status: "QUEUED",
+  });
+  renderPage();
+  select("Grupa treningowa", "Grupa dzieci");
+  fireEvent.click(screen.getByRole("button", { name: "Generuj plan" }));
+
+  expect(
+    await screen.findByRole("heading", { name: "Wybierz z ostatnich planów" }),
+  ).toBeVisible();
+  expect(startPlanGenerationRequest).not.toHaveBeenCalled();
+
+  fireEvent.click(screen.getByRole("button", { name: "Generuj nowy plan" }));
+  expect(await screen.findByText("Zadanie: job-9")).toBeVisible();
+  expect(startPlanGenerationRequest).toHaveBeenCalledTimes(1);
+});
+
+it("navigates to a matching plan and restores form draft on back", async () => {
+  vi.mocked(lookupMatchingPlansOrEmpty).mockResolvedValue([
+    {
+      id: "plan-42",
+      training_group_id: "group-1",
+      name: "Plan do otwarcia",
+      participant_count: 20,
+      group_name_snapshot: "Grupa dzieci",
+      group_min_age_snapshot: 7,
+      group_max_age_snapshot: 14,
+      training_duration_snapshot: 90,
+      available_equipment_snapshot: [],
+      training_types_snapshot: [],
+      schema_snapshot: [],
+      generated_at: "2026-11-06T12:00:00Z",
+    },
+  ]);
+
+  function PlanDetailBack() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    return (
+      <button
+        type="button"
+        onClick={() => navigate(location.state?.backTo ?? "/plans")}
+      >
+        Wróć
+      </button>
+    );
+  }
+
+  function PlanNewWithLocation() {
+    const { pathname, search } = useLocation();
+    return (
+      <>
+        <div data-testid="location">{`${pathname}${search}`}</div>
+        <PlanNewPage />
+      </>
+    );
+  }
+
+  render(
+    <QueryClientProvider
+      client={
+        new QueryClient({
+          defaultOptions: { mutations: { retry: false } },
+        })
+      }
+    >
+      <MemoryRouter initialEntries={["/plans/new"]}>
+        <Routes>
+          <Route path="/plans/new" element={<PlanNewWithLocation />} />
+          <Route path="/plans/:planId" element={<PlanDetailBack />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+  select("Grupa treningowa", "Grupa dzieci");
+  select("Sprzęt treningowy", "Tarcze");
+  select("Typ treningu", "Technika");
+  fireEvent.click(screen.getByRole("button", { name: "Generuj plan" }));
+  fireEvent.click(
+    await screen.findByRole("link", { name: /Plan do otwarcia/ }),
+  );
+  expect(await screen.findByRole("button", { name: "Wróć" })).toBeVisible();
+  expect(startPlanGenerationRequest).not.toHaveBeenCalled();
+
+  fireEvent.click(screen.getByRole("button", { name: "Wróć" }));
+  expect(
+    await screen.findByRole("combobox", { name: "Grupa treningowa" }),
+  ).toHaveTextContent("Grupa dzieci");
+  expect(screen.getByRole("button", { name: "Usuń Tarcze" })).toBeVisible();
+  expect(
+    screen.getByRole("combobox", { name: "Typ treningu" }),
+  ).toHaveTextContent("Technika");
+  await waitFor(() => {
+    expect(screen.getByTestId("location")).toHaveTextContent("/plans/new");
+    expect(screen.getByTestId("location").textContent).not.toContain("?");
+  });
 });

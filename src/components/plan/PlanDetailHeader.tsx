@@ -15,10 +15,12 @@ import {
   formatExerciseCount,
   formatParticipantCount,
 } from "@/lib/format/plural";
+import { planDetailBackLabel } from "@/lib/plan/planDetailBackLabel";
 import type { PlanDetail } from "@/types/plan";
 
 type PlanDetailHeaderProps = {
   plan: PlanDetail;
+  backTo: string;
   onBack: () => void;
   onRegenerate: () => void;
   onDelete: () => void | Promise<void>;
@@ -26,6 +28,7 @@ type PlanDetailHeaderProps = {
 
 export function PlanDetailHeader({
   plan,
+  backTo,
   onBack,
   onRegenerate,
   onDelete,
@@ -42,7 +45,7 @@ export function PlanDetailHeader({
         className="h-auto w-fit gap-2 px-0 text-sm font-medium text-foreground hover:bg-transparent hover:opacity-80"
       >
         <ArrowLeft className="size-4" aria-hidden />
-        Wróć do listy
+        {planDetailBackLabel(backTo)}
       </Button>
 
       <div className="flex flex-col gap-3">
