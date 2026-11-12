@@ -104,7 +104,10 @@ describe("PlanDetailPage", () => {
     expect(
       within(row).getByRole("meter", { name: "Intensywność" }),
     ).toHaveAttribute("aria-valuenow", "2");
-    expect(screen.getByText("1")).toBeTruthy();
+    expect(within(row).getByText("1")).toBeTruthy();
+    expect(
+      within(screen.getByRole("button", { name: /Sparing/ })).getByText("1"),
+    ).toBeTruthy();
   });
 
   it("opens exercise snapshot details from a plan row", () => {
