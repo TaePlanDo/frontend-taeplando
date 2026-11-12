@@ -4,7 +4,7 @@ import { Controller, useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { GroupPlanChoiceDialog } from "@/components/plan/GroupPlanChoiceDialog";
-import { openPlanFromGenerationDraft } from "@/components/plan/openPlanFromGenerationDraft";
+import { openPlanFromGenerationDraft } from "@/lib/plan/openPlanFromGenerationDraft";
 import { CatalogMultiSelect } from "@/components/shared/CatalogMultiSelect";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedSelect } from "@/components/shared/CustomizedSelect";
