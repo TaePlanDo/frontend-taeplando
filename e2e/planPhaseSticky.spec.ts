@@ -48,6 +48,17 @@ for (const viewport of [
     await expect(secondHeader).toBeAttached();
 
     const firstRow = page.getByRole("button", { name: /Exercise 1-1/ });
+    await expect(firstRow.getByText("1", { exact: true })).toBeVisible();
+    await expect(
+      page
+        .getByRole("button", { name: /Exercise 1-2/ })
+        .getByText("2", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole("button", { name: /Exercise 2-1/ })
+        .getByText("1", { exact: true }),
+    ).toBeVisible();
     for (const label of [
       "Intensywno\u015b\u0107",
       "Trudno\u015b\u0107",
