@@ -37,6 +37,29 @@ function renderSheet(
 }
 
 describe("ListFiltersSheet", () => {
+  it("sets the configured status when the switch is enabled", () => {
+    const onChange = vi.fn();
+    renderSheet({ name: "chagi" }, { onChange });
+
+    fireEvent.click(
+      screen.getByRole("switch", { name: "Wykluczone ćwiczenia" }),
+    );
+    expect(onChange).toHaveBeenCalledWith({
+      name: "chagi",
+      status: "SUSPENDED",
+    });
+  });
+
+  it("clears the configured status when the switch is disabled", () => {
+    const onChange = vi.fn();
+    renderSheet({ status: "SUSPENDED" }, { onChange });
+
+    const toggle = screen.getByRole("switch", { name: "Wykluczone ćwiczenia" });
+    expect(toggle.getAttribute("aria-checked")).toBe("true");
+    fireEvent.click(toggle);
+    expect(onChange).toHaveBeenCalledWith({ status: undefined });
+  });
+
   it("reports range and catalog changes immediately", async () => {
     const onChange = vi.fn();
     renderSheet({ name: "chagi" }, { onChange });

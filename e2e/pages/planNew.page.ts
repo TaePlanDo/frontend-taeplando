@@ -65,4 +65,25 @@ export class PlanNewPage {
     await expect(this.page.getByText(message)).toBeVisible();
     await expect(this.page).toHaveURL(/\/plans\/new$/);
   }
+
+  async expectChoiceDialog(groupName: string): Promise<void> {
+    const dialog = this.choiceDialog(groupName);
+    await expect(dialog).toBeVisible();
+    await expect(
+      dialog.getByRole("heading", { name: "Wybierz z ostatnich planów" }),
+    ).toBeVisible();
+  }
+
+  async openMatchingPlan(groupName: string, planName: string): Promise<void> {
+    await this.choiceDialog(groupName)
+      .locator('[data-slot="card"]')
+      .filter({
+        has: this.page.getByRole("heading", { name: planName, exact: true }),
+      })
+      .click();
+  }
+
+  private choiceDialog(groupName: string): Locator {
+    return this.page.getByRole("dialog", { name: groupName });
+  }
 }

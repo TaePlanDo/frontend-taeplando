@@ -1,14 +1,51 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 
 import {
   activeChips,
   activeDimensions,
   withoutDimension,
+  type FilterDimension,
 } from "@/lib/filters/definition";
+import type { ExerciseListFilters } from "@/types/exercise-list-filters";
 
 import { exerciseFilters } from "./exercise-filter-list";
 
 describe("filter-dimensions", () => {
+  it("ties catalog and range fields to compatible filter values", () => {
+    type CatalogField = Extract<
+      FilterDimension<ExerciseListFilters>,
+      { kind: "catalog" }
+    >["fields"][0];
+    type RangeField = Extract<
+      FilterDimension<ExerciseListFilters>,
+      { kind: "range" }
+    >["fields"][0];
+    expectTypeOf<{
+      key: "name";
+      kind: "stringCsv";
+    }>().not.toExtend<CatalogField>();
+    expectTypeOf<{
+      key: "segment_ids";
+      kind: "stringCsv";
+    }>().not.toExtend<CatalogField>();
+    expectTypeOf<{
+      key: "segment_ids";
+      kind: "intCsv";
+    }>().toExtend<CatalogField>();
+    expectTypeOf<{ key: "name"; kind: "int" }>().not.toExtend<RangeField>();
+    expectTypeOf<{ key: "min_age"; kind: "int" }>().toExtend<RangeField>();
+  });
+  it("counts and clears the excluded exercise filter independently", () => {
+    const filters = { status: "SUSPENDED" as const, name: "a" };
+    expect(activeDimensions(filters, exerciseFilters)).toHaveLength(2);
+    expect(activeChips(filters, exerciseFilters, {})).toContainEqual({
+      id: "status",
+      name: "Wykluczone ćwiczenia",
+    });
+    expect(withoutDimension(filters, "status", exerciseFilters)).toEqual({
+      name: "a",
+    });
+  });
   it("builds one chip per active dimension with catalog labels", () => {
     const chips = activeChips(
       {

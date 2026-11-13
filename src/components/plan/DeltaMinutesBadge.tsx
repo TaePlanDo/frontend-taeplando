@@ -13,6 +13,10 @@ export function DeltaMinutesBadge({
   deltaMinutes,
   className,
 }: DeltaMinutesBadgeProps) {
+  if (deltaMinutes === 0) {
+    return null;
+  }
+
   return (
     <Badge
       variant="ghost"

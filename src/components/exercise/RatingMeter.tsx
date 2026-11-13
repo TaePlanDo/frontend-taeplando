@@ -1,6 +1,6 @@
 import { cn } from "cn";
 
-import { PLAN_RATING_MAX } from "./planRatings";
+import { EXERCISE_RATING_MAX } from "./exerciseRatings";
 
 type RatingMeterProps = {
   label: string;
@@ -14,7 +14,7 @@ type RatingMeterProps = {
 export function RatingMeter({
   label,
   value,
-  max = PLAN_RATING_MAX,
+  max = EXERCISE_RATING_MAX,
   fillClass = "bg-primary",
   showLabel = true,
   className,
@@ -30,9 +30,9 @@ export function RatingMeter({
       )}
     >
       {showLabel ? (
-        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
           <span>{label}</span>
-          <span className="tabular-nums text-foreground">
+          <span className="text-base font-semibold tabular-nums text-foreground">
             {clamped}/{max}
           </span>
         </div>

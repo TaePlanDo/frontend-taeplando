@@ -1,12 +1,14 @@
-import { CalendarDays, Clock3, Dumbbell, Users } from "lucide-react";
+﻿import { Clock3, Dumbbell, Users } from "lucide-react";
+import { useState } from "react";
 
+import { EXERCISE_RATING_COLUMNS } from "@/components/exercise/exerciseRatings";
+import { RatingMeter } from "@/components/exercise/RatingMeter";
+import { ExerciseReadonlyModal } from "@/components/exercise/ExerciseReadonlyModal";
 import { CardItemBadge } from "@/components/shared/CardItemBadge";
+import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
 import { ExerciseImage } from "@/components/shared/ExerciseImage";
-import { cn } from "cn";
+import { mapPlanExerciseToSnapshot } from "@/lib/mappers/plan";
 import type { PlanExercise } from "@/types/plan";
-
-import { PLAN_RATING_COLUMNS, PLAN_RATING_COLUMNS_CLASS } from "./planRatings";
-import { RatingMeter } from "./RatingMeter";
 
 type PlanExerciseRowProps = {
   exercise: PlanExercise;
@@ -14,80 +16,90 @@ type PlanExerciseRowProps = {
 };
 
 export function PlanExerciseRow({ exercise, number }: PlanExerciseRowProps) {
-  const equipment = exercise.equipment_snapshot;
-  const trainingTypes = exercise.training_types_snapshot;
+  const [open, setOpen] = useState(false);
+  const snapshot = mapPlanExerciseToSnapshot(exercise);
 
   return (
-    <article className="flex flex-col gap-4 border-b border-border py-4 last:border-b-0 lg:flex-row lg:items-center lg:gap-6">
-      <div className="flex min-w-0 flex-1 gap-3 sm:gap-4">
-        <div className="relative shrink-0">
-          <ExerciseImage
-            src={exercise.image_url_snapshot}
-            className="size-16 rounded-xl bg-muted object-cover sm:size-20"
-          />
-          <span className="absolute -left-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-foreground">
-            {number}
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex w-full cursor-pointer flex-col gap-4 rounded-2xl border border-transparent border-b-border px-4 py-4 text-left transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-7 lg:flex-row lg:items-center lg:gap-6"
+      >
+        <div className="flex w-full min-w-0 flex-1 items-center gap-3 sm:gap-4">
+          <div className="relative shrink-0 self-start">
+            <ExerciseImage
+              src={exercise.image_url_snapshot}
+              className="size-16 rounded-xl bg-muted object-cover sm:size-20"
+            />
+            <span className="absolute -left-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-foreground">
+              {number}
+            </span>
+          </div>
+          <div className="flex min-h-16 min-w-0 flex-1 flex-col justify-between gap-2 sm:min-h-20">
+            <h4 className="break-words text-base font-semibold text-foreground sm:text-xl">
+              {exercise.name_snapshot}
+            </h4>
+            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-foreground sm:hidden">
+                <Clock3 className="size-3.5 text-primary" aria-hidden />
+                {exercise.duration_minutes_snapshot} min
+              </span>
+              <CardItemBadge
+                icon={<Users className="size-3.5 sm:size-4" aria-hidden />}
+                className="border border-foreground/20 px-2 py-1 text-xs text-foreground sm:px-3 sm:text-sm"
+                aria-label={`Minimum ${exercise.min_participants_snapshot} uczestników`}
+              >
+                {exercise.min_participants_snapshot}+
+              </CardItemBadge>
+              {exercise.equipment_snapshot.length ? (
+                exercise.equipment_snapshot.map((item) => (
+                  <CardItemBadge
+                    key={item.id}
+                    icon={
+                      <Dumbbell className="size-3.5 sm:size-4" aria-hidden />
+                    }
+                    className="border border-primary/60 bg-transparent px-2 py-1 text-xs text-primary sm:px-3 sm:text-sm"
+                  >
+                    {item.name}
+                  </CardItemBadge>
+                ))
+              ) : (
+                <CardItemBadge className="border border-foreground/20 bg-transparent px-2 py-1 text-xs text-muted-foreground sm:px-3 sm:text-sm">
+                  Brak sprzętu
+                </CardItemBadge>
+              )}
+            </div>
+          </div>
+          <span className="hidden shrink-0 items-center gap-1.5 text-base font-semibold text-foreground sm:inline-flex sm:text-lg">
+            <Clock3 className="size-4 text-primary" aria-hidden />
+            {exercise.duration_minutes_snapshot} min
           </span>
         </div>
-
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <h4 className="text-base font-semibold text-foreground sm:text-lg">
-            {exercise.name_snapshot}
-          </h4>
-          <ul className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-            <li className="inline-flex items-center gap-1.5">
-              <Clock3 className="size-3.5 text-primary" aria-hidden />
-              {exercise.duration_minutes_snapshot} min
-            </li>
-            <li className="inline-flex items-center gap-1.5">
-              <Users className="size-3.5 text-primary" aria-hidden />
-              {exercise.min_participants_snapshot}–
-              {exercise.max_participants_snapshot} os.
-            </li>
-            <li className="inline-flex items-center gap-1.5">
-              <CalendarDays className="size-3.5 text-primary" aria-hidden />
-              {exercise.min_age_snapshot}–{exercise.max_age_snapshot} lat
-            </li>
-          </ul>
-          <div className="flex flex-wrap gap-1.5">
-            {trainingTypes.map((type) => (
-              <CardItemBadge
-                key={type.id}
-                className="border border-foreground/25 bg-transparent px-2.5 py-0.5 text-foreground/80"
-              >
-                {type.name}
-              </CardItemBadge>
-            ))}
-            {equipment.length ? (
-              equipment.map((item) => (
-                <CardItemBadge
-                  key={item.id}
-                  icon={<Dumbbell className="size-3" aria-hidden />}
-                  className="border border-primary/60 bg-transparent px-2.5 py-0.5 text-primary"
-                >
-                  {item.name}
-                </CardItemBadge>
-              ))
-            ) : (
-              <CardItemBadge className="border border-foreground/20 bg-transparent px-2.5 py-0.5 text-muted-foreground">
-                Brak sprzętu
-              </CardItemBadge>
-            )}
-          </div>
+        <div className="grid w-full grid-cols-5 gap-1.5 lg:w-[24rem] lg:shrink-0">
+          {EXERCISE_RATING_COLUMNS.map((column) => (
+            <RatingMeter
+              key={column.key}
+              label={column.label}
+              value={snapshot[column.key]}
+              fillClass={column.fillClass}
+              showLabel={false}
+            />
+          ))}
         </div>
-      </div>
-
-      <div className={cn(PLAN_RATING_COLUMNS_CLASS, "lg:shrink-0")}>
-        {PLAN_RATING_COLUMNS.map((column) => (
-          <RatingMeter
-            key={column.key}
-            label={column.label}
-            value={exercise[column.key]}
-            fillClass={column.fillClass}
-            showLabel={false}
-          />
-        ))}
-      </div>
-    </article>
+      </button>
+      <CustomizedDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Podgląd ćwiczenia"
+        className="grid-rows-[auto_minmax(0,1fr)] max-h-[calc(100dvh-2rem)] gap-5 overflow-hidden p-4 sm:!top-8 sm:!bottom-8 sm:!h-auto sm:!translate-y-0 sm:max-w-190 sm:p-6"
+      >
+        <ExerciseReadonlyModal
+          kind="snapshot"
+          exercise={snapshot}
+          onClose={() => setOpen(false)}
+        />
+      </CustomizedDialog>
+    </>
   );
 }

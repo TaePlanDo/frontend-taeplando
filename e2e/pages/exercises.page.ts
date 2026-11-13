@@ -268,20 +268,49 @@ export class ExercisesPage {
     await this.exerciseDialog
       .getByRole("textbox", { name: "Opis" })
       .fill(values.description);
-    await this.exerciseDialog
-      .getByRole("spinbutton", { name: "Minimalny wiek" })
-      .fill(String(values.minAge));
-    await this.exerciseDialog
-      .getByRole("spinbutton", { name: "Maksymalny wiek" })
-      .fill(String(values.maxAge));
-    await this.exerciseDialog
-      .getByRole("spinbutton", { name: "Minimalna liczba uczestników" })
-      .fill(String(values.minParticipants));
-    await this.exerciseDialog
-      .getByRole("spinbutton", { name: "Maksymalna liczba uczestników" })
-      .fill(String(values.maxParticipants));
+    await this.setRange("Wiek", values.minAge, values.maxAge);
+    await this.setRange(
+      "Liczba uczestników",
+      values.minParticipants,
+      values.maxParticipants,
+    );
     await this.exerciseDialog
       .getByRole("spinbutton", { name: "Czas trwania w minutach" })
       .fill(String(values.durationMinutes));
+  }
+
+  private async setRange(
+    label: string,
+    min: number,
+    max: number,
+  ): Promise<void> {
+    const sliders = this.exerciseDialog.getByRole("slider", {
+      name: label,
+      exact: true,
+    });
+    const lower = sliders.nth(0);
+    const upper = sliders.nth(1);
+    const currentMax = Number(await upper.getAttribute("aria-valuenow"));
+    if (min > currentMax) {
+      await this.setSliderValue(upper, max);
+      await this.setSliderValue(lower, min);
+    } else {
+      await this.setSliderValue(lower, min);
+      await this.setSliderValue(upper, max);
+    }
+  }
+
+  private async setSliderValue(slider: Locator, target: number): Promise<void> {
+    const current = Number(await slider.getAttribute("aria-valuenow"));
+    const difference = target - current;
+    const pageKey = difference > 0 ? "PageUp" : "PageDown";
+    const arrowKey = difference > 0 ? "ArrowRight" : "ArrowLeft";
+    for (let i = 0; i < Math.floor(Math.abs(difference) / 10); i++) {
+      await slider.press(pageKey);
+    }
+    for (let i = 0; i < Math.abs(difference) % 10; i++) {
+      await slider.press(arrowKey);
+    }
+    await expect(slider).toHaveAttribute("aria-valuenow", String(target));
   }
 }

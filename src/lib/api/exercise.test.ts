@@ -3,7 +3,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createExerciseRequest,
   deleteExerciseRequest,
+  excludeExerciseRequest,
   getExercisesRequest,
+  reactivateExerciseRequest,
   updateExerciseRequest,
 } from "./exercise";
 import { ApiError } from "./errors";
@@ -34,6 +36,20 @@ function response(status: number, body: unknown) {
 describe("exercise API", () => {
   afterEach(() => vi.unstubAllGlobals());
 
+  it.each([
+    ["excludes", excludeExerciseRequest, "PUT"],
+    ["reactivates", reactivateExerciseRequest, "DELETE"],
+  ])("%s an exercise", async (_name, request, method) => {
+    const fetchMock = vi.fn().mockResolvedValue(response(204, undefined));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(request("id")).resolves.toBeUndefined();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/exercises/id/exclusion",
+      expect.objectContaining({ method }),
+    );
+  });
+
   it("gets a requested page", async () => {
     const fetchMock = vi.fn().mockResolvedValue(response(200, { items: [] }));
     vi.stubGlobal("fetch", fetchMock);
@@ -49,6 +65,7 @@ describe("exercise API", () => {
     vi.stubGlobal("fetch", fetchMock);
     await getExercisesRequest(1, 6, {
       name: "chagi",
+      status: "SUSPENDED",
       min_age: 7,
       max_age: 14,
       min_core_load: 2,
@@ -58,7 +75,7 @@ describe("exercise API", () => {
       segment_ids: [3],
     });
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/exercises?name=chagi&min_age=7&max_age=14&min_core_load=2&max_core_load=4&equipment_ids=eq-1&training_type_ids=type-1&segment_ids=3&page=1&page_size=6",
+      "/api/exercises?name=chagi&status=SUSPENDED&min_age=7&max_age=14&min_core_load=2&max_core_load=4&equipment_ids=eq-1&training_type_ids=type-1&segment_ids=3&page=1&page_size=6",
       expect.objectContaining({ method: "GET" }),
     );
   });

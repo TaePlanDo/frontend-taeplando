@@ -1,10 +1,17 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Exercise } from "@/types/exercise";
 import type { PaginatedListState } from "@/hooks/pagination/listState";
 import { ExerciseListPage } from "./ExerciseListPage";
+import { toast } from "sonner";
 
 function renderPage(initialEntry = "/exercises") {
   return render(
@@ -50,6 +57,12 @@ vi.mock("@/hooks/exercises/useDeleteExercise", () => ({
   }),
 }));
 
+const setExclusion = vi.fn();
+let exclusionPending = false;
+vi.mock("@/hooks/exercises/useExerciseExclusion", () => ({
+  useExerciseExclusion: () => ({ setExclusion, isPending: exclusionPending }),
+}));
+
 const exercise: Exercise = {
   id: "1",
   owner_user_id: "owner",
@@ -93,6 +106,7 @@ vi.mock("@/hooks/exercises/useExercises", () => ({
 describe("ExerciseListPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    exclusionPending = false;
     useExercisesMock.mockImplementation(() => state);
     Object.assign(state, {
       items: [exercise],
@@ -152,8 +166,25 @@ describe("ExerciseListPage", () => {
     renderPage();
     expect(screen.getAllByText("1 ćwiczenie")).toHaveLength(2);
     expect(screen.getByText("Ap chagi")).toBeTruthy();
+    expect(screen.getByText("Ap chagi")).not.toHaveClass("line-through");
+    expect(screen.queryByText("Wykluczone ćwiczenie:")).toBeNull();
     expect(screen.getByText("Technika")).toBeTruthy();
     expect(screen.getByText("Rozgrzewka")).toBeTruthy();
+  });
+
+  it("marks an excluded exercise while keeping its actions available", () => {
+    state.items = [{ ...exercise, status: "SUSPENDED" }];
+    renderPage();
+
+    const heading = screen.getByRole("heading", {
+      name: "Wykluczone ćwiczenie: Ap chagi",
+    });
+    expect(within(heading).getByText("Ap chagi")).toHaveClass("line-through");
+    expect(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Edytuj" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Usuń" })).toBeEnabled();
   });
   it("passes URL filters and page into useExercises", () => {
     renderPage(
@@ -170,6 +201,32 @@ describe("ExerciseListPage", () => {
       }),
     );
   });
+
+  it("applies the exclusion filter, resets the page and removes its chip", async () => {
+    renderPage("/exercises?name=chagi&page=2");
+    fireEvent.click(screen.getByRole("button", { name: "Filtruj" }));
+    fireEvent.click(
+      screen.getByRole("switch", { name: "Wykluczone ćwiczenia" }),
+    );
+    await waitFor(() =>
+      expect(useExercisesMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          filters: { name: "chagi", status: "SUSPENDED" },
+          page: 1,
+        }),
+      ),
+    );
+    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+    expect(screen.getByText("Wykluczone ćwiczenia")).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("button", { name: /Wykluczone ćwiczenia/ }),
+    );
+    await waitFor(() =>
+      expect(useExercisesMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({ filters: { name: "chagi" }, page: 1 }),
+      ),
+    );
+  });
   it("opens create and prefilled edit dialogs", async () => {
     renderPage();
     fireEvent.click(screen.getByRole("button", { name: /Dodaj ćwiczenie/ }));
@@ -182,8 +239,20 @@ describe("ExerciseListPage", () => {
       await screen.findByRole("heading", { name: "Edytuj ćwiczenie" }),
     ).toBeTruthy();
     expect(
+      screen.queryByRole("heading", { name: "Podgląd ćwiczenia" }),
+    ).toBeNull();
+    expect(
       (screen.getByLabelText("Nazwa ćwiczenia") as HTMLInputElement).value,
     ).toBe("Ap chagi");
+  });
+
+  it("opens the delete confirmation without opening the preview", () => {
+    renderPage();
+    fireEvent.click(screen.getByRole("button", { name: "Usuń" }));
+    expect(screen.getByRole("alertdialog")).toBeTruthy();
+    expect(
+      screen.queryByRole("heading", { name: "Podgląd ćwiczenia" }),
+    ).toBeNull();
   });
 
   it("does not offer editing from a global exercise preview", async () => {
@@ -219,14 +288,15 @@ describe("ExerciseListPage", () => {
     );
     const dialog = await screen.findByRole("dialog");
     for (const [label, value] of [
-      ["Intensywność fizyczna", "1"],
-      ["Trudność techniczna", "2"],
-      ["Zaangażowanie górnych partii", "3"],
-      ["Zaangażowanie dolnych partii", "4"],
-      ["Zaangażowanie partii core", "5"],
+      ["Intensywność", "1"],
+      ["Trudność", "2"],
+      ["Górne partie", "3"],
+      ["Dolne partie", "4"],
+      ["Core", "5"],
     ]) {
-      const block = within(dialog).getByText(label).parentElement!;
-      expect(within(block).getByText(value)).toBeTruthy();
+      expect(
+        within(dialog).getByRole("meter", { name: label }),
+      ).toHaveAttribute("aria-valuenow", value);
     }
     fireEvent.click(
       within(dialog).getByRole("button", { name: "Edytuj ćwiczenie" }),
@@ -244,5 +314,100 @@ describe("ExerciseListPage", () => {
     const dialog = await screen.findByRole("dialog");
     fireEvent.click(within(dialog).getByRole("button", { name: "Zamknij" }));
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("updates the preview after excluding and restoring an exercise", async () => {
+    setExclusion.mockResolvedValue(undefined);
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    const toggle = screen.getByRole("switch", { name: "Wyklucz ćwiczenie" });
+    expect(toggle).toHaveAttribute("aria-checked", "false");
+
+    fireEvent.click(toggle);
+    await waitFor(() => expect(toggle).toHaveAttribute("aria-checked", "true"));
+    expect(setExclusion).toHaveBeenCalledWith({ id: "1", excluded: true });
+
+    fireEvent.click(toggle);
+    await waitFor(() =>
+      expect(toggle).toHaveAttribute("aria-checked", "false"),
+    );
+    expect(setExclusion).toHaveBeenCalledWith({ id: "1", excluded: false });
+  });
+
+  it("synchronizes an open preview with a refreshed list", async () => {
+    const { rerender } = renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    state.items = [
+      { ...exercise, status: "SUSPENDED", description: "Nowy opis" },
+    ];
+    rerender(
+      <MemoryRouter initialEntries={["/exercises"]}>
+        <ExerciseListPage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("switch", { name: "Wyklucz ćwiczenie" }),
+      ).toHaveAttribute("aria-checked", "true"),
+    );
+    expect(screen.getByText("Nowy opis")).toBeTruthy();
+  });
+
+  it("keeps the restored exercise in the preview when it leaves filtered results", async () => {
+    state.items = [{ ...exercise, status: "SUSPENDED" }];
+    setExclusion.mockResolvedValue(undefined);
+    const { rerender } = renderPage("/exercises?status=SUSPENDED");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    fireEvent.click(screen.getByRole("switch", { name: "Wyklucz ćwiczenie" }));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("switch", { name: "Wyklucz ćwiczenie" }),
+      ).toHaveAttribute("aria-checked", "false"),
+    );
+
+    state.items = [];
+    state.listState = { kind: "empty" };
+    rerender(
+      <MemoryRouter initialEntries={["/exercises?status=SUSPENDED"]}>
+        <ExerciseListPage />
+      </MemoryRouter>,
+    );
+    expect(
+      screen.getByRole("switch", { name: "Wyklucz ćwiczenie" }),
+    ).toHaveAttribute("aria-checked", "false");
+    expect(screen.getByRole("heading", { name: "Ap chagi" })).toBeTruthy();
+  });
+
+  it("keeps the previous state and reports an exclusion error", async () => {
+    setExclusion.mockRejectedValueOnce(new Error("Ćwiczenie jest niedostępne"));
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    const toggle = screen.getByRole("switch", { name: "Wyklucz ćwiczenie" });
+
+    fireEvent.click(toggle);
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("Ćwiczenie jest niedostępne"),
+    );
+    expect(toggle).toHaveAttribute("aria-checked", "false");
+  });
+
+  it("disables the switch while the exclusion request is pending", () => {
+    exclusionPending = true;
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    expect(
+      screen.getByRole("switch", { name: "Wyklucz ćwiczenie" }),
+    ).toBeDisabled();
   });
 });

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+﻿import { describe, expect, it } from "vitest";
 
 import {
   normalizeFilters,
@@ -15,6 +15,7 @@ describe("exercise-list-search-params", () => {
       page: 3,
       filters: {
         name: "chagi",
+        status: "SUSPENDED" as const,
         min_age: 7,
         max_age: 14,
         min_participants: 2,
@@ -37,6 +38,21 @@ describe("exercise-list-search-params", () => {
     const params = toListSearchParams(state, exerciseFilters);
     expect(params.get("segment_ids")).toBe("1,3");
     expect(parseListSearchParams(params, exerciseFilters)).toEqual(state);
+  });
+
+  it("rejects unsupported statuses and removes the status on reset", () => {
+    expect(
+      parseListSearchParams(
+        new URLSearchParams("status=ACTIVE"),
+        exerciseFilters,
+      ).filters,
+    ).toEqual({});
+    const params = replaceListSearchParams(
+      new URLSearchParams("status=SUSPENDED&page=2"),
+      { filters: {}, page: 1 },
+      exerciseFilters,
+    );
+    expect(params.toString()).toBe("");
   });
 
   it("drops empty values, default ranges and duplicates", () => {
