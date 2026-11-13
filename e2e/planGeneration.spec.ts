@@ -37,7 +37,7 @@ test.describe("plan generation", () => {
   test("generates a plan, shows the result, and regenerates", async ({
     page,
   }) => {
-    await seedSystemData();
+    seedSystemData();
     const generation = await startPlanGeneration(page);
     await generation.waitForPlanDetail();
 

@@ -1,10 +1,9 @@
-import { execFile, execFileSync } from "node:child_process";
-import { promisify } from "node:util";
+import { execFileSync } from "node:child_process";
 
 import { backendDir, backendProcessEnv } from "../env";
 
-export function migrateDatabase(): void {
-  execFileSync("uv", ["run", "alembic", "upgrade", "head"], {
+function uv(args: string[]): void {
+  execFileSync("uv", ["run", ...args], {
     cwd: backendDir,
     env: backendProcessEnv(),
     stdio: "inherit",
@@ -12,10 +11,10 @@ export function migrateDatabase(): void {
   });
 }
 
-export async function seedSystemData(): Promise<void> {
-  await promisify(execFile)("uv", ["run", "seed-system-data"], {
-    cwd: backendDir,
-    env: backendProcessEnv(),
-    shell: true,
-  });
+export function migrateDatabase(): void {
+  uv(["alembic", "upgrade", "head"]);
+}
+
+export function seedSystemData(): void {
+  uv(["seed-system-data"]);
 }

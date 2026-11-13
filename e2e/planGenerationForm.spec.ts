@@ -15,7 +15,7 @@ const group = {
 
 test.describe("plan generation form", () => {
   test("starts generation after filling all parameters", async ({ page }) => {
-    await seedSystemData();
+    seedSystemData();
     const trainer = await createLocalTrainerAndLogin(page);
     await createGroup(trainer, group);
     await createEquipment(trainer, "Tarcza E2E");
