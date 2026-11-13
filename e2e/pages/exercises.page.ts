@@ -9,7 +9,20 @@ export type ExerciseFormValues = {
   minParticipants: number;
   maxParticipants: number;
   durationMinutes: number;
+  physicalDifficulty: number;
+  technicalDifficulty: number;
+  upperBodyLoad: number;
+  lowerBodyLoad: number;
+  coreLoad: number;
 };
+
+const ratingFields = [
+  ["physicalDifficulty", "Intensywność fizyczna", "Intensywność"],
+  ["technicalDifficulty", "Trudność techniczna", "Trudność"],
+  ["upperBodyLoad", "Zaangażowanie górnych partii", "Górne partie"],
+  ["lowerBodyLoad", "Zaangażowanie dolnych partii", "Dolne partie"],
+  ["coreLoad", "Zaangażowanie partii core", "Core"],
+] as const;
 
 export type ExerciseAttributes = {
   trainingType?: string;
@@ -168,6 +181,11 @@ export class ExercisesPage {
     await expect(
       dialog.getByText(`${values.durationMinutes} minut`).first(),
     ).toBeVisible();
+    for (const [key, , meterLabel] of ratingFields) {
+      await expect(
+        dialog.getByRole("meter", { name: meterLabel, exact: true }),
+      ).toHaveAttribute("aria-valuenow", String(values[key]));
+    }
 
     await expect(dialog.getByLabel("Typ")).toContainText(
       attributes.trainingType ?? "Technika",
@@ -277,6 +295,11 @@ export class ExercisesPage {
     await this.exerciseDialog
       .getByRole("spinbutton", { name: "Czas trwania w minutach" })
       .fill(String(values.durationMinutes));
+    for (const [key, label] of ratingFields) {
+      await this.exerciseDialog
+        .getByRole("spinbutton", { name: label })
+        .fill(String(values[key]));
+    }
   }
 
   private async setRange(
