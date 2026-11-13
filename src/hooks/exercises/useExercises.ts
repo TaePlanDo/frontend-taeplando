@@ -15,7 +15,7 @@ export function useExercises({
   onPageChange,
 }: UseExercisesOptions) {
   return usePaginatedList({
-    queryKey: [...queryKeys.exercises.lists(), filters],
+    queryKey: [...queryKeys.exercises.listsByStatus(filters.status), filters],
     fetchPage: (currentPage, pageSize) =>
       getExercisesRequest(currentPage, pageSize, filters),
     page,

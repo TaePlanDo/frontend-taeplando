@@ -7,7 +7,6 @@ import type {
 export type PlanPhase = {
   schema: PlanSchemaSnapshotItem;
   exercises: PlanExercise[];
-  exerciseOffset: number;
   plannedMinutes: number;
   actualMinutes: number;
   deltaMinutes: number;
@@ -35,7 +34,6 @@ export function groupPlanPhases(plan: PlanDetail): PlanPhase[] {
     byPosition.set(exercise.schema_position, bucket);
   }
 
-  let exerciseOffset = 0;
   return [...plan.schema_snapshot]
     .sort((a, b) => a.position - b.position)
     .map((schema) => {
@@ -47,16 +45,13 @@ export function groupPlanPhases(plan: PlanDetail): PlanPhase[] {
         plan.training_duration_snapshot,
       );
       const actualMinutes = sumExerciseMinutes(exercises);
-      const phase: PlanPhase = {
+      return {
         schema,
         exercises,
-        exerciseOffset,
         plannedMinutes,
         actualMinutes,
         deltaMinutes: actualMinutes - plannedMinutes,
       };
-      exerciseOffset += exercises.length;
-      return phase;
     });
 }
 

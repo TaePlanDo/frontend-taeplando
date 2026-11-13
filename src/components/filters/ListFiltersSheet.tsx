@@ -4,6 +4,7 @@ import { ListFilter } from "lucide-react";
 import { CatalogMultiSelect } from "@/components/shared/CatalogMultiSelect";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedSheet } from "@/components/shared/CustomizedSheet";
+import { CustomizedSwitch } from "@/components/shared/CustomizedSwitch";
 import { DualRangeField } from "@/components/shared/DualRangeField";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -68,10 +69,29 @@ export function ListFiltersSheet<F extends Record<string, unknown>>({
         <ScrollArea className="min-h-0 flex-1 pr-3">
           <div className="flex flex-col gap-6 pb-2">
             {header}
-            {dimensions.map(({ key, label, fields, range }) => {
-              if (!label) return null;
-              const [first, last] = fields;
-              if (range) {
+            {dimensions.map((dimension) => {
+              if (dimension.kind === "text" || !dimension.label) return null;
+              const { key, fields } = dimension;
+              const label = dimension.label;
+              const [first] = fields;
+              if (dimension.kind === "switch") {
+                return (
+                  <CustomizedSwitch
+                    key={key}
+                    label={label}
+                    checked={filters[first.key] === dimension.value}
+                    onCheckedChange={(checked) =>
+                      onChange({
+                        ...filters,
+                        [first.key]: checked ? dimension.value : undefined,
+                      })
+                    }
+                  />
+                );
+              }
+              if (dimension.kind === "range") {
+                const { range } = dimension;
+                const last = dimension.fields[1];
                 return (
                   <DualRangeField
                     key={key}

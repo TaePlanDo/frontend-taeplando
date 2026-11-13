@@ -1,4 +1,4 @@
-import type { CatalogReference, TrainingSegment } from "@/types/exercise";
+import type { CatalogReference, TrainingSegment } from "./exercise";
 
 export type PlanSchemaSnapshotItem = {
   position: number;

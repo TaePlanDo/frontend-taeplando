@@ -20,19 +20,17 @@ describe("phaseGrouping", () => {
     expect(totalActualMinutes(planFixture)).toBe(85);
   });
 
-  it("groups exercises by schema position with deltas and offsets", () => {
+  it("groups exercises by schema position with deltas", () => {
     const phases = groupPlanPhases(planFixture);
 
     expect(phases).toHaveLength(2);
     expect(phases[0]).toMatchObject({
-      exerciseOffset: 0,
       plannedMinutes: 18,
       actualMinutes: 15,
       deltaMinutes: -3,
     });
     expect(phases[0].exercises.map((e) => e.id)).toEqual(["ex-1"]);
     expect(phases[1]).toMatchObject({
-      exerciseOffset: 1,
       plannedMinutes: 72,
       actualMinutes: 70,
       deltaMinutes: -2,

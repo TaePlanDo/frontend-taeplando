@@ -9,11 +9,13 @@ import {
 export const planFilters: FilterDimension<PlanListFilters>[] = [
   {
     key: "name",
+    kind: "text",
     fields: [{ key: "name", kind: "string" }],
     chip: (filters) => `Nazwa: ${filters.name}`,
   },
   {
     key: "age",
+    kind: "range",
     label: "Wiek uczestników",
     fields: [
       { key: "min_age", kind: "int" },
@@ -25,6 +27,7 @@ export const planFilters: FilterDimension<PlanListFilters>[] = [
   },
   {
     key: "participants",
+    kind: "range",
     label: "Liczba uczestników",
     fields: [
       { key: "min_participants", kind: "int" },
@@ -36,6 +39,7 @@ export const planFilters: FilterDimension<PlanListFilters>[] = [
   },
   {
     key: "duration",
+    kind: "range",
     label: "Czas trwania",
     fields: [
       { key: "min_duration", kind: "int" },
@@ -47,6 +51,7 @@ export const planFilters: FilterDimension<PlanListFilters>[] = [
   },
   {
     key: "equipment",
+    kind: "catalog",
     label: "Sprzęt",
     fields: [{ key: "equipment_ids", kind: "stringCsv" }],
     chip: (filters, catalogs) =>
@@ -54,6 +59,7 @@ export const planFilters: FilterDimension<PlanListFilters>[] = [
   },
   {
     key: "trainingTypes",
+    kind: "catalog",
     label: "Kategorie",
     fields: [{ key: "training_type_ids", kind: "stringCsv" }],
     chip: (filters, catalogs) =>
@@ -61,6 +67,7 @@ export const planFilters: FilterDimension<PlanListFilters>[] = [
   },
   {
     key: "groups",
+    kind: "catalog",
     fields: [{ key: "training_group_ids", kind: "stringCsv" }],
     chip: (filters, catalogs) =>
       namesFor(filters.training_group_ids, catalogs.groups),

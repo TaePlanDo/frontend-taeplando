@@ -1,24 +1,30 @@
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
+import { CustomizedSwitch } from "@/components/shared/CustomizedSwitch";
 import { ExerciseImage } from "@/components/shared/ExerciseImage";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import type { Exercise } from "@/types/exercise";
+import type { Exercise, ExerciseDetails } from "@/types/exercise";
 
 import { AttributeRow } from "./AttributeRow";
 import { ExerciseStatBlock } from "./ExerciseStatBlock";
+import { EXERCISE_RATING_COLUMNS } from "./exerciseRatings";
+import { RatingMeter } from "./RatingMeter";
 
 type ExerciseReadonlyModalProps = {
-  exercise: Exercise | null;
-  onEdit: () => void;
   onClose: () => void;
-};
+} & (
+  | { kind: "snapshot"; exercise: ExerciseDetails }
+  | {
+      kind: "editable";
+      exercise: Exercise;
+      onEdit: () => void;
+      onExclusionChange: (excluded: boolean) => void;
+      exclusionDisabled: boolean;
+    }
+);
 
-export function ExerciseReadonlyModal({
-  exercise,
-  onEdit,
-  onClose,
-}: ExerciseReadonlyModalProps) {
-  if (!exercise) return null;
+export function ExerciseReadonlyModal(props: ExerciseReadonlyModalProps) {
+  const { exercise, onClose } = props;
 
   const equipment = exercise.equipment.map(({ name }) => name);
   const trainingTypes = exercise.training_types.map(({ name }) => name);
@@ -41,9 +47,19 @@ export function ExerciseReadonlyModal({
               className="size-28 shrink-0 self-start rounded-2xl bg-muted object-cover sm:size-32"
             />
             <div className="flex min-w-0 flex-1 flex-col">
-              <h1 className="text-2xl font-semibold text-foreground">
-                {exercise.name}
-              </h1>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <h1 className="text-2xl font-semibold text-foreground">
+                  {exercise.name}
+                </h1>
+                {props.kind === "editable" && (
+                  <CustomizedSwitch
+                    label="Wyklucz ćwiczenie"
+                    checked={props.exercise.status === "SUSPENDED"}
+                    onCheckedChange={props.onExclusionChange}
+                    disabled={props.exclusionDisabled}
+                  />
+                )}
+              </div>
               <p className="mt-2 text-sm break-words pr-4 text-muted-foreground">
                 {exercise.description}
               </p>
@@ -57,27 +73,22 @@ export function ExerciseReadonlyModal({
             />
             <ExerciseStatBlock label="Czas trwania" value={duration} />
           </div>
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-3 [&>div]:w-[calc((100%-1rem)/3)] sm:[&>div]:w-[calc((100%-1.5rem)/3)] lg:[&>div]:w-[calc((100%-3rem)/5)]">
-            <ExerciseStatBlock
-              label="Zaangażowanie górnych partii"
-              value={String(exercise.upper_body_load)}
-            />
-            <ExerciseStatBlock
-              label="Zaangażowanie dolnych partii"
-              value={String(exercise.lower_body_load)}
-            />
-            <ExerciseStatBlock
-              label="Zaangażowanie partii core"
-              value={String(exercise.core_load)}
-            />
-            <ExerciseStatBlock
-              label="Intensywność fizyczna"
-              value={String(exercise.physical_difficulty)}
-            />
-            <ExerciseStatBlock
-              label="Trudność techniczna"
-              value={String(exercise.technical_difficulty)}
-            />
+          <div className="grid grid-cols-2 gap-4 rounded-2xl border-2 p-4 sm:gap-6">
+            {[
+              EXERCISE_RATING_COLUMNS.slice(0, 2),
+              EXERCISE_RATING_COLUMNS.slice(2),
+            ].map((columns, index) => (
+              <div key={index} className="flex min-w-0 flex-col gap-4">
+                {columns.map((column) => (
+                  <RatingMeter
+                    key={column.key}
+                    label={column.label}
+                    value={exercise[column.key]}
+                    fillClass={column.fillClass}
+                  />
+                ))}
+              </div>
+            ))}
           </div>
 
           <div className="flex flex-col gap-2 mt-4">
@@ -115,11 +126,11 @@ export function ExerciseReadonlyModal({
         >
           Zamknij
         </CustomizedButton>
-        {exercise.scope === "PRIVATE" ? (
+        {props.kind === "editable" && props.exercise.scope === "PRIVATE" ? (
           <CustomizedButton
             variant="primary"
             className="w-full sm:w-54"
-            onClick={onEdit}
+            onClick={props.onEdit}
           >
             Edytuj ćwiczenie
           </CustomizedButton>

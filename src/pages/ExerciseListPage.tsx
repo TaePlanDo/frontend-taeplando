@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlusIcon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import { ListStateView } from "@/components/shared/ListStateView";
 import { ManagementPageLayout } from "@/components/shared/ManagementPageLayout";
 import { Badge } from "@/components/ui/badge";
 import { useDeleteExercise } from "@/hooks/exercises/useDeleteExercise";
+import { useExerciseExclusion } from "@/hooks/exercises/useExerciseExclusion";
 import { useExerciseCatalogs } from "@/hooks/exercises/useExerciseCatalogs";
 import { useExercises } from "@/hooks/exercises/useExercises";
 import { useListSearchParams } from "@/hooks/filters/useListSearchParams";
@@ -52,6 +53,8 @@ export function ExerciseListPage() {
     onPageChange: setPage,
   });
   const { deleteExercise } = useDeleteExercise();
+  const { setExclusion, isPending: isExclusionPending } =
+    useExerciseExclusion();
   const {
     data,
     isLoading,
@@ -66,10 +69,34 @@ export function ExerciseListPage() {
   const showListMetadata = hasDisplayableListData(listState);
   const isListUnavailable = listState.kind === "unavailable";
 
+  useEffect(() => {
+    setEditingExercise((current) => {
+      if (!current) return current;
+      return (
+        exercises.find((exercise) => exercise.id === current.id) ?? current
+      );
+    });
+  }, [exercises]);
+
   async function handleDelete(id: string) {
     try {
       await deleteExercise(id);
       toast.success("Ćwiczenie zostało usunięte");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  async function handleExclusionChange(excluded: boolean) {
+    if (!editingExercise || isExclusionPending || isOffline) return;
+    const id = editingExercise.id;
+    try {
+      await setExclusion({ id, excluded });
+      setEditingExercise((current) =>
+        current?.id === id
+          ? { ...current, status: excluded ? "SUSPENDED" : "ACTIVE" }
+          : current,
+      );
     } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error));
     }
@@ -147,14 +174,21 @@ export function ExerciseListPage() {
             className="grid-rows-[auto_minmax(0,1fr)] max-h-[calc(100dvh-2rem)] gap-5 overflow-hidden p-4 sm:!top-8 sm:!bottom-8 sm:!h-auto sm:!translate-y-0 sm:max-w-190 sm:p-6"
             title="Podgląd ćwiczenia"
           >
-            <ExerciseReadonlyModal
-              exercise={editingExercise}
-              onClose={() => setDialogReadonlyOpen(false)}
-              onEdit={() => {
-                setDialogReadonlyOpen(false);
-                setDialogOpen(true);
-              }}
-            />
+            {editingExercise && (
+              <ExerciseReadonlyModal
+                kind="editable"
+                exercise={editingExercise}
+                onExclusionChange={(excluded) =>
+                  void handleExclusionChange(excluded)
+                }
+                exclusionDisabled={isExclusionPending || isOffline}
+                onClose={() => setDialogReadonlyOpen(false)}
+                onEdit={() => {
+                  setDialogReadonlyOpen(false);
+                  setDialogOpen(true);
+                }}
+              />
+            )}
           </CustomizedDialog>
         </>
       }
