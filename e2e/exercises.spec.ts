@@ -183,3 +183,42 @@ test.describe("exercise details preview", () => {
     await exercises.expectDetails(exercise, attributes);
   });
 });
+
+test.describe("exercise exclusion", () => {
+  test.beforeEach(() => seedSystemData());
+
+  const catalogExercise = "Bieg między liniami";
+
+  test("excludes and reactivates a catalog exercise on the list", async ({
+    page,
+  }) => {
+    await createLocalTrainerAndLogin(page);
+    const exercises = new ExercisesPage(page);
+    await exercises.goto();
+    await exercises.searchByName(catalogExercise);
+    await exercises.expectExcluded(catalogExercise, false);
+
+    await exercises.setExcluded(catalogExercise, true);
+    await exercises.expectExcluded(catalogExercise, true);
+
+    await page.reload();
+    await exercises.expectExcluded(catalogExercise, true);
+
+    await exercises.setExcluded(catalogExercise, false);
+    await exercises.expectExcluded(catalogExercise, false);
+  });
+
+  test("does not allow deleting a catalog exercise, only excluding it", async ({
+    page,
+  }) => {
+    await createLocalTrainerAndLogin(page);
+    const exercises = new ExercisesPage(page);
+    await exercises.goto();
+    await exercises.searchByName(catalogExercise);
+
+    await exercises.expectNoDeleteButton(catalogExercise);
+    await exercises.setExcluded(catalogExercise, true);
+    await exercises.expectNoDeleteButton(catalogExercise);
+    await exercises.expectExcluded(catalogExercise, true);
+  });
+});
