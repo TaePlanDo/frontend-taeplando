@@ -28,7 +28,41 @@ export class PlanNewPage {
     await expect(this.groupSelect).toContainText(groupName);
   }
 
+  async setParticipants(count: number): Promise<void> {
+    const slider = this.page.getByRole("slider", {
+      name: "Liczba uczestników",
+    });
+    await slider.focus();
+    await slider.press("Home");
+    for (let i = 1; i < count; i++) {
+      await slider.press("ArrowRight");
+    }
+    await expect(slider).toHaveAttribute("aria-valuenow", String(count));
+  }
+
+  async addEquipment(name: string): Promise<void> {
+    await this.page
+      .getByRole("combobox", { name: "Sprzęt treningowy" })
+      .click();
+    await this.page.getByRole("option", { name, exact: true }).click();
+    await expect(
+      this.page.getByRole("button", { name: `Usuń ${name}` }),
+    ).toBeVisible();
+  }
+
+  async selectTrainingType(name: string): Promise<void> {
+    const select = this.page.getByRole("combobox", { name: "Typ treningu" });
+    await select.click();
+    await this.page.getByRole("option", { name, exact: true }).click();
+    await expect(select).toContainText(name);
+  }
+
   async submitGeneration(): Promise<void> {
     await this.generateButton.click();
+  }
+
+  async expectValidationError(message: string): Promise<void> {
+    await expect(this.page.getByText(message)).toBeVisible();
+    await expect(this.page).toHaveURL(/\/plans\/new$/);
   }
 }
