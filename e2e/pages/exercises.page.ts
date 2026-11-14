@@ -276,6 +276,14 @@ export class ExercisesPage {
     await expect(excludedHeading).toHaveCount(excluded ? 1 : 0);
   }
 
+  async firstExerciseName(): Promise<string> {
+    return this.page
+      .locator('[data-slot="card"]')
+      .first()
+      .getByRole("heading")
+      .innerText();
+  }
+
   async expectNoDeleteButton(name: string): Promise<void> {
     await expect(this.exerciseCard(name)).toBeVisible();
     await expect(

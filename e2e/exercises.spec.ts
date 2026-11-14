@@ -187,25 +187,22 @@ test.describe("exercise details preview", () => {
 test.describe("exercise exclusion", () => {
   test.beforeEach(() => seedSystemData());
 
-  const catalogExercise = "Bieg między liniami";
-
-  test("excludes and reactivates a catalog exercise on the list", async ({
-    page,
-  }) => {
+  test("excludes and reactivates an exercise on the list", async ({ page }) => {
     await createLocalTrainerAndLogin(page);
     const exercises = new ExercisesPage(page);
     await exercises.goto();
-    await exercises.searchByName(catalogExercise);
-    await exercises.expectExcluded(catalogExercise, false);
+    await exercises.createExercise(exercise);
+    await exercises.searchByName(exercise.name);
+    await exercises.expectExcluded(exercise.name, false);
 
-    await exercises.setExcluded(catalogExercise, true);
-    await exercises.expectExcluded(catalogExercise, true);
+    await exercises.setExcluded(exercise.name, true);
+    await exercises.expectExcluded(exercise.name, true);
 
     await page.reload();
-    await exercises.expectExcluded(catalogExercise, true);
+    await exercises.expectExcluded(exercise.name, true);
 
-    await exercises.setExcluded(catalogExercise, false);
-    await exercises.expectExcluded(catalogExercise, false);
+    await exercises.setExcluded(exercise.name, false);
+    await exercises.expectExcluded(exercise.name, false);
   });
 
   test("does not allow deleting a catalog exercise, only excluding it", async ({
@@ -214,6 +211,7 @@ test.describe("exercise exclusion", () => {
     await createLocalTrainerAndLogin(page);
     const exercises = new ExercisesPage(page);
     await exercises.goto();
+    const catalogExercise = await exercises.firstExerciseName();
     await exercises.searchByName(catalogExercise);
 
     await exercises.expectNoDeleteButton(catalogExercise);
