@@ -12,6 +12,11 @@ const exercise = {
   minParticipants: 2,
   maxParticipants: 16,
   durationMinutes: 10,
+  physicalDifficulty: 4,
+  technicalDifficulty: 2,
+  upperBodyLoad: 1,
+  lowerBodyLoad: 5,
+  coreLoad: 3,
 };
 
 test.describe("exercise management", () => {
@@ -156,6 +161,23 @@ test.describe("exercise configuration", () => {
     await exercises.expectValidationError("Wybierz co najmniej jeden Typ");
     await exercises.openAttributeTab("Segment");
     await exercises.expectValidationError("Wybierz co najmniej jeden Segment");
+  });
+
+  test("shows validation feedback for an out-of-range intensity", async ({
+    page,
+  }) => {
+    await createLocalTrainerAndLogin(page);
+
+    const exercises = new ExercisesPage(page);
+    await exercises.goto();
+    await exercises.submitExerciseWithoutAttributes({
+      ...exercise,
+      physicalDifficulty: 6,
+    });
+
+    await exercises.expectValidationError(
+      "Intensywność fizyczna musi być w zakresie 1–5",
+    );
   });
 });
 
