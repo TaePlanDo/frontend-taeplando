@@ -205,3 +205,40 @@ test.describe("exercise details preview", () => {
     await exercises.expectDetails(exercise, attributes);
   });
 });
+
+test.describe("exercise exclusion", () => {
+  test.beforeEach(() => seedSystemData());
+
+  test("excludes and reactivates an exercise on the list", async ({ page }) => {
+    await createLocalTrainerAndLogin(page);
+    const exercises = new ExercisesPage(page);
+    await exercises.goto();
+    await exercises.createExercise(exercise);
+    await exercises.searchByName(exercise.name);
+    await exercises.expectExcluded(exercise.name, false);
+
+    await exercises.setExcluded(exercise.name, true);
+    await exercises.expectExcluded(exercise.name, true);
+
+    await page.reload();
+    await exercises.expectExcluded(exercise.name, true);
+
+    await exercises.setExcluded(exercise.name, false);
+    await exercises.expectExcluded(exercise.name, false);
+  });
+
+  test("does not allow deleting a catalog exercise, only excluding it", async ({
+    page,
+  }) => {
+    await createLocalTrainerAndLogin(page);
+    const exercises = new ExercisesPage(page);
+    await exercises.goto();
+    const catalogExercise = await exercises.firstExerciseName();
+    await exercises.searchByName(catalogExercise);
+
+    await exercises.expectNoDeleteButton(catalogExercise);
+    await exercises.setExcluded(catalogExercise, true);
+    await exercises.expectNoDeleteButton(catalogExercise);
+    await exercises.expectExcluded(catalogExercise, true);
+  });
+});

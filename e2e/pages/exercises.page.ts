@@ -273,10 +273,49 @@ export class ExercisesPage {
     await this.page.getByRole("option", { name: value, exact: true }).click();
   }
 
-  private exerciseCard(name: string): Locator {
+  async setExcluded(name: string, excluded: boolean): Promise<void> {
+    await this.openDetails(name);
+    const exclusionSwitch = this.exerciseDialog.getByRole("switch", {
+      name: "Wyklucz ćwiczenie",
+    });
+    await exclusionSwitch.click();
+    await expect(exclusionSwitch).toHaveAttribute(
+      "aria-checked",
+      String(excluded),
+    );
+    await this.exerciseDialog.getByRole("button", { name: "Zamknij" }).click();
+    await expect(this.exerciseDialog).toHaveCount(0);
+  }
+
+  async expectExcluded(name: string, excluded: boolean): Promise<void> {
+    const excludedHeading = this.exerciseCard(name).getByRole("heading", {
+      name: `Wykluczone ćwiczenie: ${name}`,
+    });
+    await expect(excludedHeading).toHaveCount(excluded ? 1 : 0);
+  }
+
+  async firstExerciseName(): Promise<string> {
     return this.page
       .locator('[data-slot="card"]')
-      .filter({ has: this.page.getByRole("heading", { name, exact: true }) });
+      .first()
+      .getByRole("heading")
+      .innerText();
+  }
+
+  async expectNoDeleteButton(name: string): Promise<void> {
+    await expect(this.exerciseCard(name)).toBeVisible();
+    await expect(
+      this.exerciseCard(name).getByRole("button", { name: "Usuń" }),
+    ).toHaveCount(0);
+  }
+
+  private exerciseCard(name: string): Locator {
+    return this.page.locator('[data-slot="card"]').filter({
+      has: this.page.getByRole("button", {
+        name: `Pokaż szczegóły: ${name}`,
+        exact: true,
+      }),
+    });
   }
 
   private async fillExerciseForm(values: ExerciseFormValues): Promise<void> {
