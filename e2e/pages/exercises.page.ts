@@ -222,7 +222,7 @@ export class ExercisesPage {
   }
 
   async applyCatalogFilter(
-    field: "Sprzęt" | "Kategorie" | "Schematy",
+    field: "Sprzęt" | "Typ" | "Schematy",
     value: string,
   ): Promise<void> {
     await this.page.getByRole("button", { name: /Filtruj/ }).click();
