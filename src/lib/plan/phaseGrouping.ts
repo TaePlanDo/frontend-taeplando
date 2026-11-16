@@ -12,11 +12,27 @@ export type PlanPhase = {
   deltaMinutes: number;
 };
 
-export function plannedPhaseMinutes(
-  percentage: number,
+export function allocatePhaseMinutes(
+  schema: PlanSchemaSnapshotItem[],
   trainingDuration: number,
-): number {
-  return Math.round((percentage / 100) * trainingDuration);
+): Map<number, number> {
+  // Percentages are stored to two decimal places; integer arithmetic avoids
+  // floating-point differences when equal remainders are ordered.
+  const allocations = schema.map((item) => {
+    const numerator = Math.round(item.percentage * 100) * trainingDuration;
+    return {
+      position: item.position,
+      minutes: Math.floor(numerator / 10000),
+      remainder: numerator % 10000,
+    };
+  });
+  const remaining =
+    trainingDuration - allocations.reduce((sum, item) => sum + item.minutes, 0);
+  const ranked = [...allocations].sort(
+    (a, b) => b.remainder - a.remainder || a.position - b.position,
+  );
+  for (const item of ranked.slice(0, remaining)) item.minutes += 1;
+  return new Map(allocations.map((item) => [item.position, item.minutes]));
 }
 
 export function sumExerciseMinutes(exercises: PlanExercise[]): number {
@@ -27,6 +43,10 @@ export function sumExerciseMinutes(exercises: PlanExercise[]): number {
 }
 
 export function groupPlanPhases(plan: PlanDetail): PlanPhase[] {
+  const planned = allocatePhaseMinutes(
+    plan.schema_snapshot,
+    plan.training_duration_snapshot,
+  );
   const byPosition = new Map<number, PlanExercise[]>();
   for (const exercise of plan.exercises) {
     const bucket = byPosition.get(exercise.schema_position) ?? [];
@@ -40,10 +60,7 @@ export function groupPlanPhases(plan: PlanDetail): PlanPhase[] {
       const exercises = (byPosition.get(schema.position) ?? []).sort(
         (a, b) => a.position - b.position,
       );
-      const plannedMinutes = plannedPhaseMinutes(
-        schema.percentage,
-        plan.training_duration_snapshot,
-      );
+      const plannedMinutes = planned.get(schema.position) ?? 0;
       const actualMinutes = sumExerciseMinutes(exercises);
       return {
         schema,
