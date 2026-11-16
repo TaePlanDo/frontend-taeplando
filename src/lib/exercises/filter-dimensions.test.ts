@@ -68,8 +68,8 @@ describe("filter-dimensions", () => {
       "Nazwa: Ap",
       "Wiek: 7–14",
       "Sprzęt: Mata",
-      "Kategorie: Technika",
-      "Schematy: Część główna",
+      "Typ: Technika",
+      "Segment: Część główna",
     ]);
   });
 

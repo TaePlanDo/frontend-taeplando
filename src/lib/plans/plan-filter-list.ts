@@ -60,7 +60,7 @@ export const planFilters: FilterDimension<PlanListFilters>[] = [
   {
     key: "trainingTypes",
     kind: "catalog",
-    label: "Kategorie",
+    label: "Typ",
     fields: [{ key: "training_type_ids", kind: "stringCsv" }],
     chip: (filters, catalogs) =>
       namesFor(filters.training_type_ids, catalogs.trainingTypes),
