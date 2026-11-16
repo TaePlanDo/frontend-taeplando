@@ -42,11 +42,11 @@ export function ReadonlySchemaBar({
         ))}
       </div>
 
-      <ul className="flex flex-nowrap items-center gap-x-3 overflow-hidden text-xs sm:gap-x-4 sm:text-sm">
+      <ul className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs sm:gap-x-4 sm:text-sm">
         {items.map((item, index) => (
           <li
             key={`${item.position}-${item.segment_id}`}
-            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-foreground"
+            className="inline-flex max-w-full items-center gap-1.5 text-foreground"
           >
             <span
               className={cn(
@@ -55,7 +55,7 @@ export function ReadonlySchemaBar({
               )}
               aria-hidden
             />
-            <span>
+            <span className="min-w-0 [overflow-wrap:anywhere]">
               {item.name}{" "}
               <span className="text-muted-foreground">
                 {Math.round(item.percentage)}%

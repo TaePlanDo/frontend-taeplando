@@ -44,7 +44,7 @@ export function PlanSummaryCards({ plan }: PlanSummaryCardsProps) {
           <CardTitle className="text-base text-foreground">
             Schematy grupy
           </CardTitle>
-          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 sm:gap-3">
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:flex-1 sm:justify-end sm:gap-3">
             <p className="inline-flex items-center gap-2 text-sm text-foreground">
               <Clock3 className="size-4 shrink-0 text-primary" aria-hidden />
               Czas trwania: {actual} / {planned} min

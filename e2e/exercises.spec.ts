@@ -91,11 +91,11 @@ test.describe("exercise search and filters", () => {
       trainingType: "Walka",
     });
 
-    await exercises.applyCatalogFilter("Kategorie", "Technika");
+    await exercises.applyCatalogFilter("Typ", "Technika");
     await exercises.expectExercise(exercise.name, { trainingType: "Technika" });
     await exercises.expectExerciseHidden("E2E kopnięcie okrężne");
     await exercises.expectActiveFilterChip("Nazwa: E2E");
-    await exercises.expectActiveFilterChip("Kategorie: Technika");
+    await exercises.expectActiveFilterChip("Typ: Technika");
     await exercises.expectListQuery({
       training_type_ids: /^[0-9a-f-]{36}$/i,
     });
@@ -113,10 +113,10 @@ test.describe("exercise search and filters", () => {
     await exercises.searchByName(exercise.name);
     await exercises.expectExercise(exercise.name);
 
-    await exercises.applyCatalogFilter("Kategorie", "Walka");
+    await exercises.applyCatalogFilter("Typ", "Walka");
     await exercises.expectFilteredEmpty();
     await exercises.expectExerciseHidden(exercise.name);
-    await exercises.expectActiveFilterChip("Kategorie: Walka");
+    await exercises.expectActiveFilterChip("Typ: Walka");
     await exercises.expectListQuery({
       training_type_ids: /^[0-9a-f-]{36}$/i,
     });

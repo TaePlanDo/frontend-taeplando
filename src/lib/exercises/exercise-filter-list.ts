@@ -71,17 +71,17 @@ export const exerciseFilters: FilterDimension<ExerciseListFilters>[] = [
   {
     key: "trainingTypes",
     kind: "catalog",
-    label: "Kategorie",
+    label: "Typ",
     fields: [{ key: "training_type_ids", kind: "stringCsv" }],
     chip: (filters, catalogs) =>
-      `Kategorie: ${namesFor(filters.training_type_ids, catalogs.trainingTypes)}`,
+      `Typ: ${namesFor(filters.training_type_ids, catalogs.trainingTypes)}`,
   },
   {
     key: "segments",
     kind: "catalog",
-    label: "Schematy",
+    label: "Segment",
     fields: [{ key: "segment_ids", kind: "intCsv" }],
     chip: (filters, catalogs) =>
-      `Schematy: ${namesFor(filters.segment_ids, catalogs.segments)}`,
+      `Segment: ${namesFor(filters.segment_ids, catalogs.segments)}`,
   },
 ];
