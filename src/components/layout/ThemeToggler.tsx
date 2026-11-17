@@ -9,7 +9,7 @@ export function ThemeToggler() {
     <button
       type="button"
       onClick={toggleTheme}
-      className="inline-flex size-9 items-center justify-center rounded-md text-foreground transition-colors hover:bg-foreground/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+      className="inline-flex size-9 cursor-pointer items-center justify-center rounded-md text-foreground transition-colors hover:bg-foreground/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
       aria-label={theme === "dark" ? "Włącz jasny motyw" : "Włącz ciemny motyw"}
     >
       {theme === "dark" ? (

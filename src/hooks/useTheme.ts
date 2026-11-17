@@ -46,7 +46,11 @@ function setTheme(theme: Theme) {
 applyTheme(currentTheme);
 
 export function useTheme() {
-  const theme = useSyncExternalStore(subscribe, getSnapshot, () => "dark");
+  const theme = useSyncExternalStore<Theme>(
+    subscribe,
+    getSnapshot,
+    (): Theme => "dark",
+  );
   const toggleTheme = useCallback(() => {
     setTheme(currentTheme === "dark" ? "light" : "dark");
   }, []);
