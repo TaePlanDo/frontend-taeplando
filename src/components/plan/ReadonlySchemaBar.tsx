@@ -9,9 +9,9 @@ type ReadonlySchemaBarProps = {
 
 const SEGMENT_COLORS = [
   "bg-plan-schema-peach",
-  "bg-primary",
+  "bg-plan-schema-main",
   "bg-plan-schema-brown",
-  "bg-primary-foreground",
+  "bg-plan-schema-accent",
 ] as const;
 
 export function ReadonlySchemaBar({
