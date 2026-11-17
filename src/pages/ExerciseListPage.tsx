@@ -153,6 +153,7 @@ export function ExerciseListPage() {
             title={editingExercise ? "Edytuj ćwiczenie" : "Stwórz ćwiczenie"}
             trigger={
               <CustomizedButton
+                variant="action"
                 className="w-auto max-w-44 px-4 pt-2 pb-2.5 text-sm lg:w-full"
                 onClick={() => setEditingExercise(null)}
               >

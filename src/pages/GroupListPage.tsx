@@ -81,6 +81,7 @@ export function GroupListPage() {
             }
             trigger={
               <CustomizedButton
+                variant="action"
                 className="max-w-40 pt-2 pb-2.5 text-sm"
                 onClick={() => setEditingGroup(null)}
               >

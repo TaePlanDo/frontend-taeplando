@@ -57,6 +57,7 @@ export function EquipmentListPage() {
           title={editingEquipment ? "Edytuj sprzęt" : "Dodaj sprzęt"}
           trigger={
             <CustomizedButton
+              variant="action"
               className="max-w-44 pt-2 pb-2.5 text-sm"
               onClick={() => setEditingEquipment(null)}
             >
