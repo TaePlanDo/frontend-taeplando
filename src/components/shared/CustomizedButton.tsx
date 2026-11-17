@@ -20,7 +20,8 @@ const variantClasses: Record<
     "rounded-full border-2 border-primary bg-transparent text-foreground transition-colors hover:bg-transparent hover:border-foreground/70",
   danger:
     "rounded-full border-2 border-destructive bg-transparent text-foreground transition-colors hover:bg-transparent hover:border-foreground/70",
-  google: "w-full border bg-accent text-accent-foreground hover:bg-accent/90",
+  google:
+    "w-full border bg-accent text-accent-foreground hover:bg-accent/90 light:bg-card light:hover:bg-card/80",
 };
 
 export function CustomizedButton({
