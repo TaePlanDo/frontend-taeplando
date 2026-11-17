@@ -18,7 +18,7 @@ export function BackgroundDots({
       aria-hidden
       className={cn(
         className,
-        "pointer-events-none absolute -z-10 hidden w-auto -translate-y-1/2 select-none lg:block",
+        "pointer-events-none absolute -z-10 hidden w-auto -translate-y-1/2 select-none lg:block light:hidden",
       )}
       width={width}
       height={height}

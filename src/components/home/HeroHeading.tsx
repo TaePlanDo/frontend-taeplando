@@ -8,7 +8,7 @@ export function HeroHeading({ className }: HeroHeadingProps) {
   return (
     <h1
       className={cn(
-        "lg:text-5xl text-4xl leading-[1.15] font-extrabold tracking-tight text-foreground lg:w-120 text-glow-primary",
+        "lg:text-5xl text-4xl leading-[1.15] font-extrabold tracking-tight text-foreground lg:w-120 text-glow-primary light:[text-shadow:none]",
         className,
       )}
     >

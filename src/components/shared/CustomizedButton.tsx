@@ -14,7 +14,7 @@ const variantClasses: Record<
   primary:
     "w-full bg-gradient-to-r from-primary to-primary-foreground text-white hover:opacity-90",
   action:
-    "rounded-full bg-gradient-to-r from-primary to-primary-foreground text-white shadow-[0_6px_18px_0_color-mix(in_srgb,var(--primary)_35%,transparent)] hover:opacity-90",
+    "rounded-full bg-gradient-to-r from-primary to-primary-foreground text-white shadow-lg shadow-primary/35 hover:opacity-90",
   hero: "pt-6 pb-7 border-2 border-primary w-full rounded-md bg-gradient-to-r from-primary to-primary-foreground text-xl font-semibold text-white shadow-sm shadow-primary-foreground/70 transition-all hover:opacity-85",
   outline:
     "rounded-full border-2 border-primary bg-transparent text-foreground transition-colors hover:bg-transparent hover:border-foreground/70",

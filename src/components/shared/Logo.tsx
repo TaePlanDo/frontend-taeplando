@@ -51,10 +51,13 @@ export function Logo({
         width={width}
         height={height}
         alt={alt}
-        className={className}
+        className={cn(
+          className,
+          "light:drop-shadow-xl light:drop-shadow-primary/25",
+        )}
         {...props}
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-background via-background/5 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-background via-background/5 to-transparent light:hidden" />
     </div>
   );
 }
