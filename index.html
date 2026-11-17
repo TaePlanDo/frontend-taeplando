@@ -8,9 +8,12 @@
     <title>TaePlanDo</title>
     <script>
       try {
-        if (localStorage.getItem("theme") === "light")
-          document.documentElement.classList.add("light");
-      } catch {}
+        var light = localStorage.getItem("theme") === "light";
+        document.documentElement.classList.toggle("light", light);
+        document.documentElement.classList.toggle("dark", !light);
+      } catch {
+        document.documentElement.classList.add("dark");
+      }
     </script>
   </head>
   <body>
