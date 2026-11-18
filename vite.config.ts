@@ -8,6 +8,13 @@ import { defineConfig } from "vitest/config";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const proxyTarget = env.VITE_DEV_API_PROXY_TARGET ?? "http://localhost:8000";
+  const apiProxy = {
+    "/api": {
+      target: proxyTarget,
+      changeOrigin: true,
+      rewrite: (p: string) => p.replace(/^\/api/, ""),
+    },
+  };
 
   return {
     plugins: [
@@ -43,7 +50,6 @@ export default defineConfig(({ mode }) => {
           navigateFallback: "/index.html",
           // OAuth and API are real navigations/XHR - never rewrite them to the SPA shell.
           navigateFallbackDenylist: [/^\/api(?:\/|$)/],
-          runtimeCaching: [],
         },
       }),
     ],
@@ -58,24 +64,8 @@ export default defineConfig(({ mode }) => {
       setupFiles: "./src/test/setup.ts",
       exclude: ["**/node_modules/**", "**/e2e/**", "**/dist/**"],
     },
-    server: {
-      proxy: {
-        "/api": {
-          target: proxyTarget,
-          changeOrigin: true,
-          rewrite: (p) => p.replace(/^\/api/, ""),
-        },
-      },
-    },
-    // Same proxy as dev - needed for Google OAuth during `npm run preview`.
-    preview: {
-      proxy: {
-        "/api": {
-          target: proxyTarget,
-          changeOrigin: true,
-          rewrite: (p) => p.replace(/^\/api/, ""),
-        },
-      },
-    },
+    server: { proxy: apiProxy },
+    // Needed for Google OAuth during `npm run preview`.
+    preview: { proxy: apiProxy },
   };
 });
