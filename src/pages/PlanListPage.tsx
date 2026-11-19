@@ -122,6 +122,7 @@ export function PlanListPage() {
       }
       action={
         <CustomizedButton
+          variant="action"
           className="w-auto max-w-52 px-4 pt-2 pb-2.5 text-sm"
           asChild
         >

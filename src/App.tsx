@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AuthorizedLayout } from "@/components/layout/AuthorizedLayout";
 import { SheetOffsetProvider } from "@/components/shared/SheetOffset";
-import { Toaster } from "@/components/ui/sonner";
+import { AppToaster } from "@/components/shared/AppToaster";
 import { AccountPage } from "@/pages/AccountPage";
 import { EquipmentListPage } from "@/pages/EquipmentListPage";
 import { GroupListPage } from "@/pages/GroupListPage";
@@ -52,7 +52,7 @@ export function App() {
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      <Toaster theme="dark" />
+      <AppToaster />
     </SheetOffsetProvider>
   );
 }

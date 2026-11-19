@@ -6,6 +6,15 @@
     <link rel="icon" type="image/png" href="/logo.png" />
     <link rel="preload" href="/logo.png" as="image" type="image/png" />
     <title>TaePlanDo</title>
+    <script>
+      try {
+        var light = localStorage.getItem("theme") === "light";
+        document.documentElement.classList.toggle("light", light);
+        document.documentElement.classList.toggle("dark", !light);
+      } catch {
+        document.documentElement.classList.add("dark");
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

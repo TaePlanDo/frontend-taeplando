@@ -32,7 +32,7 @@ export function PlanExerciseRow({ exercise, number }: PlanExerciseRowProps) {
               src={exercise.image_url_snapshot}
               className="size-16 rounded-xl bg-muted object-cover sm:size-20"
             />
-            <span className="absolute -left-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-foreground">
+            <span className="absolute -left-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
               {number}
             </span>
           </div>

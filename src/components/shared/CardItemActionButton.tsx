@@ -18,7 +18,7 @@ export function CardItemActionButton({
       variant="outline"
       size="sm"
       className={cn(
-        "gap-1.5 border-transparent bg-transparent text-foreground/80 hover:bg-foreground/10 cursor-pointer",
+        "gap-1.5 !border-transparent !bg-transparent shadow-none text-foreground/80 hover:!bg-foreground/10 cursor-pointer",
         className,
       )}
       {...props}

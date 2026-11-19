@@ -89,7 +89,7 @@ export function CustomizedPagination({
                 className={cn(
                   pageLinkClass,
                   item === currentPage &&
-                    "border-transparent bg-primary text-background hover:bg-primary hover:text-background",
+                    "!border-transparent !bg-primary !text-background hover:!bg-primary hover:!text-background",
                 )}
                 onClick={(event) => {
                   event.preventDefault();

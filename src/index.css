@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant light (&:where(.light, .light *));
 
 @theme inline {
   --color-background: var(--background);
@@ -26,6 +27,11 @@
   --color-plan-rating-core-foreground: var(--plan-rating-core-foreground);
   --color-plan-schema-peach: var(--plan-schema-peach);
   --color-plan-schema-brown: var(--plan-schema-brown);
+  --color-chip: var(--chip);
+  --color-chip-border: var(--chip-border);
+  --color-chip-foreground: var(--chip-foreground);
+  --color-plan-schema-main: var(--plan-schema-main);
+  --color-plan-schema-accent: var(--plan-schema-accent);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -75,7 +81,41 @@
   --plan-rating-core-foreground: #e0c9a0;
   --plan-schema-peach: #f0b27a;
   --plan-schema-brown: #7a3a1a;
+  --plan-schema-main: var(--primary);
+  --plan-schema-accent: var(--primary-foreground);
+  --chip: transparent;
+  --chip-border: var(--secondary);
+  --chip-foreground: var(--secondary-foreground);
   --radius: 0.5rem;
+}
+
+:root.light {
+  --background: #f7f1e8;
+  --foreground: #1d1b22;
+  --card: #ffffff;
+  --card-foreground: #1d1b22;
+  --primary: #ff5a00;
+  --primary-foreground: #ff5a00;
+  --muted: #ece7f2;
+  --muted-foreground: #625d6b;
+  --popover: #ffffff;
+  --popover-foreground: #1d1b22;
+  --secondary: #3e3850;
+  --secondary-foreground: #ffffff;
+  --accent: #ece7f2;
+  --accent-foreground: #1d1b22;
+  --border: #d9d2e6;
+  --input: #938d9e;
+  --ring: #c2490b;
+  --plan-rating-core: #9a7a45;
+  --plan-rating-core-foreground: #7d6233;
+  --plan-schema-peach: #ffe4cc;
+  --plan-schema-main: #fb923c;
+  --plan-schema-brown: #fdba74;
+  --plan-schema-accent: #fed7aa;
+  --chip: #ffe8d9;
+  --chip-border: #f0b48c;
+  --chip-foreground: #1d1b22;
 }
 
 @utility text-glow-primary {
