@@ -9,6 +9,8 @@ import { useOnlineState } from "@/hooks/useOnlineState";
 import type { PaginatedResponse } from "@/types/pagination";
 import { getPaginatedListState } from "./listState";
 
+const DEFAULT_PAGE_SIZE = 20;
+
 type PaginatedListBaseOptions<TItem> = {
   queryKey: QueryKey;
   fetchPage: (
@@ -41,7 +43,7 @@ function isControlledPagination<TItem>(
 export function usePaginatedList<TItem>(
   options: UsePaginatedListOptions<TItem>,
 ) {
-  const { queryKey, fetchPage, pageSize = 6 } = options;
+  const { queryKey, fetchPage, pageSize = DEFAULT_PAGE_SIZE } = options;
   const [uncontrolledPage, setUncontrolledPage] = useState(
     "initialPage" in options ? (options.initialPage ?? 1) : 1,
   );
@@ -92,9 +94,13 @@ export function usePaginatedList<TItem>(
 
   const goToPage = useCallback(
     (target: number) => {
-      setPage(Math.min(Math.max(target, 1), totalPages));
+      const nextPage = Math.min(Math.max(target, 1), totalPages);
+
+      if (nextPage !== page) {
+        setPage(nextPage);
+      }
     },
-    [setPage, totalPages],
+    [page, setPage, totalPages],
   );
 
   return {
