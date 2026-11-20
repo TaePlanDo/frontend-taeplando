@@ -6,10 +6,9 @@ import {
 import { useCallback, useEffect, useState } from "react";
 
 import { useOnlineState } from "@/hooks/useOnlineState";
+import { DEFAULT_PAGE_SIZE } from "@/lib/constants/pagination";
 import type { PaginatedResponse } from "@/types/pagination";
 import { getPaginatedListState } from "./listState";
-
-const DEFAULT_PAGE_SIZE = 20;
 
 type PaginatedListBaseOptions<TItem> = {
   queryKey: QueryKey;
