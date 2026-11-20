@@ -15,6 +15,7 @@ export function usePlans({
   onPageChange,
 }: UsePlansOptions) {
   return usePaginatedList({
+    pageSize: 8,
     queryKey: [...queryKeys.plans.lists(), filters],
     fetchPage: (currentPage, pageSize) =>
       getPlansRequest(currentPage, pageSize, filters),

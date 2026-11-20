@@ -4,6 +4,7 @@ import { queryKeys } from "@/lib/queryKeys";
 
 export function useGroups() {
   return usePaginatedList({
+    pageSize: 8,
     queryKey: queryKeys.groups.lists(),
     fetchPage: getGroupsRequest,
   });

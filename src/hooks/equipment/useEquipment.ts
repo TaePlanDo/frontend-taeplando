@@ -4,6 +4,7 @@ import { queryKeys } from "@/lib/queryKeys";
 
 export function useEquipment() {
   return usePaginatedList({
+    pageSize: 20,
     queryKey: queryKeys.equipment.lists(),
     fetchPage: getEquipmentPageRequest,
   });
