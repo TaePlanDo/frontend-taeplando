@@ -1,7 +1,7 @@
 import { seedSystemData } from "./helpers/backend";
 import { startPlanGeneration } from "./helpers/startPlanGeneration";
 import { expect, test } from "./playwright";
-import { planNameForGroup, PlanDetailPage } from "./pages/planDetail.page";
+import { PlanDetailPage } from "./pages/planDetail.page";
 import { PlanNewPage } from "./pages/planNew.page";
 
 const groupValues = {
@@ -40,7 +40,7 @@ test.describe("plan generation", () => {
 
     const detail = new PlanDetailPage(page);
     await detail.expectPlan(groupValues.name);
-    const planName = planNameForGroup(groupValues.name);
+    const planName = await detail.planName();
     const existingPlanId = detail.planId();
 
     const planNew = new PlanNewPage(page);
