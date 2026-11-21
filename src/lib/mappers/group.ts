@@ -35,16 +35,14 @@ export function toFormValues(group?: Group | null): GroupDetailsFormValues {
       name: "",
       minAge: String(GROUP_LIMITS.MIN_AGE),
       maxAge: String(GROUP_LIMITS.MAX_AGE),
-      hours: "0",
-      minutes: "0",
+      durationMinutes: "0",
     };
   }
   return {
     name: group.name,
     minAge: String(group.min_age),
     maxAge: String(group.max_age),
-    hours: String(Math.floor(group.duration_minutes / 60)),
-    minutes: String(group.duration_minutes % 60),
+    durationMinutes: String(group.duration_minutes),
   };
 }
 
@@ -53,6 +51,6 @@ export function toGroupWrite(values: GroupDetailsOutput): GroupWrite {
     name: values.name,
     min_age: values.minAge,
     max_age: values.maxAge,
-    duration_minutes: values.hours * 60 + values.minutes,
+    duration_minutes: values.durationMinutes,
   };
 }

@@ -5,8 +5,7 @@ export type GroupFormValues = {
   name: string;
   minAge: number;
   maxAge: number;
-  hours: number;
-  minutes: number;
+  durationMinutes: number;
 };
 
 export class GroupsPage {
@@ -17,8 +16,7 @@ export class GroupsPage {
   readonly groupNameInput: Locator;
   readonly minAgeInput: Locator;
   readonly maxAgeInput: Locator;
-  readonly hoursInput: Locator;
-  readonly minutesInput: Locator;
+  readonly durationInput: Locator;
   readonly emptyListMessage: Locator;
 
   constructor(page: Page) {
@@ -34,11 +32,8 @@ export class GroupsPage {
     const ageSliders = this.groupDialog.getByRole("slider", { name: "Wiek" });
     this.minAgeInput = ageSliders.nth(0);
     this.maxAgeInput = ageSliders.nth(1);
-    this.hoursInput = this.groupDialog.getByRole("spinbutton", {
-      name: "Godziny",
-    });
-    this.minutesInput = this.groupDialog.getByRole("spinbutton", {
-      name: "Minuty",
+    this.durationInput = this.groupDialog.getByRole("spinbutton", {
+      name: "Czas trwania (min)",
     });
     this.emptyListMessage = page.getByText("Jeszcze nie masz żadnych grup");
   }
@@ -188,8 +183,7 @@ export class GroupsPage {
       await this.setSliderValue(this.minAgeInput, values.minAge);
       await this.setSliderValue(this.maxAgeInput, values.maxAge);
     }
-    await this.hoursInput.fill(String(values.hours));
-    await this.minutesInput.fill(String(values.minutes));
+    await this.durationInput.fill(String(values.durationMinutes));
   }
 
   private async setSliderValue(slider: Locator, target: number): Promise<void> {

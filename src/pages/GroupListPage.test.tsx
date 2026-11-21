@@ -228,8 +228,7 @@ describe("GroupListPage", () => {
     const sliders = screen.getAllByRole("slider", { name: "Wiek" });
     expect(sliders[0]).toHaveAttribute("aria-valuenow", "60");
     expect(sliders[1]).toHaveAttribute("aria-valuenow", "80");
-    expect(input("Godziny").value).toBe("0");
-    expect(input("Minuty").value).toBe("45");
+    expect(input("Czas trwania (min)").value).toBe("45");
     expect(screen.getByRole("button", { name: "Zapisz zmiany" })).toBeTruthy();
   });
 

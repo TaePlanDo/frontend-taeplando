@@ -43,26 +43,23 @@ describe("group mappers", () => {
       name: "",
       minAge: "1",
       maxAge: "99",
-      hours: "0",
-      minutes: "0",
+      durationMinutes: "0",
     });
     expect(toFormValues(undefined)).toEqual(toFormValues(null));
   });
 
-  it("splits duration into hours and minutes for an existing group", () => {
+  it("keeps an existing group duration in minutes", () => {
     expect(toFormValues(group)).toEqual({
       name: "Młodzież",
       minAge: "7",
       maxAge: "14",
-      hours: "1",
-      minutes: "30",
+      durationMinutes: "90",
     });
   });
 
-  it("keeps full hours with zero minutes", () => {
+  it("keeps full-hour durations in minutes", () => {
     expect(toFormValues({ ...group, duration_minutes: 120 })).toMatchObject({
-      hours: "2",
-      minutes: "0",
+      durationMinutes: "120",
     });
   });
 
@@ -72,8 +69,7 @@ describe("group mappers", () => {
         name: "Młodzież",
         minAge: 7,
         maxAge: 14,
-        hours: 1,
-        minutes: 30,
+        durationMinutes: 90,
       }),
     ).toEqual({
       name: "Młodzież",
@@ -91,8 +87,7 @@ describe("group mappers", () => {
         name: values.name,
         minAge: Number(values.minAge),
         maxAge: Number(values.maxAge),
-        hours: Number(values.hours),
-        minutes: Number(values.minutes),
+        durationMinutes: Number(values.durationMinutes),
       }).duration_minutes,
     ).toBe(745);
   });

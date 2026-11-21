@@ -36,36 +36,22 @@ export const groupDetailsSchema = z
       .max(255, "Nazwa grupy może mieć maksymalnie 255 znaków"),
     minAge: ageField("Minimalny wiek"),
     maxAge: ageField("Maksymalny wiek"),
-    hours: integerString({
-      required: "Podaj liczbę godzin",
-      invalid: "Godziny muszą być liczbą całkowitą",
+    durationMinutes: integerString({
+      required: "Podaj czas trwania treningu",
+      invalid: "Czas trwania musi być liczbą całkowitą",
     }).pipe(
       z
         .number()
+        .min(1, "Podaj czas trwania treningu")
         .max(
-          GROUP_LIMITS.MAX_HOURS,
-          `Godziny nie mogą przekraczać ${GROUP_LIMITS.MAX_HOURS}`,
-        ),
-    ),
-    minutes: integerString({
-      required: "Podaj liczbę minut",
-      invalid: "Minuty muszą być liczbą całkowitą",
-    }).pipe(
-      z
-        .number()
-        .max(
-          GROUP_LIMITS.MAX_MINUTES,
-          `Minuty muszą być w zakresie 0-${GROUP_LIMITS.MAX_MINUTES}`,
+          GROUP_LIMITS.MAX_DURATION_MINUTES,
+          `Czas trwania nie może przekraczać ${GROUP_LIMITS.MAX_DURATION_MINUTES} minut`,
         ),
     ),
   })
   .refine((d) => d.maxAge >= d.minAge, {
     message: "Maksymalny wiek nie może być mniejszy od minimalnego",
     path: ["maxAge"],
-  })
-  .refine((d) => d.hours * 60 + d.minutes > 0, {
-    message: "Podaj czas trwania treningu",
-    path: ["hours"],
   });
 
 export type GroupDetailsFormValues = z.input<typeof groupDetailsSchema>;

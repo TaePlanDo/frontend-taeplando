@@ -87,8 +87,7 @@ function fillForm(values: {
   name: string;
   minAge: string;
   maxAge: string;
-  hours: string;
-  minutes: string;
+  durationMinutes: string;
 }) {
   fireEvent.change(input("Nazwa Grupy"), { target: { value: values.name } });
   const [lower, upper] = screen.getAllByRole("slider", { name: "Wiek" });
@@ -99,8 +98,9 @@ function fillForm(values: {
     setSliderValue(lower, Number(values.minAge));
     setSliderValue(upper, Number(values.maxAge));
   }
-  fireEvent.change(input("Godziny"), { target: { value: values.hours } });
-  fireEvent.change(input("Minuty"), { target: { value: values.minutes } });
+  fireEvent.change(input("Czas trwania (min)"), {
+    target: { value: values.durationMinutes },
+  });
 }
 
 describe("GroupDetailsForm", () => {
@@ -123,10 +123,9 @@ describe("GroupDetailsForm", () => {
     const [lower, upper] = screen.getAllByRole("slider", { name: "Wiek" });
     expect(lower).toHaveAttribute("aria-valuenow", "1");
     expect(upper).toHaveAttribute("aria-valuenow", "99");
-    expect(input("Godziny").value).toBe("0");
-    expect(input("Minuty").value).toBe("0");
+    expect(input("Czas trwania (min)").value).toBe("0");
     expect(screen.getByText("Wiek")).toBeTruthy();
-    expect(screen.getByText("Czas trwania")).toBeTruthy();
+    expect(screen.getByText("Czas trwania (min)")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Utwórz" })).toBeTruthy();
   });
 
@@ -153,15 +152,14 @@ describe("GroupDetailsForm", () => {
     expect(createGroup).not.toHaveBeenCalled();
   });
 
-  it("shows duration error when hours and minutes are zero", async () => {
+  it("shows a duration error for zero minutes", async () => {
     renderForm();
 
     fillForm({
       name: "Grupa",
       minAge: "7",
       maxAge: "14",
-      hours: "0",
-      minutes: "0",
+      durationMinutes: "0",
     });
     fireEvent.click(screen.getByRole("button", { name: "Utwórz" }));
 
@@ -177,8 +175,7 @@ describe("GroupDetailsForm", () => {
       name: "  Grupa wakacyjna  ",
       minAge: "7",
       maxAge: "14",
-      hours: "1",
-      minutes: "30",
+      durationMinutes: "90",
     });
     fireEvent.click(screen.getByRole("button", { name: "Utwórz" }));
 
@@ -204,8 +201,7 @@ describe("GroupDetailsForm", () => {
       name: "Grupa",
       minAge: "7",
       maxAge: "14",
-      hours: "1",
-      minutes: "0",
+      durationMinutes: "60",
     });
     fireEvent.click(screen.getByRole("button", { name: "Utwórz" }));
 
@@ -226,8 +222,7 @@ describe("GroupDetailsForm", () => {
     const [lower, upper] = screen.getAllByRole("slider", { name: "Wiek" });
     expect(lower).toHaveAttribute("aria-valuenow", "7");
     expect(upper).toHaveAttribute("aria-valuenow", "14");
-    expect(input("Godziny").value).toBe("1");
-    expect(input("Minuty").value).toBe("30");
+    expect(input("Czas trwania (min)").value).toBe("90");
     expect(screen.getByRole("button", { name: "Zapisz zmiany" })).toBeTruthy();
   });
 
@@ -238,7 +233,7 @@ describe("GroupDetailsForm", () => {
     fireEvent.change(input("Nazwa Grupy"), {
       target: { value: "Młodzież starsza" },
     });
-    fireEvent.change(input("Minuty"), { target: { value: "45" } });
+    fireEvent.change(input("Czas trwania (min)"), { target: { value: "105" } });
     fireEvent.click(screen.getByRole("button", { name: "Zapisz zmiany" }));
 
     await waitFor(() => {
@@ -265,16 +260,15 @@ describe("GroupDetailsForm", () => {
     expect(screen.queryByText("Błąd tworzenia")).toBeNull();
   });
 
-  it("loads mobile duration carousels and saves the chosen duration", async () => {
+  it("loads one mobile duration carousel and saves the chosen minutes", async () => {
     isMobile = true;
     renderForm(group);
-    const hours = within(screen.getByRole("radiogroup", { name: "Godziny" }));
-    const minutes = within(screen.getByRole("radiogroup", { name: "Minuty" }));
-    expect(hours.getByRole("radio", { name: "1" })).toBeChecked();
-    expect(minutes.getByRole("radio", { name: "30" })).toBeChecked();
-    expect(hours.getAllByRole("radio")).toHaveLength(13);
-    expect(minutes.getAllByRole("radio")).toHaveLength(60);
-    fireEvent.click(minutes.getByRole("radio", { name: "45" }));
+    const duration = screen.getByRole("spinbutton", {
+      name: "Czas trwania (min)",
+    });
+    expect(screen.getAllByRole("spinbutton")).toHaveLength(1);
+    expect(duration).toHaveAttribute("aria-valuenow", "90");
+    fireEvent.click(within(duration).getByText("105", { exact: true }));
     fireEvent.click(screen.getByRole("button", { name: "Zapisz zmiany" }));
     await waitFor(() =>
       expect(updateGroup).toHaveBeenCalledWith(group.id, {
@@ -290,15 +284,16 @@ describe("GroupDetailsForm", () => {
     isMobile = true;
     createState.isCreating = true;
     renderForm();
-    for (const radio of screen.getAllByRole("radio"))
-      expect(radio).toBeDisabled();
+    expect(
+      screen.getByRole("spinbutton", { name: "Czas trwania (min)" }),
+    ).toHaveAttribute("aria-disabled", "true");
   });
 
   it("disables all inputs and the submit button while saving", () => {
     createState.isCreating = true;
     renderForm();
 
-    for (const label of ["Nazwa Grupy", "Godziny", "Minuty"]) {
+    for (const label of ["Nazwa Grupy", "Czas trwania (min)"]) {
       expect(input(label)).toBeDisabled();
     }
     for (const slider of screen.getAllByRole("slider", { name: "Wiek" })) {

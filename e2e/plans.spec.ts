@@ -8,8 +8,7 @@ const groupValues = {
   name: "Grupa E2E planów",
   minAge: 7,
   maxAge: 14,
-  hours: 0,
-  minutes: 20,
+  durationMinutes: 20,
 };
 
 test.describe("saved plans", () => {

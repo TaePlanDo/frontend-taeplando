@@ -1,6 +1,5 @@
 export const GROUP_LIMITS = {
   MIN_AGE: 1,
   MAX_AGE: 99,
-  MAX_HOURS: 12,
-  MAX_MINUTES: 59,
+  MAX_DURATION_MINUTES: 12 * 60 + 59,
 } as const;

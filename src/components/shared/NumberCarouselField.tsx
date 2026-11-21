@@ -1,35 +1,41 @@
-import { useId, useLayoutEffect, useRef, type Ref } from "react";
+import { useCallback, useId, useLayoutEffect, useRef, type Ref } from "react";
 
 import { InputErrorMessage } from "./InputErrorMessage";
 
 type Props = {
   label: string;
-  name: string;
   min: number;
   max: number;
   value: number;
   onValueChange: (value: number) => void;
   onBlur?: () => void;
-  inputRef?: Ref<HTMLInputElement>;
+  fieldRef?: Ref<HTMLDivElement>;
   disabled?: boolean;
   error?: string;
 };
 
 export function NumberCarouselField({
   label,
-  name,
   min,
   max,
   value,
   onValueChange,
   onBlur,
-  inputRef,
+  fieldRef,
   disabled,
   error,
 }: Props) {
   const id = useId();
   const viewport = useRef<HTMLDivElement>(null);
   const scrolledValue = useRef<number | null>(null);
+  const setViewport = useCallback(
+    (element: HTMLDivElement | null) => {
+      viewport.current = element;
+      if (typeof fieldRef === "function") fieldRef(element);
+      else if (fieldRef) fieldRef.current = element;
+    },
+    [fieldRef],
+  );
 
   useLayoutEffect(() => {
     // Preserve touch scrolling: a value selected by scrolling is already in place.
@@ -46,33 +52,57 @@ export function NumberCarouselField({
   }, [value, min]);
 
   return (
-    <fieldset
-      role="radiogroup"
-      aria-labelledby={`${id}-label`}
-      aria-describedby={`${id}-hint${error ? ` ${id}-error` : ""}`}
-      aria-invalid={Boolean(error)}
-      disabled={disabled}
-      className="min-w-0"
-    >
-      <legend id={`${id}-label`} className="mb-2 text-sm font-medium">
+    <div className="min-w-0">
+      <span id={`${id}-label`} className="mb-2 block text-sm font-medium">
         {label}
-      </legend>
+      </span>
       <div
-        ref={viewport}
+        ref={setViewport}
+        role="spinbutton"
+        tabIndex={disabled ? -1 : 0}
+        aria-labelledby={`${id}-label`}
+        aria-describedby={`${id}-hint${error ? ` ${id}-error` : ""}`}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={value}
+        aria-disabled={Boolean(disabled)}
+        aria-invalid={Boolean(error)}
+        onBlur={onBlur}
+        onKeyDown={(event) => {
+          if (disabled) return;
+          const next = (
+            {
+              ArrowRight: value + 1,
+              ArrowUp: value + 1,
+              ArrowLeft: value - 1,
+              ArrowDown: value - 1,
+              Home: min,
+              End: max,
+            } as Record<string, number>
+          )[event.key];
+          if (next == null) return;
+          event.preventDefault();
+          scrolledValue.current = null;
+          onValueChange(Math.min(max, Math.max(min, next)));
+        }}
         className={`relative flex w-full min-w-0 snap-x snap-mandatory gap-1 rounded-lg border border-input bg-background/40 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${disabled ? "overflow-x-hidden opacity-50" : "overflow-x-auto"}`}
         style={{ paddingInline: "calc(50% - 1.5rem)" }}
         onScroll={() => {
           const container = viewport.current;
           if (!container || disabled) return;
-          const center = container.scrollLeft + container.clientWidth / 2;
-          const options = Array.from(container.children) as HTMLElement[];
-          const nearest = options.reduce((best, option) =>
-            Math.abs(option.offsetLeft + option.clientWidth / 2 - center) <
-            Math.abs(best.offsetLeft + best.clientWidth / 2 - center)
-              ? option
-              : best,
+          const first = container.children[0] as HTMLElement;
+          const second = container.children[1] as HTMLElement | undefined;
+          if (!second) return;
+          const spacing = second.offsetLeft - first.offsetLeft;
+          if (!spacing) return;
+          const index = Math.round(
+            (container.scrollLeft +
+              container.clientWidth / 2 -
+              first.offsetLeft -
+              first.clientWidth / 2) /
+              spacing,
           );
-          const next = min + options.indexOf(nearest);
+          const next = Math.min(max, Math.max(min, min + index));
           if (next !== value) {
             scrolledValue.current = next;
             onValueChange(next);
@@ -82,27 +112,22 @@ export function NumberCarouselField({
         {Array.from({ length: max - min + 1 }, (_, index) => {
           const option = min + index;
           return (
-            <label
+            <button
               key={option}
-              className="w-12 shrink-0 snap-center cursor-pointer"
+              type="button"
+              tabIndex={-1}
+              aria-hidden="true"
+              disabled={disabled}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                scrolledValue.current = null;
+                onValueChange(option);
+                viewport.current?.focus({ preventScroll: true });
+              }}
+              className={`flex h-10 w-12 shrink-0 snap-center items-center justify-center rounded-md border text-lg ${value === option ? "border-primary bg-primary/20 font-semibold text-foreground" : "border-transparent text-muted-foreground"}`}
             >
-              <input
-                ref={option === min ? inputRef : undefined}
-                type="radio"
-                name={name}
-                value={option}
-                checked={value === option}
-                onChange={() => {
-                  scrolledValue.current = null;
-                  onValueChange(option);
-                }}
-                onBlur={onBlur}
-                className="peer sr-only"
-              />
-              <span className="flex h-10 items-center justify-center rounded-md border border-transparent text-lg text-muted-foreground peer-checked:border-primary peer-checked:bg-primary/20 peer-checked:font-semibold peer-checked:text-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
-                {option}
-              </span>
-            </label>
+              {option}
+            </button>
           );
         })}
       </div>
@@ -110,6 +135,6 @@ export function NumberCarouselField({
         Przesuń, aby wybrać
       </p>
       {error ? <InputErrorMessage id={`${id}-error`} message={error} /> : null}
-    </fieldset>
+    </div>
   );
 }

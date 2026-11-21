@@ -4,7 +4,6 @@ import { toast } from "sonner";
 
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInputWithController } from "@/components/shared/CustomizedInputWithController";
-import { CustomizedPairInputWithControllers } from "@/components/shared/CustomizedPairInputWithControllers";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { DualRangeField } from "@/components/shared/DualRangeField";
 import { NumberCarouselField } from "@/components/shared/NumberCarouselField";
@@ -95,58 +94,32 @@ export function GroupDetailsForm({ group, onClose }: GroupDetailsFormProps) {
       </div>
 
       {isMobile ? (
-        <fieldset className="min-w-0 space-y-3" disabled={isSubmitting}>
-          <legend className="text-base">Czas trwania</legend>
-          {(
-            [
-              { name: "hours", label: "Godziny", max: GROUP_LIMITS.MAX_HOURS },
-              {
-                name: "minutes",
-                label: "Minuty",
-                max: GROUP_LIMITS.MAX_MINUTES,
-              },
-            ] as const
-          ).map(({ name, label, max }) => (
-            <Controller
-              key={name}
-              control={control}
-              name={name}
-              render={({ field, fieldState }) => (
-                <NumberCarouselField
-                  label={label}
-                  name={field.name}
-                  min={0}
-                  max={max}
-                  value={Number(field.value)}
-                  onValueChange={(value) => field.onChange(String(value))}
-                  onBlur={field.onBlur}
-                  inputRef={field.ref}
-                  disabled={isSubmitting}
-                  error={fieldState.error?.message}
-                />
-              )}
-            />
-          ))}
-        </fieldset>
-      ) : (
-        <CustomizedPairInputWithControllers
-          title="Czas trwania"
+        <Controller
           control={control}
+          name="durationMinutes"
+          render={({ field, fieldState }) => (
+            <NumberCarouselField
+              label="Czas trwania (min)"
+              min={0}
+              max={GROUP_LIMITS.MAX_DURATION_MINUTES}
+              value={Number(field.value)}
+              onValueChange={(value) => field.onChange(String(value))}
+              onBlur={field.onBlur}
+              fieldRef={field.ref}
+              disabled={isSubmitting}
+              error={fieldState.error?.message}
+            />
+          )}
+        />
+      ) : (
+        <CustomizedInputWithController
+          control={control}
+          name="durationMinutes"
+          label="Czas trwania (min)"
+          type="number"
+          min={1}
+          max={GROUP_LIMITS.MAX_DURATION_MINUTES}
           disabled={isSubmitting}
-          first={{
-            name: "hours",
-            label: "Godziny",
-            type: "number",
-            min: 0,
-            max: GROUP_LIMITS.MAX_HOURS,
-          }}
-          second={{
-            name: "minutes",
-            label: "Minuty",
-            type: "number",
-            min: 0,
-            max: GROUP_LIMITS.MAX_MINUTES,
-          }}
         />
       )}
 
