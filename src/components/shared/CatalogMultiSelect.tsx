@@ -1,5 +1,5 @@
 import { useId, useRef, useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "cn";
 
 import { SelectedAttributeBadges } from "./SelectedAttributeBadges";
@@ -141,7 +141,7 @@ export function CatalogMultiSelect({
                 items[activeIndex] ? `${id}-option-${activeIndex}` : undefined
               }
               tabIndex={0}
-              className="h-full overflow-y-auto overscroll-contain outline-none"
+              className="group h-full overflow-y-auto overscroll-contain outline-none"
               onKeyDown={(event) => {
                 let next = activeIndex;
                 if (event.key === "ArrowDown")
@@ -165,6 +165,11 @@ export function CatalogMultiSelect({
             >
               {items.map((item, index) => {
                 const selected = selectedIds.includes(String(item.id));
+                const previous = items[index - 1];
+                const next = items[index + 1];
+                const joinsPrevious =
+                  previous && selectedIds.includes(String(previous.id));
+                const joinsNext = next && selectedIds.includes(String(next.id));
                 return (
                   <button
                     ref={(element) => {
@@ -183,21 +188,19 @@ export function CatalogMultiSelect({
                       list.current?.focus({ preventScroll: true });
                     }}
                     className={cn(
-                      "flex min-h-10 w-full items-center justify-between gap-3 rounded-md border px-3 py-2 text-left text-sm break-words",
+                      "block min-h-8 w-full rounded-md border px-2 py-1 text-left text-sm break-words",
                       selected
-                        ? "border-primary bg-primary/20"
+                        ? "rounded-none border-x-primary border-y-transparent bg-linear-to-r from-primary/25 to-primary-foreground/20"
                         : "border-transparent hover:bg-accent",
+                      selected &&
+                        !joinsPrevious &&
+                        "rounded-t-md border-t-primary",
+                      selected && !joinsNext && "rounded-b-md border-b-primary",
                       index === activeIndex &&
-                        "ring-1 ring-inset ring-primary/40",
+                        "group-focus-visible:outline-1 group-focus-visible:-outline-offset-4 group-focus-visible:outline-primary",
                     )}
                   >
-                    <span className="min-w-0">{item.name}</span>
-                    {selected ? (
-                      <Check
-                        className="size-4 shrink-0 text-primary"
-                        aria-hidden
-                      />
-                    ) : null}
+                    {item.name}
                   </button>
                 );
               })}
