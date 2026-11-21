@@ -19,6 +19,8 @@ type CatalogMultiSelectProps = {
   className?: string;
   labelClassName?: string;
   error?: string;
+  selectionPosition?: "above" | "below";
+  selectedLabel?: string;
 };
 
 export function CatalogMultiSelect({
@@ -33,6 +35,8 @@ export function CatalogMultiSelect({
   className,
   labelClassName,
   error,
+  selectionPosition = "below",
+  selectedLabel,
 }: CatalogMultiSelectProps) {
   const selected = selectedIds.map(
     (id) =>
@@ -45,9 +49,34 @@ export function CatalogMultiSelect({
     (item) => !selectedIds.includes(String(item.id)),
   );
 
+  const selection = selected.length ? (
+    <div
+      className={
+        selectionPosition === "above"
+          ? "mb-2 flex flex-col gap-2"
+          : "mt-3 flex flex-col gap-2"
+      }
+    >
+      {selectedLabel ? (
+        <p className="text-xs text-muted-foreground">{selectedLabel}</p>
+      ) : null}
+      <SelectedAttributeBadges
+        className="mt-0"
+        items={selected}
+        disabled={disabled || isLoading || Boolean(unavailableMessage)}
+        onRemove={(id) =>
+          onSelectedIdsChange(
+            selectedIds.filter((selectedId) => selectedId !== String(id)),
+          )
+        }
+      />
+    </div>
+  ) : null;
+
   return (
     <div className={className}>
       <div className="flex flex-col gap-1">
+        {selectionPosition === "above" ? selection : null}
         <CustomizedSelect
           label={label}
           error={error}
@@ -80,15 +109,7 @@ export function CatalogMultiSelect({
             }
           }}
         />
-        <SelectedAttributeBadges
-          items={selected}
-          disabled={disabled || isLoading || Boolean(unavailableMessage)}
-          onRemove={(id) =>
-            onSelectedIdsChange(
-              selectedIds.filter((selectedId) => selectedId !== String(id)),
-            )
-          }
-        />
+        {selectionPosition === "below" ? selection : null}
       </div>
     </div>
   );
