@@ -17,6 +17,7 @@ type Props = {
   error?: string;
   minimum?: number;
   maximum?: number;
+  formatValue?: (value: number) => string;
 };
 
 const options = Array.from(
@@ -37,6 +38,7 @@ export function NumberScaleField({
   error,
   minimum = NUMBER_SCALE_BOUNDS.min,
   maximum = NUMBER_SCALE_BOUNDS.max,
+  formatValue = String,
 }: Props) {
   const id = useId();
   const hasHints = Boolean(lowLabel || highLabel);
@@ -77,7 +79,7 @@ export function NumberScaleField({
               className="peer sr-only"
             />
             <span className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-input bg-background/40 text-sm font-medium text-foreground transition-colors peer-checked:border-primary peer-checked:bg-linear-to-r peer-checked:from-primary peer-checked:to-primary-foreground peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
-              {option}
+              {formatValue(option)}
             </span>
           </label>
         ))}

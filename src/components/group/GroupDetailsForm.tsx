@@ -102,6 +102,7 @@ export function GroupDetailsForm({ group, onClose }: GroupDetailsFormProps) {
               label="Czas trwania (min)"
               min={0}
               max={GROUP_LIMITS.MAX_DURATION_MINUTES}
+              step={GROUP_LIMITS.DURATION_STEP_MINUTES}
               value={Number(field.value)}
               onValueChange={(value) => field.onChange(String(value))}
               onBlur={field.onBlur}
@@ -117,8 +118,9 @@ export function GroupDetailsForm({ group, onClose }: GroupDetailsFormProps) {
           name="durationMinutes"
           label="Czas trwania (min)"
           type="number"
-          min={1}
+          min={0}
           max={GROUP_LIMITS.MAX_DURATION_MINUTES}
+          step={GROUP_LIMITS.DURATION_STEP_MINUTES}
           disabled={isSubmitting}
         />
       )}

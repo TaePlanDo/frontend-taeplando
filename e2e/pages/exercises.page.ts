@@ -1,5 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
+import { setSliderValue } from "../helpers/setSliderValue";
 
 export type ExerciseFormValues = {
   name: string;
@@ -354,25 +355,11 @@ export class ExercisesPage {
     const upper = sliders.nth(1);
     const currentMax = Number(await upper.getAttribute("aria-valuenow"));
     if (min > currentMax) {
-      await this.setSliderValue(upper, max);
-      await this.setSliderValue(lower, min);
+      await setSliderValue(upper, max);
+      await setSliderValue(lower, min);
     } else {
-      await this.setSliderValue(lower, min);
-      await this.setSliderValue(upper, max);
+      await setSliderValue(lower, min);
+      await setSliderValue(upper, max);
     }
-  }
-
-  private async setSliderValue(slider: Locator, target: number): Promise<void> {
-    const current = Number(await slider.getAttribute("aria-valuenow"));
-    const difference = target - current;
-    const pageKey = difference > 0 ? "PageUp" : "PageDown";
-    const arrowKey = difference > 0 ? "ArrowRight" : "ArrowLeft";
-    for (let i = 0; i < Math.floor(Math.abs(difference) / 10); i++) {
-      await slider.press(pageKey);
-    }
-    for (let i = 0; i < Math.abs(difference) % 10; i++) {
-      await slider.press(arrowKey);
-    }
-    await expect(slider).toHaveAttribute("aria-valuenow", String(target));
   }
 }

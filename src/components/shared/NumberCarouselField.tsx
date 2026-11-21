@@ -1,4 +1,11 @@
-import { useCallback, useId, useLayoutEffect, useRef, type Ref } from "react";
+import {
+  useCallback,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  type Ref,
+} from "react";
 
 import { InputErrorMessage } from "./InputErrorMessage";
 
@@ -6,6 +13,7 @@ type Props = {
   label: string;
   min: number;
   max: number;
+  step: number;
   value: number;
   onValueChange: (value: number) => void;
   onBlur?: () => void;
@@ -18,6 +26,7 @@ export function NumberCarouselField({
   label,
   min,
   max,
+  step,
   value,
   onValueChange,
   onBlur,
@@ -27,7 +36,26 @@ export function NumberCarouselField({
 }: Props) {
   const id = useId();
   const viewport = useRef<HTMLDivElement>(null);
-  const scrolledValue = useRef<number | null>(null);
+  const buttons = useRef<Array<HTMLButtonElement | null>>([]);
+  const scrolledIndex = useRef<number | null>(null);
+  const options = useMemo(() => {
+    const values = Array.from(
+      { length: Math.floor((max - min) / step) + 1 },
+      (_, index) => min + index * step,
+    );
+    // Keep a previously saved, off-step value selectable without rounding it.
+    if (
+      Number.isInteger(value) &&
+      value >= min &&
+      value <= max &&
+      !values.includes(value)
+    ) {
+      values.push(value);
+      values.sort((a, b) => a - b);
+    }
+    return values;
+  }, [min, max, step, value]);
+  const selectedIndex = options.indexOf(value);
   const setViewport = useCallback(
     (element: HTMLDivElement | null) => {
       viewport.current = element;
@@ -39,17 +67,17 @@ export function NumberCarouselField({
 
   useLayoutEffect(() => {
     // Preserve touch scrolling: a value selected by scrolling is already in place.
-    if (scrolledValue.current === value) {
-      scrolledValue.current = null;
+    if (scrolledIndex.current === selectedIndex) {
+      scrolledIndex.current = null;
       return;
     }
     const container = viewport.current;
-    const option = container?.children[value - min] as HTMLElement | undefined;
+    const option = buttons.current[selectedIndex];
     if (container && option) {
       container.scrollLeft =
         option.offsetLeft - (container.clientWidth - option.clientWidth) / 2;
     }
-  }, [value, min]);
+  }, [selectedIndex, options]);
 
   return (
     <div className="min-w-0">
@@ -63,37 +91,37 @@ export function NumberCarouselField({
           tabIndex={disabled ? -1 : 0}
           aria-labelledby={`${id}-label`}
           aria-describedby={`${id}-hint${error ? ` ${id}-error` : ""}`}
-          aria-valuemin={min}
-          aria-valuemax={max}
+          aria-valuemin={options[0]}
+          aria-valuemax={options[options.length - 1]}
           aria-valuenow={value}
           aria-disabled={Boolean(disabled)}
           aria-invalid={Boolean(error)}
           onBlur={onBlur}
           onKeyDown={(event) => {
             if (disabled) return;
-            const next = (
-              {
-                ArrowRight: value + 1,
-                ArrowUp: value + 1,
-                ArrowLeft: value - 1,
-                ArrowDown: value - 1,
-                Home: min,
-                End: max,
-              } as Record<string, number>
-            )[event.key];
-            if (next == null) return;
+            const targets: Partial<Record<string, number>> = {
+              ArrowRight: selectedIndex + 1,
+              ArrowUp: selectedIndex + 1,
+              ArrowLeft: selectedIndex - 1,
+              ArrowDown: selectedIndex - 1,
+              Home: 0,
+              End: options.length - 1,
+            };
+            const index = targets[event.key];
+            if (index == null) return;
             event.preventDefault();
-            scrolledValue.current = null;
-            onValueChange(Math.min(max, Math.max(min, next)));
+            scrolledIndex.current = null;
+            onValueChange(
+              options[Math.min(options.length - 1, Math.max(0, index))],
+            );
           }}
-          className={`relative flex w-full min-w-0 snap-x snap-mandatory gap-1 rounded-lg border border-input bg-background/40 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${disabled ? "overflow-x-hidden opacity-50" : "overflow-x-auto"}`}
+          className={`relative flex w-full min-w-0 snap-x snap-mandatory gap-1 rounded-lg border border-input bg-background/40 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${disabled ? "overflow-x-hidden opacity-50" : "overflow-x-auto"}`}
           style={{ paddingInline: "calc(50% - 1.5rem)" }}
           onScroll={() => {
             const container = viewport.current;
             if (!container || disabled) return;
-            const first = container.children[0] as HTMLElement;
-            const second = container.children[1] as HTMLElement | undefined;
-            if (!second) return;
+            const [first, second] = buttons.current;
+            if (!first || !second) return;
             const spacing = second.offsetLeft - first.offsetLeft;
             if (!spacing) return;
             const index = Math.round(
@@ -103,34 +131,35 @@ export function NumberCarouselField({
                 first.clientWidth / 2) /
                 spacing,
             );
-            const next = Math.min(max, Math.max(min, min + index));
+            const next =
+              options[Math.min(options.length - 1, Math.max(0, index))];
             if (next !== value) {
-              scrolledValue.current = next;
+              scrolledIndex.current = options.indexOf(next);
               onValueChange(next);
             }
           }}
         >
-          {Array.from({ length: max - min + 1 }, (_, index) => {
-            const option = min + index;
-            return (
-              <button
-                key={option}
-                type="button"
-                tabIndex={-1}
-                aria-hidden="true"
-                disabled={disabled}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => {
-                  scrolledValue.current = null;
-                  onValueChange(option);
-                  viewport.current?.focus({ preventScroll: true });
-                }}
-                className={`flex h-10 w-12 shrink-0 snap-center items-center justify-center rounded-md border text-lg ${value === option ? "border-primary bg-primary/20 font-semibold text-foreground" : "border-transparent text-muted-foreground"}`}
-              >
-                {option}
-              </button>
-            );
-          })}
+          {options.map((option, index) => (
+            <button
+              key={option}
+              ref={(element) => {
+                buttons.current[index] = element;
+              }}
+              type="button"
+              tabIndex={-1}
+              aria-hidden="true"
+              disabled={disabled}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                scrolledIndex.current = null;
+                onValueChange(option);
+                viewport.current?.focus({ preventScroll: true });
+              }}
+              className={`flex h-10 w-12 shrink-0 snap-center items-center justify-center rounded-md border text-lg ${value === option ? "border-primary bg-primary/20 font-semibold text-foreground" : "border-transparent text-muted-foreground"}`}
+            >
+              {option}
+            </button>
+          ))}
         </div>
         <div
           aria-hidden="true"
