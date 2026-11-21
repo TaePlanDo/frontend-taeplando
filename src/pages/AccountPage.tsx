@@ -1,20 +1,13 @@
 import { LogOut } from "lucide-react";
-import { useState } from "react";
 
 import { ChangeUsernameForm } from "@/components/account/ChangeUsernameForm";
 import { ChangePasswordForm } from "@/components/account/ChangePasswordForm";
 import { PersonalDataItem } from "@/components/account/PersonalDataItem";
-import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/auth/useAuth";
 
-const changeButtonClass =
-  "h-7 rounded-full border-primary bg-transparent px-4 text-xs hover:bg-primary/10 dark:border-primary dark:bg-transparent dark:hover:bg-primary/10";
-
 export function AccountPage() {
   const { user, logout, isLoggingOut } = useAuth();
-  const [isChangeUsernameOpen, setChangeUsernameOpen] = useState(false);
-  const [isChangePasswordOpen, setChangePasswordOpen] = useState(false);
 
   const isLocal = user?.auth_method === "LOCAL";
 
@@ -36,29 +29,15 @@ export function AccountPage() {
           <PersonalDataItem
             title="Nazwa użytkownika"
             value={user?.full_name ?? ""}
-            action={
-              isLocal ? (
-                <CustomizedDialog
-                  trigger={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      aria-label="Zmień nazwę"
-                      className={changeButtonClass}
-                    >
-                      Zmień
-                    </Button>
+            edit={
+              isLocal
+                ? {
+                    buttonLabel: "Zmień nazwę",
+                    title: "Zmień nazwę użytkownika",
+                    description: "Podaj nową nazwę użytkownika.",
+                    Form: ChangeUsernameForm,
                   }
-                  title="Zmień nazwę użytkownika"
-                  description="Podaj nową nazwę użytkownika."
-                  open={isChangeUsernameOpen}
-                  onOpenChange={setChangeUsernameOpen}
-                >
-                  <ChangeUsernameForm
-                    onClose={() => setChangeUsernameOpen(false)}
-                  />
-                </CustomizedDialog>
-              ) : null
+                : undefined
             }
           />
           <PersonalDataItem title="Email" value={user?.email ?? ""} />
@@ -66,28 +45,12 @@ export function AccountPage() {
             <PersonalDataItem
               title="Hasło"
               value="••••••••"
-              action={
-                <CustomizedDialog
-                  trigger={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      aria-label="Zmień hasło"
-                      className={changeButtonClass}
-                    >
-                      Zmień
-                    </Button>
-                  }
-                  title="Zmień hasło"
-                  description="Podaj nowe hasło."
-                  open={isChangePasswordOpen}
-                  onOpenChange={setChangePasswordOpen}
-                >
-                  <ChangePasswordForm
-                    onClose={() => setChangePasswordOpen(false)}
-                  />
-                </CustomizedDialog>
-              }
+              edit={{
+                buttonLabel: "Zmień hasło",
+                title: "Zmień hasło",
+                description: "Podaj nowe hasło.",
+                Form: ChangePasswordForm,
+              }}
             />
           ) : null}
         </dl>
