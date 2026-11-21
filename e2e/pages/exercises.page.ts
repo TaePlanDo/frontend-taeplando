@@ -336,8 +336,9 @@ export class ExercisesPage {
       .fill(String(values.durationMinutes));
     for (const [key, label] of ratingFields) {
       await this.exerciseDialog
-        .getByRole("spinbutton", { name: label })
-        .fill(String(values[key]));
+        .getByRole("radiogroup", { name: label, exact: true })
+        .getByText(String(values[key]), { exact: true })
+        .click();
     }
   }
 

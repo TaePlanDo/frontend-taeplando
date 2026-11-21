@@ -3,6 +3,7 @@ import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 
 import { ExerciseAttributesSelector } from "@/components/exercise/ExerciseAttributesSelector";
+import { ExerciseRatingField } from "@/components/exercise/ExerciseRatingField";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInputWithController } from "@/components/shared/CustomizedInputWithController";
 import { DualRangeField } from "@/components/shared/DualRangeField";
@@ -17,7 +18,6 @@ import {
   type ExerciseFormValues,
 } from "@/lib/validation/exercise";
 import type { Exercise } from "@/types/exercise";
-import { PLANNING_FILTER_BOUNDS } from "@/types/exercise-list-filters";
 
 type Props = { exercise?: Exercise | null; onClose: () => void };
 
@@ -129,22 +129,20 @@ export function ExerciseForm({ exercise, onClose }: Props) {
             />
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
-            <CustomizedInputWithController
+            <ExerciseRatingField
               control={control}
               name="physicalDifficulty"
               label="Intensywność fizyczna"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niska"
+              highLabel="Wysoka"
               disabled={isSubmitting}
             />
-            <CustomizedInputWithController
+            <ExerciseRatingField
               control={control}
               name="technicalDifficulty"
               label="Trudność techniczna"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niska"
+              highLabel="Wysoka"
               disabled={isSubmitting}
             />
             <CustomizedInputWithController
@@ -155,31 +153,28 @@ export function ExerciseForm({ exercise, onClose }: Props) {
               min="1"
               disabled={isSubmitting}
             />
-            <CustomizedInputWithController
+            <ExerciseRatingField
               control={control}
               name="upperBodyLoad"
               label="Zaangażowanie górnych partii"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niskie"
+              highLabel="Wysokie"
               disabled={isSubmitting}
             />
-            <CustomizedInputWithController
+            <ExerciseRatingField
               control={control}
               name="lowerBodyLoad"
               label="Zaangażowanie dolnych partii"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niskie"
+              highLabel="Wysokie"
               disabled={isSubmitting}
             />
-            <CustomizedInputWithController
+            <ExerciseRatingField
               control={control}
               name="coreLoad"
               label="Zaangażowanie partii core"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niskie"
+              highLabel="Wysokie"
               disabled={isSubmitting}
             />
           </div>

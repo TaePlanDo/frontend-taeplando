@@ -2,7 +2,7 @@ import { seedSystemData } from "./helpers/backend";
 import { createEquipment } from "./helpers/createEquipment";
 import { createLocalTrainerAndLogin } from "./helpers/createLocalTrainer";
 import { ExercisesPage } from "./pages/exercises.page";
-import { test } from "./playwright";
+import { expect, test } from "./playwright";
 
 const exercise = {
   name: "E2E kopnięcie frontalne",
@@ -163,21 +163,28 @@ test.describe("exercise configuration", () => {
     await exercises.expectValidationError("Wybierz co najmniej jeden Segment");
   });
 
-  test("shows validation feedback for an out-of-range intensity", async ({
-    page,
-  }) => {
+  test("offers only ratings 1–5 with keyboard selection", async ({ page }) => {
     await createLocalTrainerAndLogin(page);
 
     const exercises = new ExercisesPage(page);
     await exercises.goto();
-    await exercises.submitExerciseWithoutAttributes({
-      ...exercise,
-      physicalDifficulty: 6,
-    });
-
-    await exercises.expectValidationError(
-      "Intensywność fizyczna musi być w zakresie 1–5",
-    );
+    await exercises.addExerciseButton.click();
+    const groups = exercises.exerciseDialog.getByRole("radiogroup");
+    await expect(groups).toHaveCount(5);
+    for (const group of await groups.all()) {
+      await expect(group.getByRole("radio")).toHaveCount(5);
+      for (const value of [1, 2, 3, 4, 5]) {
+        await expect(
+          group.getByRole("radio", { name: String(value), exact: true }),
+        ).toHaveAttribute("value", String(value));
+      }
+      const selected = group.getByRole("radio", { name: "3", exact: true });
+      await expect(selected).toBeChecked();
+      await selected.focus();
+      await selected.press("ArrowRight");
+      await expect(group.getByRole("radio", { name: "4" })).toBeChecked();
+      await expect(group.getByRole("radio", { checked: true })).toHaveCount(1);
+    }
   });
 });
 
