@@ -31,27 +31,40 @@ function deferred<T>() {
   return { promise, resolve };
 }
 
-function setup(fetchPage: (page: number) => Promise<PaginatedResponse<Item>>) {
+function createWrapper() {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  const wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={client}>{children}</QueryClientProvider>
-  );
 
+  return function QueryWrapper({ children }: { children: ReactNode }) {
+    return (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
+  };
+}
+
+function setup(
+  fetchPage: (
+    page: number,
+    pageSize: number,
+  ) => Promise<PaginatedResponse<Item>>,
+  initialPage = 1,
+) {
   return renderHook(
     () =>
       usePaginatedList<Item>({
         queryKey: ["items"],
         fetchPage,
+        initialPage,
       }),
-    { wrapper },
+    { wrapper: createWrapper() },
   );
 }
 
 describe("usePaginatedList", () => {
-  it("loads the first page", async () => {
-    const { result } = setup(async (page) => pageOf(page));
+  it("loads the first page with the default page size", async () => {
+    const fetchPage = vi.fn(async (page: number) => pageOf(page));
+    const { result } = setup(fetchPage);
 
     expect(result.current.isLoading).toBe(true);
 
@@ -59,6 +72,7 @@ describe("usePaginatedList", () => {
     expect(result.current.items).toEqual([{ id: "p1" }]);
     expect(result.current.isError).toBe(false);
     expect(result.current.listState).toEqual({ kind: "ready" });
+    expect(fetchPage).toHaveBeenCalledWith(1, 20);
   });
 
   it("reports a failed request as an error, not as an empty list", async () => {
@@ -148,6 +162,40 @@ describe("usePaginatedList", () => {
     expect(result.current.items).toEqual([{ id: "p2" }]);
   });
 
+  it.each([
+    [0, 1, 2],
+    [4, 3, 1],
+  ])(
+    "clamps requested page %i to %i",
+    async (targetPage, expectedPage, initialPage) => {
+      const { result } = setup(async (page) => pageOf(page), initialPage);
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => result.current.goToPage(targetPage));
+
+      await waitFor(() => expect(result.current.page).toBe(expectedPage));
+    },
+  );
+
+  it("does not report a page change when the requested page is already active", async () => {
+    const onPageChange = vi.fn();
+    const { result } = renderHook(
+      () =>
+        usePaginatedList<Item>({
+          queryKey: ["controlled-items"],
+          fetchPage: async (page) => pageOf(page),
+          page: 1,
+          onPageChange,
+        }),
+      { wrapper: createWrapper() },
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    act(() => result.current.goToPage(1));
+
+    expect(onPageChange).not.toHaveBeenCalled();
+  });
+
   it("moves to the last page when the selected one no longer exists", async () => {
     let totalPages = 3;
     const { result } = setup(async (page) =>
@@ -172,12 +220,6 @@ describe("usePaginatedList", () => {
 
   it("reports past-last-page clamps through onPageChange when controlled", async () => {
     let totalPages = 3;
-    const client = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
-    });
-    const wrapper = ({ children }: { children: ReactNode }) => (
-      <QueryClientProvider client={client}>{children}</QueryClientProvider>
-    );
 
     const { result } = renderHook(
       () => {
@@ -192,7 +234,7 @@ describe("usePaginatedList", () => {
           onPageChange: setPage,
         });
       },
-      { wrapper },
+      { wrapper: createWrapper() },
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));

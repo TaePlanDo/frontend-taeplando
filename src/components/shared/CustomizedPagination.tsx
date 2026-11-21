@@ -7,6 +7,7 @@ import {
   PaginationItem,
   PaginationLink,
 } from "@/components/ui/pagination";
+import { PageJumpForm } from "@/components/shared/PageJumpForm";
 import { cn } from "cn";
 
 type PageItem = number | "ellipsis";
@@ -55,7 +56,10 @@ export function CustomizedPagination({
   const isLastPage = currentPage >= pagesNumber;
 
   return (
-    <Pagination className={className} aria-label="Paginacja">
+    <Pagination
+      className={cn("flex-col items-center gap-2", className)}
+      aria-label="Paginacja"
+    >
       <PaginationContent>
         <PaginationItem>
           <PaginationLink
@@ -121,6 +125,7 @@ export function CustomizedPagination({
           </PaginationLink>
         </PaginationItem>
       </PaginationContent>
+      <PageJumpForm pagesNumber={pagesNumber} goToPage={goToPage} />
     </Pagination>
   );
 }
