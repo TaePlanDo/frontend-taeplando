@@ -8,8 +8,7 @@ const groupValues = {
   name: "Grupa schematu",
   minAge: 7,
   maxAge: 14,
-  hours: 1,
-  minutes: 0,
+  durationMinutes: 60,
 };
 
 async function setupGroupWithSchemaPage(page: Page): Promise<GroupsPage> {
