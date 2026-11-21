@@ -1,3 +1,4 @@
+import { DEFAULT_GROUP_DURATION } from "@/lib/constants/group";
 import type {
   GroupDetailsFormValues,
   GroupDetailsOutput,
@@ -30,7 +31,13 @@ export function toPlanSchemaSnapshot(
 
 export function toFormValues(group?: Group | null): GroupDetailsFormValues {
   if (!group) {
-    return { name: "", minAge: "", maxAge: "", hours: "0", minutes: "0" };
+    return {
+      name: "",
+      minAge: "",
+      maxAge: "",
+      hours: String(DEFAULT_GROUP_DURATION.HOURS),
+      minutes: String(DEFAULT_GROUP_DURATION.MINUTES),
+    };
   }
   return {
     name: group.name,
