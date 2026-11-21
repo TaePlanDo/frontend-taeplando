@@ -44,7 +44,7 @@ export class ExercisesPage {
       name: "Wszystkie ćwiczenia",
     });
     this.addExerciseButton = page.getByRole("button", {
-      name: "Dodaj ćwiczenie",
+      name: /^Dodaj(?: ćwiczenie)?$/,
     });
     this.exerciseDialog = page.getByRole("dialog", {
       name: /^(Stwórz ćwiczenie|Edytuj ćwiczenie|Podgląd ćwiczenia)$/,
@@ -336,9 +336,8 @@ export class ExercisesPage {
       .fill(String(values.durationMinutes));
     for (const [key, label] of ratingFields) {
       await this.exerciseDialog
-        .getByRole("radiogroup", { name: label, exact: true })
-        .getByText(String(values[key]), { exact: true })
-        .click();
+        .getByRole("spinbutton", { name: label })
+        .fill(String(values[key]));
     }
   }
 

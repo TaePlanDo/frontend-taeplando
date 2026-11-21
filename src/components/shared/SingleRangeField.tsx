@@ -1,7 +1,10 @@
 import { useId } from "react";
 import { Slider } from "@/components/ui/slider";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { NUMBER_SCALE_BOUNDS } from "@/lib/constants/numberScale";
 
 import { InputErrorMessage } from "./InputErrorMessage";
+import { NumberScaleField } from "./NumberScaleField";
 
 type SingleRangeFieldProps = {
   label: string;
@@ -14,7 +17,19 @@ type SingleRangeFieldProps = {
   error?: string;
 };
 
-export function SingleRangeField({
+export function SingleRangeField(props: SingleRangeFieldProps) {
+  const isMobile = useIsMobile();
+  if (
+    isMobile &&
+    props.min === NUMBER_SCALE_BOUNDS.min &&
+    props.max === NUMBER_SCALE_BOUNDS.max
+  ) {
+    return <NumberScaleField {...props} />;
+  }
+  return <SingleSliderField {...props} />;
+}
+
+function SingleSliderField({
   label,
   min,
   max,

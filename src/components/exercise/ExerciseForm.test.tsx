@@ -11,6 +11,7 @@ import { ExerciseForm } from "./ExerciseForm";
 import type { Exercise } from "@/types/exercise";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock("@/hooks/useIsMobile", () => ({ useIsMobile: () => true }));
 
 const createExercise = vi.fn();
 const updateExercise = vi.fn();

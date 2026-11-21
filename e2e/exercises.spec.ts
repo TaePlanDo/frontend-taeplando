@@ -121,6 +121,77 @@ test.describe("exercise search and filters", () => {
       training_type_ids: /^[0-9a-f-]{36}$/i,
     });
   });
+
+  test("uses mobile buttons for rating ranges and desktop sliders after resizing", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await createLocalTrainerAndLogin(page);
+    const exercises = new ExercisesPage(page);
+    await exercises.goto();
+    await page.getByRole("button", { name: /Filtruj/ }).click();
+    const range = exercises.filtersDialog.getByRole("group", {
+      name: "Intensywność fizyczna",
+      exact: true,
+    });
+    await range
+      .getByRole("radiogroup", { name: "Od" })
+      .getByText("2", { exact: true })
+      .click();
+    await expect(
+      range
+        .getByRole("radiogroup", { name: "Od" })
+        .getByRole("radio", { name: "2" }),
+    ).toBeChecked();
+    await range
+      .getByRole("radiogroup", { name: "Do" })
+      .getByText("4", { exact: true })
+      .click();
+    await exercises.expectListQuery({
+      min_physical_difficulty: /^2$/,
+      max_physical_difficulty: /^4$/,
+    });
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await expect(exercises.filtersDialog.getByRole("radiogroup")).toHaveCount(
+      0,
+    );
+    const sliders = exercises.filtersDialog.getByRole("slider", {
+      name: "Intensywność fizyczna",
+      exact: true,
+    });
+    await expect(sliders.nth(0)).toHaveAttribute("aria-valuenow", "2");
+    await expect(sliders.nth(1)).toHaveAttribute("aria-valuenow", "4");
+    await exercises.filtersDialog
+      .getByRole("button", { name: "Close" })
+      .click();
+    await exercises.expectActiveFilterChip("Intensywność fizyczna: 2–4");
+    await page.reload();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.getByRole("button", { name: /Filtruj/ }).click();
+    await expect(
+      range
+        .getByRole("radiogroup", { name: "Od" })
+        .getByRole("radio", { name: "2" }),
+    ).toBeChecked();
+    await expect(
+      range
+        .getByRole("radiogroup", { name: "Do" })
+        .getByRole("radio", { name: "4" }),
+    ).toBeChecked();
+    await exercises.filtersDialog
+      .getByRole("button", { name: "Wyczyść" })
+      .click();
+    await expect(
+      range
+        .getByRole("radiogroup", { name: "Od" })
+        .getByRole("radio", { name: "1" }),
+    ).toBeChecked();
+    await expect(
+      range
+        .getByRole("radiogroup", { name: "Do" })
+        .getByRole("radio", { name: "5" }),
+    ).toBeChecked();
+  });
 });
 
 test.describe("exercise configuration", () => {
@@ -163,7 +234,10 @@ test.describe("exercise configuration", () => {
     await exercises.expectValidationError("Wybierz co najmniej jeden Segment");
   });
 
-  test("offers only ratings 1–5 with keyboard selection", async ({ page }) => {
+  test("offers mobile rating buttons and preserves values when resizing", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
     await createLocalTrainerAndLogin(page);
 
     const exercises = new ExercisesPage(page);
@@ -184,6 +258,24 @@ test.describe("exercise configuration", () => {
       await selected.press("ArrowRight");
       await expect(group.getByRole("radio", { name: "4" })).toBeChecked();
       await expect(group.getByRole("radio", { checked: true })).toHaveCount(1);
+    }
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await expect(groups).toHaveCount(0);
+    for (const label of [
+      "Intensywność fizyczna",
+      "Trudność techniczna",
+      "Zaangażowanie górnych partii",
+      "Zaangażowanie dolnych partii",
+      "Zaangażowanie partii core",
+    ]) {
+      await expect(
+        exercises.exerciseDialog.getByRole("spinbutton", { name: label }),
+      ).toHaveValue("4");
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(groups).toHaveCount(5);
+    for (const group of await groups.all()) {
+      await expect(group.getByRole("radio", { name: "4" })).toBeChecked();
     }
   });
 });
