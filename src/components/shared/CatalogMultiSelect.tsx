@@ -196,6 +196,7 @@ export function CatalogMultiSelect({
                         !joinsPrevious &&
                         "rounded-t-md border-t-primary",
                       selected && !joinsNext && "rounded-b-md border-b-primary",
+                      selected && joinsPrevious && "border-t-primary/20",
                       index === activeIndex &&
                         "group-focus-visible:outline-1 group-focus-visible:-outline-offset-4 group-focus-visible:outline-primary",
                     )}
