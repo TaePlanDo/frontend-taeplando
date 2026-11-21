@@ -43,7 +43,7 @@ describe("group mappers", () => {
       name: "",
       minAge: "1",
       maxAge: "99",
-      durationMinutes: "0",
+      durationMinutes: "60",
     });
     expect(toFormValues(undefined)).toEqual(toFormValues(null));
   });

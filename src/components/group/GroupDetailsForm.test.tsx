@@ -123,7 +123,7 @@ describe("GroupDetailsForm", () => {
     const [lower, upper] = screen.getAllByRole("slider", { name: "Wiek" });
     expect(lower).toHaveAttribute("aria-valuenow", "1");
     expect(upper).toHaveAttribute("aria-valuenow", "99");
-    expect(input("Czas trwania (min)").value).toBe("0");
+    expect(input("Czas trwania (min)").value).toBe("60");
     expect(screen.getByText("Wiek")).toBeTruthy();
     expect(screen.getByText("Czas trwania (min)")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Utwórz" })).toBeTruthy();
@@ -135,7 +135,7 @@ describe("GroupDetailsForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Utwórz" }));
 
     expect(await screen.findByText("Nazwa grupy jest wymagana")).toBeTruthy();
-    expect(screen.getByText("Podaj czas trwania treningu")).toBeTruthy();
+    expect(screen.queryByText("Podaj czas trwania treningu")).toBeNull();
     expect(createGroup).not.toHaveBeenCalled();
   });
 

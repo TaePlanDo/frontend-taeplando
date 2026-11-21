@@ -35,7 +35,7 @@ export function toFormValues(group?: Group | null): GroupDetailsFormValues {
       name: "",
       minAge: String(GROUP_LIMITS.MIN_AGE),
       maxAge: String(GROUP_LIMITS.MAX_AGE),
-      durationMinutes: "0",
+      durationMinutes: String(GROUP_LIMITS.DEFAULT_DURATION_MINUTES),
     };
   }
   return {
