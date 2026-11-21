@@ -121,13 +121,13 @@ export function applyRatios(
   }));
 }
 
-/** Keep the total at 100%, taking increases from the largest other segments. */
+/** Edit only this segment, limiting increases to the remaining percentage pool. */
 export function setSegmentPercentage(
   items: SchemaDraftItem[],
   segmentId: number,
   percentage: number,
 ): SchemaDraftItem[] {
-  if (items.length < 2 || !Number.isFinite(percentage)) return items;
+  if (!Number.isFinite(percentage)) return items;
   const target = items.find((item) => item.segmentId === segmentId);
   if (!target) return items;
 
@@ -135,35 +135,29 @@ export function setSegmentPercentage(
   const bounded = Math.max(
     MIN_PERCENTAGE,
     Math.min(
-      TOTAL_PERCENTAGE - (items.length - 1) * MIN_PERCENTAGE,
+      TOTAL_PERCENTAGE - getSchemaTotal(items) + target.percentage,
       Math.round(percentage),
     ),
   );
-  let difference = bounded - target.percentage;
-  if (difference === 0) return items;
+  if (bounded === target.percentage) return items;
 
-  const next = items.map((item) => ({
-    ...item,
-    percentage: item.segmentId === segmentId ? bounded : item.percentage,
-  }));
-  const others = next
-    .filter((item) => item.segmentId !== segmentId)
-    .sort((a, b) => b.percentage - a.percentage);
-  for (const item of others) {
-    const transfer = Math.min(difference, item.percentage - MIN_PERCENTAGE);
-    item.percentage -= transfer;
-    difference -= transfer;
-    if (difference === 0) break;
-  }
-  return next;
+  return items.map((item) =>
+    item.segmentId === segmentId ? { ...item, percentage: bounded } : item,
+  );
+}
+
+export function getSchemaTotal(items: SchemaDraftItem[]): number {
+  return items.reduce((total, item) => total + item.percentage, 0);
 }
 
 export function canSaveSchema(items: SchemaDraftItem[]): boolean {
   if (items.length === 0) {
     return false;
   }
-  const sum = items.reduce((total, item) => total + item.percentage, 0);
-  return sum === 100 && items.every((item) => item.percentage >= 1);
+  return (
+    getSchemaTotal(items) === GROUP_SCHEMA_LIMITS.TOTAL_PERCENTAGE &&
+    items.every((item) => item.percentage >= GROUP_SCHEMA_LIMITS.MIN_PERCENTAGE)
+  );
 }
 
 export function toSchemaWritePayload(

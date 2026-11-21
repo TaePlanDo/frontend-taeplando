@@ -24,48 +24,63 @@ function sum(items: SchemaDraftItem[]) {
   return items.reduce((total, item) => total + item.percentage, 0);
 }
 
-describe("schema-draft", () => {
-  it("redistributes a segment increase without changing order or the source", () => {
-    const start = initDraftFromSchema([], catalog);
-    const before = structuredClone(start);
-    const next = setSegmentPercentage(start, catalog[0].id, 98);
+function draft(values: number[]): SchemaDraftItem[] {
+  return values.map((percentage, index) => ({
+    segmentId: index,
+    segmentCode: `SEGMENT_${index}`,
+    segmentName: `Segment ${index}`,
+    percentage,
+  }));
+}
 
-    expect(percentages(next)).toEqual([98, 1, 1]);
-    expect(canSaveSchema(next)).toBe(true);
-    expect(next.map((item) => item.segmentId)).toEqual(
-      start.map((item) => item.segmentId),
-    );
+describe("schema-draft", () => {
+  it("decreases only the selected segment and releases its percentage into the pool", () => {
+    const start = draft([20, 60, 20]);
+    const before = structuredClone(start);
+    const next = setSegmentPercentage(start, 1, 45);
+
+    expect(percentages(next)).toEqual([20, 45, 20]);
+    expect(sum(next)).toBe(85);
+    expect(canSaveSchema(next)).toBe(false);
+    expect(next[0]).toBe(start[0]);
+    expect(next[2]).toBe(start[2]);
     expect(start).toEqual(before);
   });
 
-  it("keeps every segment at least 1% and the sum at 100 for all slider values", () => {
-    for (let count = 2; count <= 6; count++) {
-      const segments = Array.from({ length: count }, (_, index) => ({
-        id: index,
-        code: `SEGMENT_${index}`,
-        name: `Segment ${index}`,
-      }));
-      let items = initDraftFromSchema([], segments);
-      for (const segment of segments) {
-        for (const requested of [1, 15, 50, 99, 100, 20.5, -1]) {
-          items = setSegmentPercentage(items, segment.id, requested);
-          expect(canSaveSchema(items)).toBe(true);
-          expect(items.every((item) => Number.isInteger(item.percentage))).toBe(
-            true,
-          );
-          expect(
-            items.find((item) => item.segmentId === segment.id)?.percentage,
-          ).toBe(
-            Math.max(1, Math.min(100 - (count - 1), Math.round(requested))),
-          );
-        }
-      }
-    }
+  it("allocates only free percentages and never takes from another segment", () => {
+    const start = draft([20, 60, 20]);
+    const reduced = setSegmentPercentage(start, 0, 10);
+    const increased = setSegmentPercentage(reduced, 1, 65);
+    expect(percentages(increased)).toEqual([10, 65, 20]);
+    expect(sum(increased)).toBe(95);
+
+    const capped = setSegmentPercentage(increased, 2, 50);
+    expect(percentages(capped)).toEqual([10, 65, 25]);
+    expect(canSaveSchema(capped)).toBe(true);
+    expect(setSegmentPercentage(capped, 0, 11)).toBe(capped);
   });
 
-  it("keeps a single segment at 100% and ignores invalid edits", () => {
-    const single = initDraftFromSchema([], [catalog[0]]);
-    expect(setSegmentPercentage(single, catalog[0].id, 10)).toBe(single);
+  it("rounds to whole percentages and keeps the minimum at 1%", () => {
+    const start = draft([10, 50, 10]);
+    expect(percentages(setSegmentPercentage(start, 0, 20.7))).toEqual([
+      21, 50, 10,
+    ]);
+    expect(percentages(setSegmentPercentage(start, 0, 200))).toEqual([
+      40, 50, 10,
+    ]);
+    expect(percentages(setSegmentPercentage(start, 0, -1))).toEqual([
+      1, 50, 10,
+    ]);
+  });
+
+  it("allows a single segment to release and reclaim its free percentages", () => {
+    const single = draft([100]);
+    const reduced = setSegmentPercentage(single, 0, 1);
+    expect(percentages(reduced)).toEqual([1]);
+    expect(percentages(setSegmentPercentage(reduced, 0, 100))).toEqual([100]);
+  });
+
+  it("ignores invalid edits", () => {
     const items = initDraftFromSchema([], catalog);
     expect(setSegmentPercentage(items, -1, 10)).toBe(items);
     expect(setSegmentPercentage(items, catalog[0].id, NaN)).toBe(items);

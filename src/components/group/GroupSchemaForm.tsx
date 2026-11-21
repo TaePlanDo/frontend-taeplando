@@ -32,6 +32,7 @@ import {
   addSegment,
   applyRatios,
   canSaveSchema,
+  getSchemaTotal,
   initDraftFromSchema,
   removeSegment,
   setSegmentPercentage,
@@ -117,6 +118,9 @@ function GroupSchemaEditor({
   }));
 
   const saveAllowed = canSaveSchema(items);
+  const totalPercentage = getSchemaTotal(items);
+  const remainingPercentage =
+    GROUP_SCHEMA_LIMITS.TOTAL_PERCENTAGE - totalPercentage;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -168,8 +172,8 @@ function GroupSchemaEditor({
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-foreground/70">
-        Ustaw udział części treningu. Suma zawsze wynosi 100%; każdy segment co
-        najmniej 1%.
+        Ustaw udział części treningu. Do zapisu potrzebne jest 100%; każdy
+        segment co najmniej 1%.
       </p>
 
       {items.length > 0 ? (
@@ -198,7 +202,16 @@ function GroupSchemaEditor({
             items={items.map((item) => item.segmentCode)}
             strategy={verticalListSortingStrategy}
           >
-            <h3 className="font-semibold sm:hidden">Segmenty treningu</h3>
+            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 sm:hidden">
+              <h3 className="font-semibold">Segmenty treningu</h3>
+              <output
+                aria-label="Łączny udział segmentów"
+                aria-live="polite"
+                className="text-sm tabular-nums text-muted-foreground"
+              >
+                Łącznie: {totalPercentage}% · Wolne: {remainingPercentage}%
+              </output>
+            </div>
             <ul
               className={`flex flex-col gap-3 sm:gap-1 ${items.length === 1 ? "sm:hidden" : ""}`}
               aria-label="Kolejność segmentów"
@@ -209,10 +222,7 @@ function GroupSchemaEditor({
                   item={item}
                   canRemove={items.length > 1}
                   disabled={isUpdating}
-                  maxPercentage={
-                    GROUP_SCHEMA_LIMITS.TOTAL_PERCENTAGE -
-                    (items.length - 1) * GROUP_SCHEMA_LIMITS.MIN_PERCENTAGE
-                  }
+                  maxPercentage={item.percentage + remainingPercentage}
                   onPercentageChange={(percentage) =>
                     setItems((current) =>
                       setSegmentPercentage(current, item.segmentId, percentage),
@@ -250,10 +260,9 @@ function GroupSchemaEditor({
       ) : null}
 
       {!saveAllowed ? (
-        <InputErrorMessage
-          message="Każdy segment musi mieć udział co najmniej 1%, a suma musi wynosić 100%."
-          className="mx-2"
-        />
+        <p className="mx-2 text-sm text-muted-foreground">
+          Przydziel pozostałe {remainingPercentage}%, aby zapisać schemat.
+        </p>
       ) : null}
 
       {error ? <InputErrorMessage message={error} className="mx-2" /> : null}

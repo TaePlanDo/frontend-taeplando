@@ -1,9 +1,10 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "cn";
-import { GripVertical, Trash2 } from "lucide-react";
+import { GripVertical, Minus, Plus, Trash2 } from "lucide-react";
 
 import { CardItemActionButton } from "@/components/shared/CardItemActionButton";
+import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { GROUP_SCHEMA_LIMITS } from "@/lib/constants/group";
 import type { SchemaDraftItem } from "@/lib/groups/schema-draft";
@@ -77,19 +78,53 @@ export function GroupSchemaOrderRow({
           />
         ) : null}
       </div>
-      <Slider
-        className="h-8 sm:hidden [&_[data-slot=slider-track]]:h-2.5 [&_[data-slot=slider-range]]:bg-linear-to-r [&_[data-slot=slider-range]]:from-primary [&_[data-slot=slider-range]]:to-primary-foreground"
-        aria-label={`Udział: ${item.segmentName}`}
-        aria-valuetext={`${item.percentage}%`}
-        min={GROUP_SCHEMA_LIMITS.MIN_PERCENTAGE}
-        max={maxPercentage}
-        step={GROUP_SCHEMA_LIMITS.MIN_PERCENTAGE}
-        value={[item.percentage]}
-        disabled={disabled || !canRemove}
-        onValueChange={([percentage]) => {
-          if (percentage != null) onPercentageChange(percentage);
-        }}
-      />
+      <div className="flex items-center gap-3 sm:hidden">
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="size-9 shrink-0"
+          aria-label={`Zmniejsz udział: ${item.segmentName}`}
+          disabled={
+            disabled || item.percentage <= GROUP_SCHEMA_LIMITS.MIN_PERCENTAGE
+          }
+          onClick={() =>
+            onPercentageChange(
+              item.percentage - GROUP_SCHEMA_LIMITS.PERCENTAGE_STEP,
+            )
+          }
+        >
+          <Minus className="size-4" aria-hidden />
+        </Button>
+        <Slider
+          className="h-9 [&_[data-slot=slider-track]]:h-2.5 [&_[data-slot=slider-range]]:bg-linear-to-r [&_[data-slot=slider-range]]:from-primary [&_[data-slot=slider-range]]:to-primary-foreground"
+          aria-label={`Udział: ${item.segmentName}`}
+          aria-valuetext={`${item.percentage}%`}
+          min={GROUP_SCHEMA_LIMITS.MIN_PERCENTAGE}
+          max={GROUP_SCHEMA_LIMITS.TOTAL_PERCENTAGE}
+          step={GROUP_SCHEMA_LIMITS.PERCENTAGE_STEP}
+          value={[item.percentage]}
+          disabled={disabled}
+          onValueChange={([percentage]) => {
+            if (percentage != null) onPercentageChange(percentage);
+          }}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="size-9 shrink-0"
+          aria-label={`Zwiększ udział: ${item.segmentName}`}
+          disabled={disabled || item.percentage >= maxPercentage}
+          onClick={() =>
+            onPercentageChange(
+              item.percentage + GROUP_SCHEMA_LIMITS.PERCENTAGE_STEP,
+            )
+          }
+        >
+          <Plus className="size-4" aria-hidden />
+        </Button>
+      </div>
     </li>
   );
 }

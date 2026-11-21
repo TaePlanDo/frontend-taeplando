@@ -11,5 +11,6 @@ export const DEFAULT_GROUP_DURATION = {
 
 export const GROUP_SCHEMA_LIMITS = {
   MIN_PERCENTAGE: 1,
+  PERCENTAGE_STEP: 1,
   TOTAL_PERCENTAGE: 100,
 } as const;

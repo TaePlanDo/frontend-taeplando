@@ -28,11 +28,7 @@ import {
   INTERACTION_FOCUS,
   useInteractionReducedMotion,
 } from "./ui-interaction-motion";
-import {
-  normalizeRatios,
-  type RatioSegment,
-  useRatioBalancer,
-} from "./use-ratio-balancer";
+import { type RatioSegment, useRatioBalancer } from "./use-ratio-balancer";
 
 export type { RatioSegment };
 
@@ -81,10 +77,8 @@ export function RatioBalancer({
     React.useState<RatioSegment[]>(defaultSegments);
   const segments = controlledSegments ?? internalSegments;
 
-  const currentRatios = React.useMemo(
-    () => normalizeRatios(segments.map((s) => s.ratio)),
-    [segments],
-  );
+  const currentRatios = segments.map((segment) => segment.ratio);
+  const totalRatio = currentRatios.reduce((total, ratio) => total + ratio, 0);
 
   const handleChange = React.useCallback(
     (nextRatios: number[]) => {
@@ -132,7 +126,7 @@ export function RatioBalancer({
         <div className="mb-3 flex items-center justify-between text-[12px] font-medium text-muted-foreground">
           <span>{label}</span>
           <span className="font-mono text-[11px] tabular-nums text-muted-foreground/80">
-            SUMA 100%
+            SUMA {totalRatio}%
           </span>
         </div>
       )}
