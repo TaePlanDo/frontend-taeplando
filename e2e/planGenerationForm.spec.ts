@@ -4,7 +4,7 @@ import { createGroup } from "./helpers/createGroup";
 import { createLocalTrainerAndLogin } from "./helpers/createLocalTrainer";
 import { PlanGenerationPage } from "./pages/planGeneration.page";
 import { PlanNewPage } from "./pages/planNew.page";
-import { test } from "./playwright";
+import { expect, test } from "./playwright";
 
 const group = {
   name: "Grupa E2E formularz",
@@ -19,12 +19,34 @@ test.describe("plan generation form", () => {
     const trainer = await createLocalTrainerAndLogin(page);
     await createGroup(trainer, group);
     await createEquipment(trainer, "Tarcza E2E");
+    await createEquipment(trainer, "Piłka E2E");
 
     const planNew = new PlanNewPage(page);
     await planNew.goto();
     await planNew.selectGroup(group.name);
     await planNew.setParticipants(12);
-    await planNew.addEquipment("Tarcza E2E");
+    await page.getByRole("combobox", { name: "Sprzęt treningowy" }).click();
+    const list = page.getByRole("listbox", { name: "Sprzęt treningowy" });
+    const shield = list.getByRole("option", {
+      name: "Tarcza E2E",
+      exact: true,
+    });
+    const ball = list.getByRole("option", { name: "Piłka E2E", exact: true });
+    await shield.click();
+    await ball.click();
+    await expect(shield).toHaveAttribute("aria-selected", "true");
+    await expect(ball).toHaveAttribute("aria-selected", "true");
+    await shield.click();
+    await expect(shield).toHaveAttribute("aria-selected", "false");
+    await shield.click();
+    await page.keyboard.press("Escape");
+    await expect(list).not.toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Usuń Tarcza E2E" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Usuń Piłka E2E" }),
+    ).toBeVisible();
     await planNew.selectTrainingType("Kondycja");
     await planNew.submitGeneration();
 

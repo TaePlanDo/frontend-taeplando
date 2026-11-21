@@ -35,6 +35,7 @@ describe("ExerciseAttributesSelector", () => {
     fireEvent.mouseDown(typeTab, { button: 0, ctrlKey: false });
     fireEvent.click(await screen.findByLabelText("Dodaj typ"));
     fireEvent.click(await screen.findByRole("option", { name: "Technika" }));
+    fireEvent.keyDown(screen.getByRole("listbox"), { key: "Escape" });
 
     expect(onTypeIdsChange).toHaveBeenCalledWith(["t1"]);
   });

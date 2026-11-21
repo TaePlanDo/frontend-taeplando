@@ -99,17 +99,17 @@ describe("PlanDetailPage", () => {
     expect(screen.getByText("Sparing")).toBeTruthy();
     expect(screen.getAllByText("Tarcza").length).toBeGreaterThan(0);
     const phaseHeader = screen.getByRole("button", { name: /Rozgrzewka/ });
-    expect(phaseHeader).toHaveClass("sticky");
+    expect(phaseHeader.parentElement).toHaveClass("sticky");
     expect(
-      within(phaseHeader)
-        .getAllByText("Intensywność")[0]
-        .closest("[data-slot=badge]"),
+      within(phaseHeader.parentElement!).getByText("Intensywność"),
     ).toHaveClass("text-emerald-400");
     expect(
-      within(phaseHeader)
-        .getAllByText("Trudność")[0]
-        .closest("[data-slot=badge]"),
+      within(phaseHeader.parentElement!).getByText("Trudność"),
     ).toHaveClass("text-violet-300");
+    expect(within(phaseHeader).queryByText("Intensywność")).toBeNull();
+    expect(
+      within(phaseHeader.parentElement!).getByText("Intensywność"),
+    ).not.toHaveClass("bg-emerald-500/15");
     const row = screen.getByRole("button", { name: /Bieg/ });
     expect(within(row).getByText("2+")).toBeTruthy();
     expect(within(row).getAllByRole("meter")).toHaveLength(5);
