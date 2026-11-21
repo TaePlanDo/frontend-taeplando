@@ -1,12 +1,12 @@
 import { useId, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "cn";
-import { Popover } from "radix-ui";
-
 import {
-  DROPDOWN_COLLISION_PADDING,
-  DROPDOWN_SPACING,
-} from "@/lib/constants/dropdown";
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 import { SelectedAttributeBadges } from "./SelectedAttributeBadges";
 import { InputErrorMessage } from "./InputErrorMessage";
@@ -79,164 +79,151 @@ export function CatalogMultiSelect({
   return (
     <div className={className}>
       <div className="flex flex-col gap-1">
-        <Popover.Root
-          modal
-          open={open && canOpen}
-          onOpenChange={handleOpenChange}
-        >
-          <Popover.Anchor asChild>
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor={id}
-                className={cn(
-                  "text-sm font-medium text-foreground",
-                  labelClassName,
-                )}
-              >
-                {label}
-              </label>
-              <Popover.Trigger asChild>
-                <button
-                  id={id}
-                  type="button"
-                  role="combobox"
-                  aria-haspopup="dialog"
-                  aria-controls={`${id}-popup`}
-                  aria-expanded={open && canOpen}
-                  aria-invalid={Boolean(error)}
-                  aria-describedby={error ? `${id}-error` : undefined}
-                  disabled={!canOpen}
-                  onKeyDown={(event) => {
-                    if (event.key === "ArrowDown") {
-                      event.preventDefault();
-                      handleOpenChange(true);
-                      setKeyboardNavigation(true);
-                    }
-                  }}
-                  className="flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 text-left text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <span className="min-w-0 truncate text-muted-foreground">
-                    {unavailableMessage
-                      ? unavailableMessage
-                      : isLoading
-                        ? "Ładowanie…"
-                        : items.length === 0
-                          ? "Brak dostępnych elementów"
-                          : selectedIds.length > 0
-                            ? `Wybrano: ${selectedIds.length}`
-                            : placeholder}
-                  </span>
-                  <ChevronDown
-                    className="size-4 shrink-0 opacity-60"
-                    aria-hidden
-                  />
-                </button>
-              </Popover.Trigger>
-            </div>
-          </Popover.Anchor>
-          <Popover.Portal>
-            <Popover.Content
-              id={`${id}-popup`}
-              aria-label={label}
-              aria-describedby={undefined}
-              align="start"
-              sideOffset={DROPDOWN_SPACING}
-              collisionPadding={DROPDOWN_COLLISION_PADDING}
-              onOpenAutoFocus={(event) => {
-                event.preventDefault();
-                list.current?.focus({ preventScroll: true });
-                if (list.current)
-                  list.current.scrollTop =
-                    optionRefs.current[activeIndex]?.offsetTop ?? 0;
-              }}
-              className="dropdown-panel-height z-50 flex w-(--radix-popover-trigger-width) max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-xl outline-none [--dropdown-available-height:var(--radix-popover-content-available-height)]"
+        <Dialog open={open && canOpen} onOpenChange={handleOpenChange}>
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor={id}
+              className={cn(
+                "text-sm font-medium text-foreground",
+                labelClassName,
+              )}
             >
-              <div
-                ref={list}
-                id={`${id}-options`}
-                role="listbox"
-                aria-label={label}
-                aria-multiselectable="true"
-                aria-activedescendant={
-                  items[activeIndex] ? `${id}-option-${activeIndex}` : undefined
-                }
-                tabIndex={0}
-                className="relative min-h-0 overflow-y-auto overscroll-contain outline-none"
+              {label}
+            </label>
+            <DialogTrigger asChild>
+              <button
+                id={id}
+                type="button"
+                role="combobox"
+                aria-haspopup="dialog"
+                aria-controls={`${id}-popup`}
+                aria-expanded={open && canOpen}
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? `${id}-error` : undefined}
+                disabled={!canOpen}
                 onKeyDown={(event) => {
-                  let next = activeIndex;
-                  if (event.key === "ArrowDown")
-                    next = (activeIndex + 1) % items.length;
-                  else if (event.key === "ArrowUp")
-                    next = (activeIndex - 1 + items.length) % items.length;
-                  else if (event.key === "Home") next = 0;
-                  else if (event.key === "End") next = items.length - 1;
-                  else if (event.key === " " || event.key === "Enter") {
+                  if (event.key === "ArrowDown") {
                     event.preventDefault();
+                    handleOpenChange(true);
                     setKeyboardNavigation(true);
-                    const item = items[activeIndex];
-                    if (item) toggle(String(item.id));
-                    return;
-                  } else return;
+                  }
+                }}
+                className="flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 text-left text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <span className="min-w-0 truncate text-muted-foreground">
+                  {unavailableMessage
+                    ? unavailableMessage
+                    : isLoading
+                      ? "Ładowanie…"
+                      : items.length === 0
+                        ? "Brak dostępnych elementów"
+                        : selectedIds.length > 0
+                          ? `Wybrano: ${selectedIds.length}`
+                          : placeholder}
+                </span>
+                <ChevronDown
+                  className="size-4 shrink-0 opacity-60"
+                  aria-hidden
+                />
+              </button>
+            </DialogTrigger>
+          </div>
+          <DialogContent
+            id={`${id}-popup`}
+            aria-describedby={undefined}
+            showCloseButton={false}
+            onOpenAutoFocus={(event) => {
+              event.preventDefault();
+              list.current?.focus({ preventScroll: true });
+              if (list.current)
+                list.current.scrollTop =
+                  optionRefs.current[activeIndex]?.offsetTop ?? 0;
+            }}
+            className="dropdown-panel-height !top-[calc(50%+2rem)] !flex !w-[calc(100vw-2rem)] !max-w-96 !flex-col !gap-0 !p-1 overflow-hidden rounded-lg border-border bg-popover text-popover-foreground shadow-xl sm:!max-w-lg"
+          >
+            <DialogTitle className="sr-only">{label}</DialogTitle>
+            <div
+              ref={list}
+              id={`${id}-options`}
+              role="listbox"
+              aria-label={label}
+              aria-multiselectable="true"
+              aria-activedescendant={
+                items[activeIndex] ? `${id}-option-${activeIndex}` : undefined
+              }
+              tabIndex={0}
+              className="relative min-h-0 overflow-y-auto overscroll-contain outline-none"
+              onKeyDown={(event) => {
+                let next = activeIndex;
+                if (event.key === "ArrowDown")
+                  next = (activeIndex + 1) % items.length;
+                else if (event.key === "ArrowUp")
+                  next = (activeIndex - 1 + items.length) % items.length;
+                else if (event.key === "Home") next = 0;
+                else if (event.key === "End") next = items.length - 1;
+                else if (event.key === " " || event.key === "Enter") {
                   event.preventDefault();
                   setKeyboardNavigation(true);
-                  setActiveIndex(next);
-                  optionRefs.current[next]?.scrollIntoView({
-                    block: "nearest",
-                  });
-                }}
-              >
-                {items.map((item, index) => {
-                  const selected = selectedIds.includes(String(item.id));
-                  const previous = items[index - 1];
-                  const next = items[index + 1];
-                  const joinsPrevious =
-                    previous && selectedIds.includes(String(previous.id));
-                  const joinsNext =
-                    next && selectedIds.includes(String(next.id));
-                  return (
-                    <button
-                      ref={(element) => {
-                        optionRefs.current[index] = element;
-                      }}
-                      key={item.id}
-                      id={`${id}-option-${index}`}
-                      type="button"
-                      role="option"
-                      aria-selected={selected}
-                      tabIndex={-1}
-                      onPointerDown={() => setKeyboardNavigation(false)}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => {
-                        setKeyboardNavigation(false);
-                        setActiveIndex(index);
-                        toggle(String(item.id));
-                        list.current?.focus({ preventScroll: true });
-                      }}
-                      className={cn(
-                        "block min-h-8 w-full rounded-md border bg-linear-to-r from-transparent to-transparent px-2 py-1 text-left text-sm break-words outline-none transition-[border-color,--tw-gradient-from,--tw-gradient-to] duration-150 ease-out motion-reduce:transition-none",
-                        selected
-                          ? "rounded-none border-x-primary border-y-transparent from-primary/25 to-primary-foreground/20"
-                          : "border-transparent",
-                        selected &&
-                          !joinsPrevious &&
-                          "rounded-t-md border-t-primary",
-                        selected &&
-                          !joinsNext &&
-                          "rounded-b-md border-b-primary",
-                        selected && joinsPrevious && "border-t-primary/20",
-                        keyboardNavigation &&
-                          index === activeIndex &&
-                          "outline-solid outline-1 -outline-offset-4 outline-primary",
-                      )}
-                    >
-                      {item.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </Popover.Content>
-          </Popover.Portal>
-        </Popover.Root>
+                  const item = items[activeIndex];
+                  if (item) toggle(String(item.id));
+                  return;
+                } else return;
+                event.preventDefault();
+                setKeyboardNavigation(true);
+                setActiveIndex(next);
+                optionRefs.current[next]?.scrollIntoView({
+                  block: "nearest",
+                });
+              }}
+            >
+              {items.map((item, index) => {
+                const selected = selectedIds.includes(String(item.id));
+                const previous = items[index - 1];
+                const next = items[index + 1];
+                const joinsPrevious =
+                  previous && selectedIds.includes(String(previous.id));
+                const joinsNext = next && selectedIds.includes(String(next.id));
+                return (
+                  <button
+                    ref={(element) => {
+                      optionRefs.current[index] = element;
+                    }}
+                    key={item.id}
+                    id={`${id}-option-${index}`}
+                    type="button"
+                    role="option"
+                    aria-selected={selected}
+                    tabIndex={-1}
+                    onPointerDown={() => setKeyboardNavigation(false)}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      setKeyboardNavigation(false);
+                      setActiveIndex(index);
+                      toggle(String(item.id));
+                      list.current?.focus({ preventScroll: true });
+                    }}
+                    className={cn(
+                      "block min-h-8 w-full rounded-md border bg-linear-to-r from-transparent to-transparent px-2 py-1 text-left text-sm break-words outline-none transition-[border-color,--tw-gradient-from,--tw-gradient-to] duration-150 ease-out motion-reduce:transition-none",
+                      selected
+                        ? "rounded-none border-x-primary border-y-transparent from-primary/25 to-primary-foreground/20"
+                        : "border-transparent",
+                      selected &&
+                        !joinsPrevious &&
+                        "rounded-t-md border-t-primary",
+                      selected && !joinsNext && "rounded-b-md border-b-primary",
+                      selected && joinsPrevious && "border-t-primary/20",
+                      keyboardNavigation &&
+                        index === activeIndex &&
+                        "outline-solid outline-1 -outline-offset-4 outline-primary",
+                    )}
+                  >
+                    {item.name}
+                  </button>
+                );
+              })}
+            </div>
+          </DialogContent>
+        </Dialog>
         {error ? (
           <InputErrorMessage id={`${id}-error`} message={error} />
         ) : null}

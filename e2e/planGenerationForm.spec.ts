@@ -15,7 +15,7 @@ const group = {
 
 test.describe("plan generation form", () => {
   for (const width of [390, 1280]) {
-    test(`keeps the multiselect separated and stable after pointer selections at ${width}px`, async ({
+    test(`opens a compact multiselect popup with outside space at ${width}px`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 900 });
@@ -26,28 +26,21 @@ test.describe("plan generation form", () => {
       await new PlanNewPage(page).goto();
 
       const trigger = page.getByRole("combobox", { name: "Sprzęt treningowy" });
-      const control = trigger.locator("..");
       await trigger.click();
       const popup = page.getByRole("dialog", { name: "Sprzęt treningowy" });
       await expect(popup).toBeVisible();
       await expect(popup).toBeInViewport({ ratio: 1 });
-      const expectGap = () =>
-        expect
-          .poll(async () => {
-            const [fieldBox, popupBox] = await Promise.all([
-              control.boundingBox(),
-              popup.boundingBox(),
-            ]);
-            if (!fieldBox || !popupBox) return Infinity;
-            const gap = Math.max(
-              fieldBox.y - popupBox.y - popupBox.height,
-              popupBox.y - fieldBox.y - fieldBox.height,
-            );
-            return Math.abs(gap - 16);
-          })
-          .toBeLessThan(1);
-      await expectGap();
-      const initialHeight = (await popup.boundingBox())!.height;
+      const initialBox = (await popup.boundingBox())!;
+      expect(initialBox.x).toBeGreaterThanOrEqual(16);
+      expect(width - initialBox.x - initialBox.width).toBeGreaterThanOrEqual(
+        16,
+      );
+      expect(initialBox.y).toBeGreaterThanOrEqual(64);
+      expect(900 - initialBox.y - initialBox.height).toBeGreaterThanOrEqual(16);
+      expect(
+        Math.abs(initialBox.x + initialBox.width / 2 - width / 2),
+      ).toBeLessThan(1);
+      const initialHeight = initialBox.height;
       const optionsHeight = await popup
         .getByRole("option")
         .evaluateAll((options) =>
@@ -62,7 +55,6 @@ test.describe("plan generation form", () => {
         const option = popup.getByRole("option", { name, exact: true });
         await option.click();
         await expect(option).toHaveCSS("outline-style", "none");
-        await expectGap();
         await expect
           .poll(async () =>
             Math.abs((await popup.boundingBox())!.height - initialHeight),
