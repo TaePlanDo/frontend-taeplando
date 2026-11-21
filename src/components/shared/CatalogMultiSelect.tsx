@@ -128,7 +128,7 @@ export function CatalogMultiSelect({
                 block: "nearest",
               });
             }}
-            className="!top-[max(5rem,12.5dvh)] !block !h-[min(75dvh,calc(100dvh-6rem))] !w-[calc(100vw-2rem)] !max-w-96 !translate-y-0 !p-1 rounded-lg border-border bg-popover text-popover-foreground shadow-xl sm:!top-[max(5rem,25dvh)] sm:!h-[min(50dvh,calc(100dvh-6rem))] sm:!max-w-lg"
+            className="dropdown-panel-height !top-[max(5rem,12.5dvh)] !block !w-[calc(100vw-2rem)] !max-w-96 !translate-y-0 !p-1 rounded-lg border-border bg-popover text-popover-foreground shadow-xl sm:!top-[max(5rem,25dvh)] sm:!max-w-lg"
           >
             <DialogTitle className="sr-only">{label}</DialogTitle>
             <div

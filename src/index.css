@@ -125,9 +125,22 @@
     0 0 110px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
+@utility dropdown-panel-height {
+  height: min(75dvh, calc(100dvh - 6rem));
+
+  @media (width >= 40rem) {
+    height: min(50dvh, calc(100dvh - 6rem));
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    width: 0;
   }
 
   html {
@@ -140,4 +153,8 @@
     margin: 0;
     min-height: 100vh;
   }
+}
+
+[data-slot="scroll-area-scrollbar"][data-orientation="vertical"] {
+  display: none;
 }
