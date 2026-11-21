@@ -1,21 +1,15 @@
-import { Separator } from "@/components/ui/separator";
-
 type PersonalDataItemProps = {
   title: string;
   value: string;
-  separator?: boolean;
 };
 
-export function PersonalDataItem({
-  title,
-  value,
-  separator = true,
-}: PersonalDataItemProps) {
+export function PersonalDataItem({ title, value }: PersonalDataItemProps) {
   return (
-    <>
-      <h3 className="text-xl font-semibold text-primary">{title}</h3>
-      <p className="text-lg text-foreground truncate">{value}</p>
-      {separator && <Separator />}
-    </>
+    <div className="min-w-0 space-y-2">
+      <dt className="text-base font-semibold text-primary">{title}</dt>
+      <dd className="text-lg text-foreground [overflow-wrap:anywhere]">
+        {value}
+      </dd>
+    </div>
   );
 }
