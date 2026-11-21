@@ -188,10 +188,10 @@ export function CatalogMultiSelect({
                       list.current?.focus({ preventScroll: true });
                     }}
                     className={cn(
-                      "block min-h-8 w-full rounded-md border px-2 py-1 text-left text-sm break-words",
+                      "block min-h-8 w-full rounded-md border bg-linear-to-r from-transparent to-transparent px-2 py-1 text-left text-sm break-words transition-[border-color,--tw-gradient-from,--tw-gradient-to] duration-150 ease-out motion-reduce:transition-none",
                       selected
-                        ? "rounded-none border-x-primary border-y-transparent bg-linear-to-r from-primary/25 to-primary-foreground/20"
-                        : "border-transparent hover:bg-accent",
+                        ? "rounded-none border-x-primary border-y-transparent from-primary/25 to-primary-foreground/20"
+                        : "border-transparent",
                       selected &&
                         !joinsPrevious &&
                         "rounded-t-md border-t-primary",
