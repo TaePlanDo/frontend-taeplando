@@ -52,6 +52,7 @@ async function addFromList(tabLabel: string, optionLabel: string) {
     await screen.findByLabelText(`Dodaj ${tabLabel.toLowerCase()}`),
   );
   fireEvent.click(await screen.findByRole("option", { name: optionLabel }));
+  fireEvent.keyDown(screen.getByRole("listbox"), { key: "Escape" });
 }
 
 describe("ExerciseForm", () => {
