@@ -148,7 +148,7 @@ describe("schema-draft", () => {
     expect(start.map((item) => item.percentage)).toEqual([20, 40, 20]);
   });
 
-  it("removes a row by segment id and renormalizes to 100", () => {
+  it("removes a row from a full schema without reallocating its percentages", () => {
     const start: SchemaDraftItem[] = [
       {
         segmentId: 1,
@@ -163,7 +163,10 @@ describe("schema-draft", () => {
         percentage: 80,
       },
     ];
-    expect(percentages(removeSegment(start, 1))).toEqual([100]);
+    const next = removeSegment(start, 1);
+    expect(percentages(next)).toEqual([80]);
+    expect(sum(next)).toBe(80);
+    expect(canSaveSchema(next)).toBe(false);
   });
 
   it("builds the write payload and gates save at min 1%", () => {

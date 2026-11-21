@@ -188,6 +188,29 @@ describe("GroupSchemaForm", () => {
     expect(save).toBeDisabled();
   });
 
+  it("returns a removed segment's percentage to the free pool for manual allocation", async () => {
+    render(<GroupSchemaForm group={group} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("combobox", { name: "Dodaj segment" }));
+    fireEvent.click(await screen.findByRole("option", { name: "Rozgrzewka" }));
+    fireEvent.click(screen.getByRole("button", { name: "Usuń Rozgrzewka" }));
+
+    expect(screen.getByText("(99%)")).toBeTruthy();
+    expect(screen.getByLabelText("Łączny udział segmentów")).toHaveTextContent(
+      "Łącznie: 99% · Wolne: 1%",
+    );
+    expect(
+      screen.getByRole("button", { name: "Zapisz schemat" }),
+    ).toBeDisabled();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Zwiększ udział: Część główna" }),
+    );
+    expect(screen.getByText("(100%)")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Zapisz schemat" }),
+    ).toBeEnabled();
+  });
+
   it("keeps free percentages unallocated when removing and re-adding a segment", async () => {
     render(<GroupSchemaForm group={group} onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("combobox", { name: "Dodaj segment" }));

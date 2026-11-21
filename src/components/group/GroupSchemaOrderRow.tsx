@@ -48,7 +48,7 @@ export function GroupSchemaOrderRow({
           "z-10 border-foreground/10 bg-background opacity-90 shadow-sm",
       )}
     >
-      <div className="flex w-full min-w-0 items-center justify-between gap-2">
+      <div className="flex w-full min-w-0 items-center justify-between gap-2 sm:contents">
         <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2">
           <button
             type="button"
@@ -71,19 +71,19 @@ export function GroupSchemaOrderRow({
           <CardItemActionButton
             type="button"
             icon={<Trash2 className="h-4 w-4" />}
-            className="text-primary hover:bg-primary/10 px-2"
+            className="text-primary hover:bg-primary/10 px-2 sm:order-3"
             aria-label={`Usuń ${item.segmentName}`}
             disabled={disabled}
             onClick={onRemove}
           />
         ) : null}
       </div>
-      <div className="flex items-center gap-3 sm:hidden">
+      <div className="flex items-center gap-3 sm:order-2 sm:gap-1">
         <Button
           type="button"
           variant="outline"
           size="icon"
-          className="size-9 shrink-0"
+          className="size-9 shrink-0 sm:size-7"
           aria-label={`Zmniejsz udział: ${item.segmentName}`}
           disabled={
             disabled || item.percentage <= GROUP_SCHEMA_LIMITS.MIN_PERCENTAGE
@@ -97,7 +97,7 @@ export function GroupSchemaOrderRow({
           <Minus className="size-4" aria-hidden />
         </Button>
         <Slider
-          className="h-9 [&_[data-slot=slider-track]]:h-2.5 [&_[data-slot=slider-range]]:bg-linear-to-r [&_[data-slot=slider-range]]:from-primary [&_[data-slot=slider-range]]:to-primary-foreground"
+          className="h-9 sm:hidden [&_[data-slot=slider-track]]:h-2.5 [&_[data-slot=slider-range]]:bg-linear-to-r [&_[data-slot=slider-range]]:from-primary [&_[data-slot=slider-range]]:to-primary-foreground"
           aria-label={`Udział: ${item.segmentName}`}
           aria-valuetext={`${item.percentage}%`}
           min={GROUP_SCHEMA_LIMITS.MIN_PERCENTAGE}
@@ -113,7 +113,7 @@ export function GroupSchemaOrderRow({
           type="button"
           variant="outline"
           size="icon"
-          className="size-9 shrink-0"
+          className="size-9 shrink-0 sm:size-7"
           aria-label={`Zwiększ udział: ${item.segmentName}`}
           disabled={disabled || item.percentage >= maxPercentage}
           onClick={() =>

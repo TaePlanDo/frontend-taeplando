@@ -213,7 +213,7 @@ function GroupSchemaEditor({
               </output>
             </div>
             <ul
-              className={`flex flex-col gap-3 sm:gap-1 ${items.length === 1 ? "sm:hidden" : ""}`}
+              className="flex flex-col gap-3 sm:gap-1"
               aria-label="Kolejność segmentów"
             >
               {items.map((item) => (

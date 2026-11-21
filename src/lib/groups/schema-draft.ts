@@ -102,10 +102,7 @@ export function removeSegment(
   if (next.length === items.length) {
     return items;
   }
-  if (getSchemaTotal(items) < GROUP_SCHEMA_LIMITS.TOTAL_PERCENTAGE) {
-    return next;
-  }
-  return withNormalizedPercentages(next);
+  return next;
 }
 
 export function applyRatios(
