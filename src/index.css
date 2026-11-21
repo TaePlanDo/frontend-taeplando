@@ -126,10 +126,18 @@
 }
 
 @utility dropdown-panel-height {
-  height: min(75dvh, calc(100dvh - 6rem));
+  max-height: min(
+    75dvh,
+    calc(100dvh - 6rem),
+    var(--dropdown-available-height, 100dvh)
+  );
 
   @media (width >= 40rem) {
-    height: min(50dvh, calc(100dvh - 6rem));
+    max-height: min(
+      50dvh,
+      calc(100dvh - 6rem),
+      var(--dropdown-available-height, 100dvh)
+    );
   }
 }
 

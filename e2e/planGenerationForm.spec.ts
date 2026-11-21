@@ -48,6 +48,15 @@ test.describe("plan generation form", () => {
           .toBeLessThan(1);
       await expectGap();
       const initialHeight = (await popup.boundingBox())!.height;
+      const optionsHeight = await popup
+        .getByRole("option")
+        .evaluateAll((options) =>
+          options.reduce(
+            (height, option) => height + option.getBoundingClientRect().height,
+            0,
+          ),
+        );
+      expect(initialHeight).toBeLessThanOrEqual(optionsHeight + 16);
 
       for (const name of ["Tarcza E2E", "Piłka E2E", "Tarcza E2E"]) {
         const option = popup.getByRole("option", { name, exact: true });

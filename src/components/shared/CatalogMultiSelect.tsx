@@ -149,7 +149,7 @@ export function CatalogMultiSelect({
                   list.current.scrollTop =
                     optionRefs.current[activeIndex]?.offsetTop ?? 0;
               }}
-              className="dropdown-panel-height z-50 max-h-(--radix-popover-content-available-height) w-(--radix-popover-trigger-width) max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-xl outline-none"
+              className="dropdown-panel-height z-50 flex w-(--radix-popover-trigger-width) max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-xl outline-none [--dropdown-available-height:var(--radix-popover-content-available-height)]"
             >
               <div
                 ref={list}
@@ -161,7 +161,7 @@ export function CatalogMultiSelect({
                   items[activeIndex] ? `${id}-option-${activeIndex}` : undefined
                 }
                 tabIndex={0}
-                className="relative h-full overflow-y-auto overscroll-contain outline-none"
+                className="relative min-h-0 overflow-y-auto overscroll-contain outline-none"
                 onKeyDown={(event) => {
                   let next = activeIndex;
                   if (event.key === "ArrowDown")
