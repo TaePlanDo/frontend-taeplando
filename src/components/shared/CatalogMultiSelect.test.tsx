@@ -20,6 +20,10 @@ describe("CatalogMultiSelect", () => {
     );
     expect(screen.getByRole("combobox")).toBeDisabled();
     const remove = screen.getByRole("button", { name: "Usuń Tarcze" });
+    expect(
+      screen.getByRole("combobox").compareDocumentPosition(remove) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     expect(remove).toBeDisabled();
     fireEvent.click(remove);
     expect(onChange).not.toHaveBeenCalled();

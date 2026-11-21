@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { TriangleAlert } from "lucide-react";
 
-import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { CustomizedTabs } from "@/components/shared/CustomizedTabs";
 import { useExerciseCatalogs } from "@/hooks/exercises/useExerciseCatalogs";
 
@@ -18,11 +17,27 @@ type Props = {
   errors: Partial<Record<"type" | "segment", string>>;
 };
 
-const tabs: { id: Tab; label: string }[] = [
-  { id: "equipment", label: "Sprzęt" },
-  { id: "type", label: "Typ" },
-  { id: "segment", label: "Segment" },
-];
+const tabOrder: Tab[] = ["equipment", "type", "segment"];
+const tabs: Record<
+  Tab,
+  { label: string; selectedLabel: string; placeholder: string }
+> = {
+  equipment: {
+    label: "Sprzęt",
+    selectedLabel: "Wybrany sprzęt",
+    placeholder: "Dodaj kolejny sprzęt…",
+  },
+  type: {
+    label: "Typ",
+    selectedLabel: "Wybrane typy",
+    placeholder: "Dodaj kolejny typ…",
+  },
+  segment: {
+    label: "Segment",
+    selectedLabel: "Wybrane segmenty",
+    placeholder: "Dodaj kolejny segment…",
+  },
+};
 const emptyCatalog = [] as const;
 
 export function ExerciseAttributesSelector({
@@ -82,29 +97,23 @@ export function ExerciseAttributesSelector({
         value={tab}
         onValueChange={setTab}
         className="grid h-auto grid-cols-3 border"
-        tabs={tabs.map(({ id, label }) => ({
+        tabs={tabOrder.map((id) => ({
           value: id,
           label: (
             <span className="inline-flex items-center gap-1 leading-none">
               <span>
-                {label} ({count(id)})
+                {tabs[id].label} ({count(id)})
               </span>
               {(id === "type" || id === "segment") && count(id) === 0 ? (
                 <TriangleAlert
                   className="size-3.5 shrink-0 self-center text-primary"
-                  aria-label={`Brak wybranego: ${label}`}
+                  aria-label={`Brak wybranego: ${tabs[id].label}`}
                 />
               ) : null}
             </span>
           ),
         }))}
       />
-      {tab === "type" && errors.type ? (
-        <InputErrorMessage message={errors.type} className="mt-2" />
-      ) : null}
-      {tab === "segment" && errors.segment ? (
-        <InputErrorMessage message={errors.segment} className="mt-2" />
-      ) : null}
       {isError ? (
         <div className="mt-3 text-sm text-destructive">
           Nie udało się pobrać elementów listy.{" "}
@@ -118,9 +127,13 @@ export function ExerciseAttributesSelector({
         </div>
       ) : (
         <CatalogMultiSelect
-          className="mt-3"
-          label={`Dodaj ${tabs.find(({ id }) => id === tab)?.label.toLowerCase()}`}
+          className="mt-3 mb-4"
+          label={`Dodaj ${tabs[tab].label.toLowerCase()}`}
           labelClassName="sr-only"
+          placeholder={tabs[tab].placeholder}
+          selectedLabel={tabs[tab].selectedLabel}
+          selectionPosition="above"
+          error={tab === "equipment" ? undefined : errors[tab]}
           items={[...active.items]}
           selectedIds={active.ids}
           onSelectedIdsChange={active.setIds}
