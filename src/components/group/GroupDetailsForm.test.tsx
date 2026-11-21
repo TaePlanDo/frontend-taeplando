@@ -268,6 +268,8 @@ describe("GroupDetailsForm", () => {
     });
     expect(screen.getAllByRole("spinbutton")).toHaveLength(1);
     expect(duration).toHaveAttribute("aria-valuenow", "90");
+    fireEvent.keyDown(duration, { key: "ArrowRight" });
+    expect(duration).toHaveAttribute("aria-valuenow", "91");
     fireEvent.click(within(duration).getByText("105", { exact: true }));
     fireEvent.click(screen.getByRole("button", { name: "Zapisz zmiany" }));
     await waitFor(() =>

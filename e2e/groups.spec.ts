@@ -16,7 +16,7 @@ test.describe("training groups", () => {
       name: "Czas trwania (min)",
     });
     await duration.press("ArrowRight");
-    await expect(duration).toHaveAttribute("aria-valuenow", "5");
+    await expect(duration).toHaveAttribute("aria-valuenow", "1");
     await duration.getByText("90", { exact: true }).click();
     await expect(duration).toHaveAttribute("aria-valuenow", "90");
     await page.setViewportSize({ width: 1280, height: 900 });
