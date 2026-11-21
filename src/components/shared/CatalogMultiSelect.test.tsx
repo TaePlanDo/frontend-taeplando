@@ -1,11 +1,17 @@
 import { useState } from "react";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { CatalogMultiSelect } from "./CatalogMultiSelect";
 
 describe("CatalogMultiSelect", () => {
-  it("keeps the popup open, marks selections and permits deselecting every item", () => {
+  it("keeps the list open, marks selections and permits deselecting every item", async () => {
     function Form() {
       const [selected, setSelected] = useState<string[]>([]);
       return (
@@ -38,8 +44,13 @@ describe("CatalogMultiSelect", () => {
     expect(
       within(list).getByRole("option", { name: "Tarcze" }),
     ).toHaveAttribute("aria-selected", "false");
-    fireEvent.keyDown(list, { key: "End" });
-    fireEvent.keyDown(list, { key: " " });
+    fireEvent.keyDown(within(list).getByRole("option", { name: "Tarcze" }), {
+      key: "End",
+    });
+    await waitFor(() =>
+      expect(within(list).getByRole("option", { name: "Piłka" })).toHaveFocus(),
+    );
+    fireEvent.click(within(list).getByRole("option", { name: "Piłka" }));
     expect(within(list).getByRole("option", { name: "Piłka" })).toHaveAttribute(
       "aria-selected",
       "false",
@@ -48,6 +59,33 @@ describe("CatalogMultiSelect", () => {
     fireEvent.keyDown(list, { key: "Escape" });
     expect(screen.queryByRole("listbox")).toBeNull();
   });
+  it.each([
+    { disabled: true },
+    { isLoading: true },
+    { unavailableMessage: "Brak połączenia" },
+    { items: [] },
+  ])(
+    "does not reopen after the catalog becomes available again: %j",
+    (unavailable) => {
+      const props = {
+        label: "Sprzęt",
+        items: [{ id: "1", name: "Tarcze" }],
+        selectedIds: [],
+        onSelectedIdsChange: vi.fn(),
+      };
+      const { rerender } = render(<CatalogMultiSelect {...props} />);
+      fireEvent.click(screen.getByRole("combobox", { name: "Sprzęt" }));
+      expect(screen.getByRole("listbox")).toBeVisible();
+      rerender(<CatalogMultiSelect {...props} {...unavailable} />);
+      expect(screen.queryByRole("listbox")).toBeNull();
+      rerender(<CatalogMultiSelect {...props} />);
+      expect(screen.queryByRole("listbox")).toBeNull();
+      expect(screen.getByRole("combobox", { name: "Sprzęt" })).toHaveAttribute(
+        "aria-expanded",
+        "false",
+      );
+    },
+  );
   it("disables selection and removal while disabled", () => {
     const onChange = vi.fn();
     render(

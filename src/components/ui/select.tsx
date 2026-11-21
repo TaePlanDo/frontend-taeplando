@@ -2,10 +2,8 @@ import * as React from "react";
 import { cn } from "cn";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Select as SelectPrimitive } from "radix-ui";
-import {
-  DROPDOWN_COLLISION_PADDING,
-  DROPDOWN_SPACING,
-} from "@/lib/constants/dropdown";
+import { DROPDOWN_SPACING } from "@/lib/constants/dropdown";
+import { useDropdownCollisionPadding } from "@/hooks/useDropdownCollisionPadding";
 
 function Select({
   ...props
@@ -57,9 +55,10 @@ function SelectContent({
   position = "popper",
   align = "center",
   sideOffset = DROPDOWN_SPACING,
-  collisionPadding = DROPDOWN_COLLISION_PADDING,
+  collisionPadding,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
+  const defaultCollisionPadding = useDropdownCollisionPadding();
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
@@ -71,7 +70,7 @@ function SelectContent({
         position={position}
         align={align}
         sideOffset={sideOffset}
-        collisionPadding={collisionPadding}
+        collisionPadding={collisionPadding ?? defaultCollisionPadding}
         {...props}
       >
         <SelectScrollUpButton />

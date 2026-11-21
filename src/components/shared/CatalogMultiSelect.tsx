@@ -1,12 +1,10 @@
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "cn";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Popover, ToggleGroup } from "radix-ui";
+
+import { DROPDOWN_SPACING } from "@/lib/constants/dropdown";
+import { useDropdownCollisionPadding } from "@/hooks/useDropdownCollisionPadding";
 
 import { SelectedAttributeBadges } from "./SelectedAttributeBadges";
 import { InputErrorMessage } from "./InputErrorMessage";
@@ -44,19 +42,15 @@ export function CatalogMultiSelect({
   error,
 }: CatalogMultiSelectProps) {
   const id = useId();
+  const collisionPadding = useDropdownCollisionPadding();
   const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
   const [keyboardNavigation, setKeyboardNavigation] = useState(false);
   const list = useRef<HTMLDivElement>(null);
-  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const unavailable = disabled || isLoading || Boolean(unavailableMessage);
+  const unavailable = Boolean(disabled || isLoading || unavailableMessage);
   const canOpen = !unavailable && items.length > 0;
-  const toggle = (id: string) =>
-    onSelectedIdsChange(
-      selectedIds.includes(id)
-        ? selectedIds.filter((selectedId) => selectedId !== id)
-        : [...selectedIds, id],
-    );
+  useEffect(() => {
+    if (!canOpen) setOpen(false);
+  }, [canOpen]);
   const selected = selectedIds.map(
     (id) =>
       items.find((item) => String(item.id) === id) ?? {
@@ -64,22 +58,15 @@ export function CatalogMultiSelect({
         name: `Niedostępny element (${id})`,
       },
   );
-  function handleOpenChange(next: boolean) {
-    setOpen(next);
-    setKeyboardNavigation(false);
-    if (next)
-      setActiveIndex(
-        Math.max(
-          0,
-          items.findIndex((item) => selectedIds.includes(String(item.id))),
-        ),
-      );
-  }
 
   return (
-    <div className={className}>
+    <div
+      className={className}
+      onPointerDownCapture={() => setKeyboardNavigation(false)}
+      onKeyDownCapture={() => setKeyboardNavigation(true)}
+    >
       <div className="flex flex-col gap-1">
-        <Dialog open={open && canOpen} onOpenChange={handleOpenChange}>
+        <Popover.Root modal open={open && canOpen} onOpenChange={setOpen}>
           <div className="flex flex-col gap-1">
             <label
               htmlFor={id}
@@ -90,7 +77,7 @@ export function CatalogMultiSelect({
             >
               {label}
             </label>
-            <DialogTrigger asChild>
+            <Popover.Trigger asChild>
               <button
                 id={id}
                 type="button"
@@ -104,8 +91,7 @@ export function CatalogMultiSelect({
                 onKeyDown={(event) => {
                   if (event.key === "ArrowDown") {
                     event.preventDefault();
-                    handleOpenChange(true);
-                    setKeyboardNavigation(true);
+                    setOpen(true);
                   }
                 }}
                 className="flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 text-left text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
@@ -126,110 +112,91 @@ export function CatalogMultiSelect({
                   aria-hidden
                 />
               </button>
-            </DialogTrigger>
+            </Popover.Trigger>
           </div>
-          <DialogContent
-            id={`${id}-popup`}
-            aria-describedby={undefined}
-            showCloseButton={false}
-            onOpenAutoFocus={(event) => {
-              event.preventDefault();
-              list.current?.focus({ preventScroll: true });
-              if (list.current)
-                list.current.scrollTop =
-                  optionRefs.current[activeIndex]?.offsetTop ?? 0;
-            }}
-            className="dropdown-panel-height !top-[calc(50%+2rem)] !flex !w-[calc(100vw-2rem)] !max-w-96 !flex-col !gap-0 !p-1 overflow-hidden rounded-lg border-border bg-popover text-popover-foreground shadow-xl sm:!max-w-lg"
-          >
-            <DialogTitle className="sr-only">{label}</DialogTitle>
-            <div
-              ref={list}
-              id={`${id}-options`}
-              role="listbox"
-              aria-label={label}
-              aria-multiselectable="true"
-              aria-activedescendant={
-                items[activeIndex] ? `${id}-option-${activeIndex}` : undefined
-              }
-              tabIndex={0}
-              className="relative min-h-0 overflow-y-auto overscroll-contain outline-none"
-              onKeyDown={(event) => {
-                let next = activeIndex;
-                if (event.key === "ArrowDown")
-                  next = (activeIndex + 1) % items.length;
-                else if (event.key === "ArrowUp")
-                  next = (activeIndex - 1 + items.length) % items.length;
-                else if (event.key === "Home") next = 0;
-                else if (event.key === "End") next = items.length - 1;
-                else if (event.key === " " || event.key === "Enter") {
-                  event.preventDefault();
-                  setKeyboardNavigation(true);
-                  const item = items[activeIndex];
-                  if (item) toggle(String(item.id));
-                  return;
-                } else return;
+          <Popover.Portal>
+            <Popover.Content
+              id={`${id}-popup`}
+              aria-describedby={undefined}
+              align="start"
+              sideOffset={DROPDOWN_SPACING}
+              collisionPadding={collisionPadding}
+              onOpenAutoFocus={(event) => {
                 event.preventDefault();
-                setKeyboardNavigation(true);
-                setActiveIndex(next);
-                optionRefs.current[next]?.scrollIntoView({
-                  block: "nearest",
-                });
+                const option =
+                  list.current?.querySelector<HTMLButtonElement>(
+                    '[aria-selected="true"]',
+                  ) ??
+                  list.current?.querySelector<HTMLButtonElement>(
+                    '[role="option"]',
+                  );
+                option?.focus({ preventScroll: true });
+                if (list.current && option)
+                  list.current.scrollTop = option.offsetTop;
               }}
+              className="dropdown-panel-height z-50 flex w-(--radix-popover-trigger-width) max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md outline-none [--dropdown-available-height:var(--radix-popover-content-available-height)]"
             >
-              {items.map((item, index) => {
-                const selected = selectedIds.includes(String(item.id));
-                const previous = items[index - 1];
-                const next = items[index + 1];
-                const joinsPrevious =
-                  previous && selectedIds.includes(String(previous.id));
-                const joinsNext = next && selectedIds.includes(String(next.id));
-                return (
-                  <button
-                    ref={(element) => {
-                      optionRefs.current[index] = element;
-                    }}
-                    key={item.id}
-                    id={`${id}-option-${index}`}
-                    type="button"
-                    role="option"
-                    aria-selected={selected}
-                    tabIndex={-1}
-                    onPointerDown={() => setKeyboardNavigation(false)}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => {
-                      setKeyboardNavigation(false);
-                      setActiveIndex(index);
-                      toggle(String(item.id));
-                      list.current?.focus({ preventScroll: true });
-                    }}
-                    className={cn(
-                      "block min-h-8 w-full rounded-md border bg-linear-to-r from-transparent to-transparent px-2 py-1 text-left text-sm break-words outline-none transition-[border-color,--tw-gradient-from,--tw-gradient-to] duration-150 ease-out motion-reduce:transition-none",
-                      selected
-                        ? "rounded-none border-x-primary border-y-transparent from-primary/25 to-primary-foreground/20"
-                        : "border-transparent",
-                      selected &&
-                        !joinsPrevious &&
-                        "rounded-t-md border-t-primary",
-                      selected && !joinsNext && "rounded-b-md border-b-primary",
-                      selected && joinsPrevious && "border-t-primary/20",
-                      keyboardNavigation &&
-                        index === activeIndex &&
-                        "outline-solid outline-1 -outline-offset-4 outline-primary",
-                    )}
-                  >
-                    {item.name}
-                  </button>
-                );
-              })}
-            </div>
-          </DialogContent>
-        </Dialog>
+              <Popover.Title className="sr-only">{label}</Popover.Title>
+              <ToggleGroup.Root
+                ref={list}
+                type="multiple"
+                value={selectedIds}
+                onValueChange={onSelectedIdsChange}
+                disabled={!canOpen}
+                id={`${id}-options`}
+                role="listbox"
+                aria-label={label}
+                aria-multiselectable="true"
+                orientation="vertical"
+                loop
+                className="relative min-h-0 overflow-y-auto overscroll-contain outline-none"
+              >
+                {items.map((item, index) => {
+                  const selected = selectedIds.includes(String(item.id));
+                  const previous = items[index - 1];
+                  const next = items[index + 1];
+                  const joinsPrevious =
+                    previous && selectedIds.includes(String(previous.id));
+                  const joinsNext =
+                    next && selectedIds.includes(String(next.id));
+                  return (
+                    <ToggleGroup.Item
+                      key={item.id}
+                      value={String(item.id)}
+                      type="button"
+                      role="option"
+                      aria-selected={selected}
+                      aria-pressed={undefined}
+                      className={cn(
+                        "block min-h-8 w-full rounded-md border bg-linear-to-r from-transparent to-transparent px-2 py-1 text-left text-sm break-words outline-none transition-[border-color,--tw-gradient-from,--tw-gradient-to] duration-150 ease-out motion-reduce:transition-none",
+                        selected
+                          ? "rounded-none border-x-primary border-y-transparent from-primary/25 to-primary-foreground/20"
+                          : "border-transparent",
+                        selected &&
+                          !joinsPrevious &&
+                          "rounded-t-md border-t-primary",
+                        selected &&
+                          !joinsNext &&
+                          "rounded-b-md border-b-primary",
+                        selected && joinsPrevious && "border-t-primary/20",
+                        keyboardNavigation &&
+                          "focus:outline-solid focus:outline-1 focus:-outline-offset-4 focus:outline-primary",
+                      )}
+                    >
+                      {item.name}
+                    </ToggleGroup.Item>
+                  );
+                })}
+              </ToggleGroup.Root>
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
         {error ? (
           <InputErrorMessage id={`${id}-error`} message={error} />
         ) : null}
         <SelectedAttributeBadges
           items={selected}
-          disabled={disabled || isLoading || Boolean(unavailableMessage)}
+          disabled={unavailable}
           onRemove={(id) =>
             onSelectedIdsChange(
               selectedIds.filter((selectedId) => selectedId !== String(id)),

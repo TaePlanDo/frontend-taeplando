@@ -8,7 +8,7 @@ export function PlanNewPage() {
 
   return (
     <div className="relative isolate flex flex-1 overflow-hidden">
-      <div className="flex min-w-0 flex-1 items-center justify-center px-4 py-8 sm:px-6 lg:p-6">
+      <div className="flex min-w-0 flex-1 items-start justify-center px-4 py-8 sm:px-6 lg:p-6">
         <section className="w-full max-w-xl">
           <h1 className="text-center text-3xl font-bold sm:text-4xl lg:text-left lg:text-5xl lg:text-primary">
             Wybór <span className="text-primary">parametrów</span>
