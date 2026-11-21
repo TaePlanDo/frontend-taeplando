@@ -1,12 +1,15 @@
+import { LogOut } from "lucide-react";
 import { useState } from "react";
 
 import { ChangeUsernameForm } from "@/components/account/ChangeUsernameForm";
 import { ChangePasswordForm } from "@/components/account/ChangePasswordForm";
 import { PersonalDataItem } from "@/components/account/PersonalDataItem";
-import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/auth/useAuth";
+
+const changeButtonClass =
+  "h-7 rounded-full border-primary bg-transparent px-4 text-xs hover:bg-primary/10 dark:border-primary dark:bg-transparent dark:hover:bg-primary/10";
 
 export function AccountPage() {
   const { user, logout, isLoggingOut } = useAuth();
@@ -16,67 +19,90 @@ export function AccountPage() {
   const isLocal = user?.auth_method === "LOCAL";
 
   return (
-    <div className="flex min-w-0 flex-1 items-center justify-center px-4 py-8 sm:px-6">
+    <div className="flex min-w-0 flex-1 items-center justify-center px-3 py-6 sm:px-6">
       <section
         aria-labelledby="account-title"
-        className="w-full min-w-0 max-w-2xl rounded-2xl border border-border bg-card p-4 text-center sm:p-8"
+        className="w-full min-w-0 max-w-md rounded-lg border border-foreground/20 bg-card px-5 sm:px-6"
       >
-        <div className="mx-auto flex w-full min-w-0 max-w-md flex-col gap-6">
-          <h1 id="account-title" className="text-2xl font-semibold">
+        <header className="border-b border-foreground/20 py-5">
+          <h1 id="account-title" className="text-xl font-semibold">
             Dane użytkownika
           </h1>
-          <Separator className="w-full" />
-          <dl className="flex min-w-0 flex-col gap-6">
-            <PersonalDataItem
-              title="Nazwa użytkownika"
-              value={user?.full_name ?? ""}
-            />
-            <PersonalDataItem title="Email" value={user?.email ?? ""} />
-          </dl>
-          <Separator className="w-full" />
+          <p className="mt-1 text-sm text-muted-foreground">
+            Zarządzaj swoim kontem
+          </p>
+        </header>
+        <dl className="min-w-0">
+          <PersonalDataItem
+            title="Nazwa użytkownika"
+            value={user?.full_name ?? ""}
+            action={
+              isLocal ? (
+                <CustomizedDialog
+                  trigger={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      aria-label="Zmień nazwę"
+                      className={changeButtonClass}
+                    >
+                      Zmień
+                    </Button>
+                  }
+                  title="Zmień nazwę użytkownika"
+                  description="Podaj nową nazwę użytkownika."
+                  open={isChangeUsernameOpen}
+                  onOpenChange={setChangeUsernameOpen}
+                >
+                  <ChangeUsernameForm
+                    onClose={() => setChangeUsernameOpen(false)}
+                  />
+                </CustomizedDialog>
+              ) : null
+            }
+          />
+          <PersonalDataItem title="Email" value={user?.email ?? ""} />
           {isLocal ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <CustomizedDialog
-                trigger={
-                  <CustomizedButton className="w-full">
-                    Zmień nazwę
-                  </CustomizedButton>
-                }
-                title="Zmień nazwę użytkownika"
-                description="Podaj nową nazwę użytkownika."
-                open={isChangeUsernameOpen}
-                onOpenChange={setChangeUsernameOpen}
-              >
-                <ChangeUsernameForm
-                  onClose={() => setChangeUsernameOpen(false)}
-                />
-              </CustomizedDialog>
-              <CustomizedDialog
-                trigger={
-                  <CustomizedButton className="w-full">
-                    Zmień hasło
-                  </CustomizedButton>
-                }
-                title="Zmień hasło"
-                description="Podaj nowe hasło."
-                open={isChangePasswordOpen}
-                onOpenChange={setChangePasswordOpen}
-              >
-                <ChangePasswordForm
-                  onClose={() => setChangePasswordOpen(false)}
-                />
-              </CustomizedDialog>
-            </div>
+            <PersonalDataItem
+              title="Hasło"
+              value="••••••••"
+              action={
+                <CustomizedDialog
+                  trigger={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      aria-label="Zmień hasło"
+                      className={changeButtonClass}
+                    >
+                      Zmień
+                    </Button>
+                  }
+                  title="Zmień hasło"
+                  description="Podaj nowe hasło."
+                  open={isChangePasswordOpen}
+                  onOpenChange={setChangePasswordOpen}
+                >
+                  <ChangePasswordForm
+                    onClose={() => setChangePasswordOpen(false)}
+                  />
+                </CustomizedDialog>
+              }
+            />
           ) : null}
-          <CustomizedButton
-            variant="danger"
-            className="mx-auto w-full max-w-64"
+        </dl>
+        <footer className="flex justify-center py-5">
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-full border-primary bg-transparent px-4 text-primary hover:bg-primary/10 hover:text-primary dark:border-primary dark:bg-transparent dark:hover:bg-primary/10"
             onClick={() => void logout()}
             disabled={isLoggingOut}
           >
+            <LogOut aria-hidden />
             Wyloguj się
-          </CustomizedButton>
-        </div>
+          </Button>
+        </footer>
       </section>
     </div>
   );
