@@ -50,7 +50,14 @@ export const groupDetailsSchema = z
     minutes: integerString({
       required: "Podaj liczbę minut",
       invalid: "Minuty muszą być liczbą całkowitą",
-    }).pipe(z.number().max(59, "Minuty muszą być w zakresie 0-59")),
+    }).pipe(
+      z
+        .number()
+        .max(
+          GROUP_LIMITS.MAX_MINUTES,
+          `Minuty muszą być w zakresie 0-${GROUP_LIMITS.MAX_MINUTES}`,
+        ),
+    ),
   })
   .refine((d) => d.maxAge >= d.minAge, {
     message: "Maksymalny wiek nie może być mniejszy od minimalnego",

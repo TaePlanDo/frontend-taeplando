@@ -31,12 +31,9 @@ export class GroupsPage {
     this.groupNameInput = this.groupDialog.getByRole("textbox", {
       name: "Nazwa Grupy",
     });
-    this.minAgeInput = this.groupDialog.getByRole("spinbutton", {
-      name: "Minimalny",
-    });
-    this.maxAgeInput = this.groupDialog.getByRole("spinbutton", {
-      name: "Maksymalny",
-    });
+    const ageSliders = this.groupDialog.getByRole("slider", { name: "Wiek" });
+    this.minAgeInput = ageSliders.nth(0);
+    this.maxAgeInput = ageSliders.nth(1);
     this.hoursInput = this.groupDialog.getByRole("spinbutton", {
       name: "Godziny",
     });
@@ -181,9 +178,29 @@ export class GroupsPage {
 
   private async fillGroupForm(values: GroupFormValues): Promise<void> {
     await this.groupNameInput.fill(values.name);
-    await this.minAgeInput.fill(String(values.minAge));
-    await this.maxAgeInput.fill(String(values.maxAge));
+    if (
+      values.minAge >
+      Number(await this.maxAgeInput.getAttribute("aria-valuenow"))
+    ) {
+      await this.setSliderValue(this.maxAgeInput, values.maxAge);
+      await this.setSliderValue(this.minAgeInput, values.minAge);
+    } else {
+      await this.setSliderValue(this.minAgeInput, values.minAge);
+      await this.setSliderValue(this.maxAgeInput, values.maxAge);
+    }
     await this.hoursInput.fill(String(values.hours));
     await this.minutesInput.fill(String(values.minutes));
+  }
+
+  private async setSliderValue(slider: Locator, target: number): Promise<void> {
+    const difference =
+      target - Number(await slider.getAttribute("aria-valuenow"));
+    for (let i = 0; i < Math.floor(Math.abs(difference) / 10); i++) {
+      await slider.press(difference > 0 ? "PageUp" : "PageDown");
+    }
+    for (let i = 0; i < Math.abs(difference) % 10; i++) {
+      await slider.press(difference > 0 ? "ArrowRight" : "ArrowLeft");
+    }
+    await expect(slider).toHaveAttribute("aria-valuenow", String(target));
   }
 }

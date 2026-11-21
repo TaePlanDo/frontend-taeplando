@@ -225,8 +225,9 @@ describe("GroupListPage", () => {
 
     expect(screen.getByText("Edytuj Grupę treningową")).toBeTruthy();
     expect(input("Nazwa Grupy").value).toBe("Seniorzy");
-    expect(input("Minimalny").value).toBe("60");
-    expect(input("Maksymalny").value).toBe("80");
+    const sliders = screen.getAllByRole("slider", { name: "Wiek" });
+    expect(sliders[0]).toHaveAttribute("aria-valuenow", "60");
+    expect(sliders[1]).toHaveAttribute("aria-valuenow", "80");
     expect(input("Godziny").value).toBe("0");
     expect(input("Minuty").value).toBe("45");
     expect(screen.getByRole("button", { name: "Zapisz zmiany" })).toBeTruthy();

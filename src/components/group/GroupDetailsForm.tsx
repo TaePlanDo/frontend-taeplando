@@ -1,11 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInputWithController } from "@/components/shared/CustomizedInputWithController";
 import { CustomizedPairInputWithControllers } from "@/components/shared/CustomizedPairInputWithControllers";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
+import { DualRangeField } from "@/components/shared/DualRangeField";
+import { NumberCarouselField } from "@/components/shared/NumberCarouselField";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useCreateGroup } from "@/hooks/groups/useCreateGroup";
 import { useUpdateGroup } from "@/hooks/groups/useUpdateGroup";
 import { GROUP_LIMITS } from "@/lib/constants/group";
@@ -27,16 +30,21 @@ export function GroupDetailsForm({ group, onClose }: GroupDetailsFormProps) {
   const { createGroup, isCreating, error: createError } = useCreateGroup();
   const { updateGroup, isUpdating, error: updateError } = useUpdateGroup();
 
-  const { control, handleSubmit } = useForm<
-    GroupDetailsFormValues,
-    unknown,
-    GroupDetailsOutput
-  >({
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<GroupDetailsFormValues, unknown, GroupDetailsOutput>({
     resolver: zodResolver(groupDetailsSchema),
     defaultValues: toFormValues(group),
   });
 
   const isSubmitting = isCreating || isUpdating;
+  const isMobile = useIsMobile();
+  const values = watch();
+  const ageError = errors.minAge?.message ?? errors.maxAge?.message;
   const submitError = isEdit ? updateError : createError;
 
   const onSubmit: SubmitHandler<GroupDetailsOutput> = async (values) => {
@@ -58,7 +66,7 @@ export function GroupDetailsForm({ group, onClose }: GroupDetailsFormProps) {
 
   return (
     <form
-      className="flex flex-col gap-4"
+      className="flex min-w-0 flex-col gap-4"
       onSubmit={handleSubmit(onSubmit)}
       noValidate
     >
@@ -71,45 +79,76 @@ export function GroupDetailsForm({ group, onClose }: GroupDetailsFormProps) {
         disabled={isSubmitting}
       />
 
-      <CustomizedPairInputWithControllers
-        title="Wiek"
-        control={control}
-        disabled={isSubmitting}
-        first={{
-          name: "minAge",
-          label: "Minimalny",
-          type: "number",
-          min: GROUP_LIMITS.MIN_AGE,
-          max: GROUP_LIMITS.MAX_AGE,
-        }}
-        second={{
-          name: "maxAge",
-          label: "Maksymalny",
-          type: "number",
-          min: GROUP_LIMITS.MIN_AGE,
-          max: GROUP_LIMITS.MAX_AGE,
-        }}
-      />
+      <div className="flex flex-col gap-1.5">
+        <DualRangeField
+          label="Wiek"
+          min={GROUP_LIMITS.MIN_AGE}
+          max={GROUP_LIMITS.MAX_AGE}
+          value={[Number(values.minAge), Number(values.maxAge)]}
+          onValueChange={([min, max]) => {
+            setValue("minAge", String(min), { shouldValidate: true });
+            setValue("maxAge", String(max), { shouldValidate: true });
+          }}
+          disabled={isSubmitting}
+        />
+        {ageError ? <InputErrorMessage message={ageError} /> : null}
+      </div>
 
-      <CustomizedPairInputWithControllers
-        title="Czas trwania"
-        control={control}
-        disabled={isSubmitting}
-        first={{
-          name: "hours",
-          label: "Godziny",
-          type: "number",
-          min: 0,
-          max: GROUP_LIMITS.MAX_HOURS,
-        }}
-        second={{
-          name: "minutes",
-          label: "Minuty",
-          type: "number",
-          min: 0,
-          max: 59,
-        }}
-      />
+      {isMobile ? (
+        <fieldset className="min-w-0 space-y-3" disabled={isSubmitting}>
+          <legend className="text-base">Czas trwania</legend>
+          {(
+            [
+              { name: "hours", label: "Godziny", max: GROUP_LIMITS.MAX_HOURS },
+              {
+                name: "minutes",
+                label: "Minuty",
+                max: GROUP_LIMITS.MAX_MINUTES,
+              },
+            ] as const
+          ).map(({ name, label, max }) => (
+            <Controller
+              key={name}
+              control={control}
+              name={name}
+              render={({ field, fieldState }) => (
+                <NumberCarouselField
+                  label={label}
+                  name={field.name}
+                  min={0}
+                  max={max}
+                  value={Number(field.value)}
+                  onValueChange={(value) => field.onChange(String(value))}
+                  onBlur={field.onBlur}
+                  inputRef={field.ref}
+                  disabled={isSubmitting}
+                  error={fieldState.error?.message}
+                />
+              )}
+            />
+          ))}
+        </fieldset>
+      ) : (
+        <CustomizedPairInputWithControllers
+          title="Czas trwania"
+          control={control}
+          disabled={isSubmitting}
+          first={{
+            name: "hours",
+            label: "Godziny",
+            type: "number",
+            min: 0,
+            max: GROUP_LIMITS.MAX_HOURS,
+          }}
+          second={{
+            name: "minutes",
+            label: "Minuty",
+            type: "number",
+            min: 0,
+            max: GROUP_LIMITS.MAX_MINUTES,
+          }}
+        />
+      )}
 
       {submitError ? (
         <InputErrorMessage message={submitError} className="mx-2" />

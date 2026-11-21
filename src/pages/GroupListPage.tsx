@@ -74,6 +74,7 @@ export function GroupListPage() {
           <CustomizedDialog
             open={dialogOpen}
             onOpenChange={setDialogOpen}
+            className="max-h-[calc(100dvh-2rem)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             title={
               editingGroup
                 ? "Edytuj Grupę treningową"
