@@ -14,6 +14,59 @@ const group = {
 };
 
 test.describe("plan generation form", () => {
+  for (const width of [390, 1280]) {
+    test(`keeps the multiselect separated and stable after pointer selections at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      const trainer = await createLocalTrainerAndLogin(page);
+      await createGroup(trainer, group);
+      await createEquipment(trainer, "Tarcza E2E");
+      await createEquipment(trainer, "Piłka E2E");
+      await new PlanNewPage(page).goto();
+
+      const trigger = page.getByRole("combobox", { name: "Sprzęt treningowy" });
+      const control = trigger.locator("..");
+      await trigger.click();
+      const popup = page.getByRole("dialog", { name: "Sprzęt treningowy" });
+      await expect(popup).toBeVisible();
+      await expect(popup).toBeInViewport({ ratio: 1 });
+      const expectGap = () =>
+        expect
+          .poll(async () => {
+            const [fieldBox, popupBox] = await Promise.all([
+              control.boundingBox(),
+              popup.boundingBox(),
+            ]);
+            if (!fieldBox || !popupBox) return Infinity;
+            const gap = Math.max(
+              fieldBox.y - popupBox.y - popupBox.height,
+              popupBox.y - fieldBox.y - fieldBox.height,
+            );
+            return Math.abs(gap - 16);
+          })
+          .toBeLessThan(1);
+      await expectGap();
+      const initialHeight = (await popup.boundingBox())!.height;
+
+      for (const name of ["Tarcza E2E", "Piłka E2E", "Tarcza E2E"]) {
+        const option = popup.getByRole("option", { name, exact: true });
+        await option.click();
+        await expect(option).toHaveCSS("outline-style", "none");
+        await expectGap();
+        await expect
+          .poll(async () =>
+            Math.abs((await popup.boundingBox())!.height - initialHeight),
+          )
+          .toBeLessThan(1);
+      }
+
+      await page.mouse.click(5, 500);
+      await expect(popup).not.toBeVisible();
+      await expect(trigger).toBeFocused();
+    });
+  }
+
   test("starts generation after filling all parameters", async ({ page }) => {
     seedSystemData();
     const trainer = await createLocalTrainerAndLogin(page);
