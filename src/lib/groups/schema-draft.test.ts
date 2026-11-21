@@ -131,6 +131,23 @@ describe("schema-draft", () => {
     expect(addSegment(next, catalog[0])).toEqual(next);
   });
 
+  it("adds a segment from the free pool without changing existing percentages", () => {
+    const start = draft([20, 40, 20]);
+    const next = addSegment(start, catalog[2]);
+    expect(percentages(next)).toEqual([20, 40, 20, 1]);
+    expect(sum(next)).toBe(81);
+    expect(start.map((item) => item.percentage)).toEqual([20, 40, 20]);
+  });
+
+  it("removes a segment from an incomplete draft without filling the free pool", () => {
+    const start = draft([20, 40, 20]);
+    const next = removeSegment(start, 1);
+    expect(percentages(next)).toEqual([20, 20]);
+    expect(sum(next)).toBe(40);
+    expect(next.map((item) => item.segmentId)).toEqual([0, 2]);
+    expect(start.map((item) => item.percentage)).toEqual([20, 40, 20]);
+  });
+
   it("removes a row by segment id and renormalizes to 100", () => {
     const start: SchemaDraftItem[] = [
       {

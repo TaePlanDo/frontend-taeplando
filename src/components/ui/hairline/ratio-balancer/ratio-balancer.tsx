@@ -77,8 +77,10 @@ export function RatioBalancer({
     React.useState<RatioSegment[]>(defaultSegments);
   const segments = controlledSegments ?? internalSegments;
 
-  const currentRatios = segments.map((segment) => segment.ratio);
-  const totalRatio = currentRatios.reduce((total, ratio) => total + ratio, 0);
+  const totalRatio = segments.reduce(
+    (total, segment) => total + segment.ratio,
+    0,
+  );
 
   const handleChange = React.useCallback(
     (nextRatios: number[]) => {
@@ -139,7 +141,6 @@ export function RatioBalancer({
         {segments.map((seg, i) => {
           const colorClass = COLORS[i % COLORS.length];
           const isLast = i === segments.length - 1;
-          const ratio = currentRatios[i] ?? seg.ratio;
 
           return (
             <React.Fragment key={seg.id}>
@@ -147,7 +148,7 @@ export function RatioBalancer({
               <div
                 ref={(el) => balancer.attachSegment(i, el)}
                 className={`relative flex min-w-[42px] flex-col justify-between overflow-hidden rounded-[10px] border px-2.5 py-1.5 transition-[flex-grow] will-change-[flex-grow] ${colorClass}`}
-                style={{ flexGrow: ratio }}
+                style={{ flexGrow: seg.ratio }}
               >
                 <div className="flex items-center justify-between">
                   <span className="truncate text-[11px] font-medium tracking-tight">
@@ -164,7 +165,7 @@ export function RatioBalancer({
                     }}
                     className="font-mono text-[13px] font-medium tabular-nums"
                   >
-                    {Math.round(ratio)}%
+                    {Math.round(seg.ratio)}%
                   </span>
                   <span
                     style={{
@@ -174,7 +175,7 @@ export function RatioBalancer({
                     className="font-mono text-[13px] font-medium tabular-nums"
                   >
                     <NumberRoll
-                      value={Math.round(ratio)}
+                      value={Math.round(seg.ratio)}
                       suffix="%"
                       duration={380}
                     />
@@ -219,10 +220,7 @@ export function RatioBalancer({
               >
                 <span>{seg.label}:</span>
                 <span className="font-semibold text-foreground">
-                  {Math.round(
-                    currentRatios[segments.indexOf(seg)] ?? seg.ratio,
-                  )}
-                  %
+                  {Math.round(seg.ratio)}%
                 </span>
               </span>
             ))}

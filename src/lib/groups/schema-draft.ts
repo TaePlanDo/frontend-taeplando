@@ -53,7 +53,7 @@ export function initDraftFromSchema(
   );
 }
 
-/** Append an unused catalog segment at 1%, taking that 1% from the largest row. */
+/** Use the free pool first; a fully allocated schema donates from its largest row. */
 export function addSegment(
   items: SchemaDraftItem[],
   segment: TrainingSegment,
@@ -62,15 +62,18 @@ export function addSegment(
     return items;
   }
 
+  const { MIN_PERCENTAGE, TOTAL_PERCENTAGE } = GROUP_SCHEMA_LIMITS;
+  const added: SchemaDraftItem = {
+    segmentId: segment.id,
+    segmentCode: segment.code,
+    segmentName: segment.name,
+    percentage: MIN_PERCENTAGE,
+  };
   if (items.length === 0) {
-    return [
-      {
-        segmentId: segment.id,
-        segmentCode: segment.code,
-        segmentName: segment.name,
-        percentage: 100,
-      },
-    ];
+    return [{ ...added, percentage: TOTAL_PERCENTAGE }];
+  }
+  if (getSchemaTotal(items) + added.percentage <= TOTAL_PERCENTAGE) {
+    return [...items, added];
   }
 
   const next = items.map((item) => ({ ...item }));
@@ -80,18 +83,12 @@ export function addSegment(
       biggest = i;
     }
   }
-  if (next[biggest].percentage <= 1) {
+  if (next[biggest].percentage < MIN_PERCENTAGE + added.percentage) {
     return items;
   }
 
-  next[biggest].percentage -= 1;
-  next.push({
-    segmentId: segment.id,
-    segmentCode: segment.code,
-    segmentName: segment.name,
-    percentage: 1,
-  });
-  return next;
+  next[biggest].percentage -= added.percentage;
+  return [...next, added];
 }
 
 export function removeSegment(
@@ -104,6 +101,9 @@ export function removeSegment(
   const next = items.filter((item) => item.segmentId !== segmentId);
   if (next.length === items.length) {
     return items;
+  }
+  if (getSchemaTotal(items) < GROUP_SCHEMA_LIMITS.TOTAL_PERCENTAGE) {
+    return next;
   }
   return withNormalizedPercentages(next);
 }

@@ -187,4 +187,56 @@ describe("GroupSchemaForm", () => {
     expect(decrease).toBeDisabled();
     expect(save).toBeDisabled();
   });
+
+  it("keeps free percentages unallocated when removing and re-adding a segment", async () => {
+    render(<GroupSchemaForm group={group} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("combobox", { name: "Dodaj segment" }));
+    fireEvent.click(await screen.findByRole("option", { name: "Rozgrzewka" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Zmniejsz udział: Część główna" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Usuń Rozgrzewka" }));
+
+    expect(screen.getByText("(98%)")).toBeTruthy();
+    expect(screen.getByLabelText("Łączny udział segmentów")).toHaveTextContent(
+      "Łącznie: 98% · Wolne: 2%",
+    );
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Dodaj segment" }));
+    fireEvent.click(await screen.findByRole("option", { name: "Rozgrzewka" }));
+    expect(screen.getByText("(98%)")).toBeTruthy();
+    expect(screen.getByText("(1%)")).toBeTruthy();
+    expect(screen.getByLabelText("Łączny udział segmentów")).toHaveTextContent(
+      "Łącznie: 99% · Wolne: 1%",
+    );
+    expect(
+      screen.getByRole("button", { name: "Zapisz schemat" }),
+    ).toBeDisabled();
+  });
+
+  it("preserves an incomplete total when adjusting the desktop divider", async () => {
+    render(<GroupSchemaForm group={group} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("combobox", { name: "Dodaj segment" }));
+    fireEvent.click(await screen.findByRole("option", { name: "Rozgrzewka" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Zmniejsz udział: Część główna" }),
+    );
+
+    fireEvent.keyDown(
+      screen.getByRole("separator", {
+        name: "Zmień podział między Część główna a Rozgrzewka",
+      }),
+      { key: "ArrowLeft" },
+    );
+
+    expect(screen.getByText("(97%)")).toBeTruthy();
+    expect(screen.getByText("(2%)")).toBeTruthy();
+    expect(screen.getByText("SUMA 99%")).toBeTruthy();
+    expect(screen.getByLabelText("Łączny udział segmentów")).toHaveTextContent(
+      "Łącznie: 99% · Wolne: 1%",
+    );
+    expect(
+      screen.getByRole("button", { name: "Zapisz schemat" }),
+    ).toBeDisabled();
+  });
 });
