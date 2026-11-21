@@ -94,7 +94,7 @@ describe("GroupDetailsForm", () => {
     expect(input("Nazwa Grupy").placeholder).toBe("Grupa wakacyjna");
     expect(input("Minimalny").value).toBe("");
     expect(input("Maksymalny").value).toBe("");
-    expect(input("Godziny").value).toBe("0");
+    expect(input("Godziny").value).toBe("1");
     expect(input("Minuty").value).toBe("0");
     expect(screen.getByText("Wiek")).toBeTruthy();
     expect(screen.getByText("Czas trwania")).toBeTruthy();

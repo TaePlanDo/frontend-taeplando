@@ -27,12 +27,14 @@ import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { useTrainingSegments } from "@/hooks/groups/useTrainingSegments";
 import { useUpdateGroupSchema } from "@/hooks/groups/useUpdateGroupSchema";
+import { GROUP_SCHEMA_LIMITS } from "@/lib/constants/group";
 import {
   addSegment,
   applyRatios,
   canSaveSchema,
   initDraftFromSchema,
   removeSegment,
+  setSegmentPercentage,
   toSchemaWritePayload,
   type SchemaDraftItem,
 } from "@/lib/groups/schema-draft";
@@ -171,20 +173,22 @@ function GroupSchemaEditor({
       </p>
 
       {items.length > 0 ? (
-        <RatioBalancer
-          className="max-w-none"
-          label="Schemat treningu"
-          segments={ratioSegments}
-          minRatio={1}
-          showLegend={false}
-          disabled={isUpdating}
-          onValueCommit={(ratios) =>
-            setItems((current) => applyRatios(current, ratios))
-          }
-        />
+        <div className="hidden sm:block">
+          <RatioBalancer
+            className="max-w-none"
+            label="Schemat treningu"
+            segments={ratioSegments}
+            minRatio={GROUP_SCHEMA_LIMITS.MIN_PERCENTAGE}
+            showLegend={false}
+            disabled={isUpdating}
+            onValueCommit={(ratios) =>
+              setItems((current) => applyRatios(current, ratios))
+            }
+          />
+        </div>
       ) : null}
 
-      {items.length > 1 ? (
+      {items.length > 0 ? (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -194,8 +198,9 @@ function GroupSchemaEditor({
             items={items.map((item) => item.segmentCode)}
             strategy={verticalListSortingStrategy}
           >
+            <h3 className="font-semibold sm:hidden">Segmenty treningu</h3>
             <ul
-              className="flex flex-col gap-1"
+              className={`flex flex-col gap-3 sm:gap-1 ${items.length === 1 ? "sm:hidden" : ""}`}
               aria-label="Kolejność segmentów"
             >
               {items.map((item) => (
@@ -204,6 +209,15 @@ function GroupSchemaEditor({
                   item={item}
                   canRemove={items.length > 1}
                   disabled={isUpdating}
+                  maxPercentage={
+                    GROUP_SCHEMA_LIMITS.TOTAL_PERCENTAGE -
+                    (items.length - 1) * GROUP_SCHEMA_LIMITS.MIN_PERCENTAGE
+                  }
+                  onPercentageChange={(percentage) =>
+                    setItems((current) =>
+                      setSegmentPercentage(current, item.segmentId, percentage),
+                    )
+                  }
                   onRemove={() =>
                     setItems((current) =>
                       removeSegment(current, item.segmentId),

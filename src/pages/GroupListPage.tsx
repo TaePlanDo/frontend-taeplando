@@ -96,6 +96,7 @@ export function GroupListPage() {
             />
           </CustomizedDialog>
           <CustomizedDialog
+            className="w-[calc(100%-2rem)] max-h-[calc(100dvh-2rem)] overflow-y-auto [overflow-wrap:anywhere] sm:max-h-none sm:max-w-190 sm:overflow-visible sm:[overflow-wrap:normal]"
             title={
               schemaGroup ? `Schemat: ${schemaGroup.name}` : "Schemat grupy"
             }

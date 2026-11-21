@@ -1,4 +1,5 @@
 import { normalizeRatios } from "@/components/ui/hairline/ratio-balancer/use-ratio-balancer";
+import { GROUP_SCHEMA_LIMITS } from "@/lib/constants/group";
 import type { GroupSchemaItem, GroupSchemaWrite } from "@/types/group";
 import type { TrainingSegment } from "@/types/training-segment";
 
@@ -118,6 +119,43 @@ export function applyRatios(
     ...item,
     percentage: ratios[index]!,
   }));
+}
+
+/** Keep the total at 100%, taking increases from the largest other segments. */
+export function setSegmentPercentage(
+  items: SchemaDraftItem[],
+  segmentId: number,
+  percentage: number,
+): SchemaDraftItem[] {
+  if (items.length < 2 || !Number.isFinite(percentage)) return items;
+  const target = items.find((item) => item.segmentId === segmentId);
+  if (!target) return items;
+
+  const { MIN_PERCENTAGE, TOTAL_PERCENTAGE } = GROUP_SCHEMA_LIMITS;
+  const bounded = Math.max(
+    MIN_PERCENTAGE,
+    Math.min(
+      TOTAL_PERCENTAGE - (items.length - 1) * MIN_PERCENTAGE,
+      Math.round(percentage),
+    ),
+  );
+  let difference = bounded - target.percentage;
+  if (difference === 0) return items;
+
+  const next = items.map((item) => ({
+    ...item,
+    percentage: item.segmentId === segmentId ? bounded : item.percentage,
+  }));
+  const others = next
+    .filter((item) => item.segmentId !== segmentId)
+    .sort((a, b) => b.percentage - a.percentage);
+  for (const item of others) {
+    const transfer = Math.min(difference, item.percentage - MIN_PERCENTAGE);
+    item.percentage -= transfer;
+    difference -= transfer;
+    if (difference === 0) break;
+  }
+  return next;
 }
 
 export function canSaveSchema(items: SchemaDraftItem[]): boolean {

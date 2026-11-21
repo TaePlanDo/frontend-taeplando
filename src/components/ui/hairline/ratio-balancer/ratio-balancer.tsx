@@ -22,6 +22,7 @@
  * ───────────────────────────────────────────────────────── */
 
 import * as React from "react";
+import { cn } from "cn";
 import { NumberRoll } from "./number-roll";
 import {
   INTERACTION_FOCUS,
@@ -121,7 +122,10 @@ export function RatioBalancer({
       {...props}
       role="region"
       aria-label={label ?? "Podział udziałów"}
-      className={`relative flex w-full max-w-xl select-none flex-col text-foreground ${className}`}
+      className={cn(
+        "relative flex w-full max-w-xl select-none flex-col text-foreground",
+        className,
+      )}
     >
       {/* Label and Total */}
       {label && (

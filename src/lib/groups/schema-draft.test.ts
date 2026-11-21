@@ -5,6 +5,7 @@ import {
   canSaveSchema,
   initDraftFromSchema,
   removeSegment,
+  setSegmentPercentage,
   toSchemaWritePayload,
   type SchemaDraftItem,
 } from "./schema-draft";
@@ -24,6 +25,53 @@ function sum(items: SchemaDraftItem[]) {
 }
 
 describe("schema-draft", () => {
+  it("redistributes a segment increase without changing order or the source", () => {
+    const start = initDraftFromSchema([], catalog);
+    const before = structuredClone(start);
+    const next = setSegmentPercentage(start, catalog[0].id, 98);
+
+    expect(percentages(next)).toEqual([98, 1, 1]);
+    expect(canSaveSchema(next)).toBe(true);
+    expect(next.map((item) => item.segmentId)).toEqual(
+      start.map((item) => item.segmentId),
+    );
+    expect(start).toEqual(before);
+  });
+
+  it("keeps every segment at least 1% and the sum at 100 for all slider values", () => {
+    for (let count = 2; count <= 6; count++) {
+      const segments = Array.from({ length: count }, (_, index) => ({
+        id: index,
+        code: `SEGMENT_${index}`,
+        name: `Segment ${index}`,
+      }));
+      let items = initDraftFromSchema([], segments);
+      for (const segment of segments) {
+        for (const requested of [1, 15, 50, 99, 100, 20.5, -1]) {
+          items = setSegmentPercentage(items, segment.id, requested);
+          expect(canSaveSchema(items)).toBe(true);
+          expect(items.every((item) => Number.isInteger(item.percentage))).toBe(
+            true,
+          );
+          expect(
+            items.find((item) => item.segmentId === segment.id)?.percentage,
+          ).toBe(
+            Math.max(1, Math.min(100 - (count - 1), Math.round(requested))),
+          );
+        }
+      }
+    }
+  });
+
+  it("keeps a single segment at 100% and ignores invalid edits", () => {
+    const single = initDraftFromSchema([], [catalog[0]]);
+    expect(setSegmentPercentage(single, catalog[0].id, 10)).toBe(single);
+    const items = initDraftFromSchema([], catalog);
+    expect(setSegmentPercentage(items, -1, 10)).toBe(items);
+    expect(setSegmentPercentage(items, catalog[0].id, NaN)).toBe(items);
+    expect(setSegmentPercentage(items, catalog[0].id, Infinity)).toBe(items);
+  });
+
   it("equal-splits an empty schema across the catalog", () => {
     const items = initDraftFromSchema([], catalog);
     expect(items).toHaveLength(3);

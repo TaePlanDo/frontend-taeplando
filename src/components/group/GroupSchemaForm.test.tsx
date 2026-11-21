@@ -114,4 +114,30 @@ describe("GroupSchemaForm", () => {
     expect(toast.success).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
   });
+
+  it("saves exact percentages changed through a segment slider", async () => {
+    updateGroupSchema.mockResolvedValue(undefined);
+    render(<GroupSchemaForm group={group} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("combobox", { name: "Dodaj segment" }));
+    fireEvent.click(await screen.findByRole("option", { name: "Rozgrzewka" }));
+
+    fireEvent.keyDown(
+      screen.getByRole("slider", { name: "Udział: Rozgrzewka" }),
+      {
+        key: "ArrowRight",
+      },
+    );
+    expect(screen.getByText("(2%)")).toBeTruthy();
+    expect(screen.getByText("(98%)")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Zapisz schemat" }));
+
+    await waitFor(() =>
+      expect(updateGroupSchema).toHaveBeenCalledWith("group-1", {
+        items: [
+          { segment_id: 3, percentage: 98 },
+          { segment_id: 1, percentage: 2 },
+        ],
+      }),
+    );
+  });
 });

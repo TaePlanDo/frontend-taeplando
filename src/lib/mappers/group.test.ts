@@ -38,12 +38,12 @@ describe("group mappers", () => {
     expect(normalizeGroup(fromApi).schema[0].percentage).toBe(70);
   });
 
-  it("returns empty values for a new group", () => {
+  it("defaults a new group to one hour with empty name and age fields", () => {
     expect(toFormValues(null)).toEqual({
       name: "",
       minAge: "",
       maxAge: "",
-      hours: "0",
+      hours: "1",
       minutes: "0",
     });
     expect(toFormValues(undefined)).toEqual(toFormValues(null));
