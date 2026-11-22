@@ -155,79 +155,83 @@ export function ExerciseForm({ exercise, onClose }: Props) {
               />
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <ExerciseRatingField
-              control={control}
-              name="physicalDifficulty"
-              label="Intensywność fizyczna"
-              lowLabel="Niska"
-              highLabel="Wysoka"
-              disabled={isSubmitting}
-            />
-            <ExerciseRatingField
-              control={control}
-              name="technicalDifficulty"
-              label="Trudność techniczna"
-              lowLabel="Niska"
-              highLabel="Wysoka"
-              disabled={isSubmitting}
-            />
-            {isMobile ? (
-              <Controller
+          <div className="flex flex-col gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <ExerciseRatingField
                 control={control}
-                name="durationMinutes"
-                render={({ field, fieldState }) => (
-                  <NumberCarouselField
-                    label="Czas trwania w minutach"
-                    min={EXERCISE_DURATION_LIMITS.min}
-                    max={EXERCISE_DURATION_LIMITS.max}
-                    step={EXERCISE_DURATION_LIMITS.step}
-                    value={Number(field.value)}
-                    onValueChange={(value) => field.onChange(String(value))}
-                    onBlur={field.onBlur}
-                    fieldRef={field.ref}
-                    disabled={isSubmitting}
-                    error={fieldState.error?.message}
-                  />
-                )}
-              />
-            ) : (
-              <CustomizedInputWithController
-                control={control}
-                name="durationMinutes"
-                label="Czas trwania w minutach"
-                type="number"
-                min={EXERCISE_DURATION_LIMITS.min}
-                max={EXERCISE_DURATION_LIMITS.max}
-                step={EXERCISE_DURATION_LIMITS.step}
+                name="physicalDifficulty"
+                label="Intensywność fizyczna"
+                lowLabel="Niska"
+                highLabel="Wysoka"
                 disabled={isSubmitting}
               />
-            )}
-            <ExerciseRatingField
-              control={control}
-              name="upperBodyLoad"
-              label="Zaangażowanie górnych partii"
-              lowLabel="Niskie"
-              highLabel="Wysokie"
-              disabled={isSubmitting}
-            />
-            <ExerciseRatingField
-              control={control}
-              name="lowerBodyLoad"
-              label="Zaangażowanie dolnych partii"
-              lowLabel="Niskie"
-              highLabel="Wysokie"
-              disabled={isSubmitting}
-            />
-            <ExerciseRatingField
-              control={control}
-              name="coreLoad"
-              label="Zaangażowanie partii core"
-              lowLabel="Niskie"
-              highLabel="Wysokie"
-              disabled={isSubmitting}
-            />
+              <ExerciseRatingField
+                control={control}
+                name="technicalDifficulty"
+                label="Trudność techniczna"
+                lowLabel="Niska"
+                highLabel="Wysoka"
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <ExerciseRatingField
+                control={control}
+                name="upperBodyLoad"
+                label="Zaangażowanie górnych partii"
+                lowLabel="Niskie"
+                highLabel="Wysokie"
+                disabled={isSubmitting}
+              />
+              <ExerciseRatingField
+                control={control}
+                name="lowerBodyLoad"
+                label="Zaangażowanie dolnych partii"
+                lowLabel="Niskie"
+                highLabel="Wysokie"
+                disabled={isSubmitting}
+              />
+              <ExerciseRatingField
+                control={control}
+                name="coreLoad"
+                label="Zaangażowanie partii core"
+                lowLabel="Niskie"
+                highLabel="Wysokie"
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
+          {isMobile ? (
+            <Controller
+              control={control}
+              name="durationMinutes"
+              render={({ field, fieldState }) => (
+                <NumberCarouselField
+                  label="Czas trwania w minutach"
+                  min={EXERCISE_DURATION_LIMITS.min}
+                  max={EXERCISE_DURATION_LIMITS.max}
+                  step={EXERCISE_DURATION_LIMITS.step}
+                  value={Number(field.value)}
+                  onValueChange={(value) => field.onChange(String(value))}
+                  onBlur={field.onBlur}
+                  fieldRef={field.ref}
+                  disabled={isSubmitting}
+                  error={fieldState.error?.message}
+                />
+              )}
+            />
+          ) : (
+            <CustomizedInputWithController
+              control={control}
+              name="durationMinutes"
+              label="Czas trwania w minutach"
+              type="number"
+              min={EXERCISE_DURATION_LIMITS.min}
+              max={EXERCISE_DURATION_LIMITS.max}
+              step={EXERCISE_DURATION_LIMITS.step}
+              disabled={isSubmitting}
+            />
+          )}
           <ExerciseAttributesSelector
             equipmentIds={values.equipmentIds}
             typeIds={values.trainingTypeIds}
