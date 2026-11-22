@@ -38,7 +38,7 @@ describe("group mappers", () => {
     expect(normalizeGroup(fromApi).schema[0].percentage).toBe(70);
   });
 
-  it("defaults a new group to the full age range", () => {
+  it("defaults a new group to 60 minutes and the full age range", () => {
     expect(toFormValues(null)).toEqual({
       name: "",
       minAge: "1",
