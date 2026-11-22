@@ -230,6 +230,7 @@ export class ExercisesPage {
     await expect(this.filtersDialog).toBeVisible();
     await this.filtersDialog.getByRole("combobox", { name: field }).click();
     await this.page.getByRole("option", { name: value, exact: true }).click();
+    await this.page.keyboard.press("Escape");
     await this.filtersDialog.getByRole("button", { name: "Close" }).click();
     await expect(this.filtersDialog).toHaveCount(0);
   }
@@ -272,6 +273,7 @@ export class ExercisesPage {
       .getByRole("combobox", { name: `Dodaj ${tab.toLowerCase()}` })
       .click();
     await this.page.getByRole("option", { name: value, exact: true }).click();
+    await this.page.keyboard.press("Escape");
   }
 
   async setExcluded(name: string, excluded: boolean): Promise<void> {
