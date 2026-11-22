@@ -45,6 +45,7 @@ export class PlanNewPage {
       .getByRole("combobox", { name: "Sprzęt treningowy" })
       .click();
     await this.page.getByRole("option", { name, exact: true }).click();
+    await this.page.keyboard.press("Escape");
     await expect(
       this.page.getByRole("button", { name: `Usuń ${name}` }),
     ).toBeVisible();

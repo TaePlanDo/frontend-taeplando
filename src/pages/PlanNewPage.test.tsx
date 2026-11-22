@@ -52,6 +52,8 @@ function select(label: string, option: string) {
     key: "ArrowDown",
   });
   fireEvent.click(screen.getByRole("option", { name: option }));
+  const list = screen.queryByRole("listbox", { name: label });
+  if (list) fireEvent.keyDown(list, { key: "Escape" });
 }
 
 function loadedOptions() {

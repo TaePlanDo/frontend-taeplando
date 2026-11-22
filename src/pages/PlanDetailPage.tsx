@@ -66,7 +66,7 @@ export function PlanDetailPage() {
   const phases = groupPlanPhases(plan);
 
   return (
-    <div className="flex flex-1 justify-center p-6">
+    <div className="flex flex-1 justify-center px-3 py-6 sm:px-6">
       <div className="mb-12 flex w-full max-w-96 flex-col gap-8 lg:max-w-220">
         <PlanDetailHeader
           plan={plan}

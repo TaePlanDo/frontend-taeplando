@@ -4,7 +4,26 @@ import { describe, expect, it, vi } from "vitest";
 import { DualRangeField } from "./DualRangeField";
 import { SingleRangeField } from "./SingleRangeField";
 
+vi.mock("@/hooks/useIsMobile", () => ({ useIsMobile: () => true }));
+
 describe("SingleRangeField", () => {
+  it("uses mobile buttons for a single 1–5 value", () => {
+    const onChange = vi.fn();
+    render(
+      <SingleRangeField
+        label="Wartość"
+        min={1}
+        max={5}
+        value={3}
+        onValueChange={onChange}
+        formatValue={(value) => `${value}/5`}
+      />,
+    );
+    expect(screen.queryByRole("slider")).not.toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "3/5" })).toBeChecked();
+    fireEvent.click(screen.getByRole("radio", { name: "5/5" }));
+    expect(onChange).toHaveBeenCalledWith(5);
+  });
   it("renders one accessible thumb and supports keyboard changes within bounds", () => {
     const onChange = vi.fn();
     render(

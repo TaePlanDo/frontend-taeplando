@@ -1,8 +1,6 @@
 import { ChevronDown, Clock3 } from "lucide-react";
 import { useState } from "react";
 
-import { EXERCISE_RATING_COLUMNS } from "@/components/exercise/exerciseRatings";
-import { Badge } from "@/components/ui/badge";
 import { CardItemBadge } from "@/components/shared/CardItemBadge";
 import { Card } from "@/components/ui/card";
 import { cn } from "cn";
@@ -11,6 +9,7 @@ import { type PlanPhase } from "@/lib/plan/phaseGrouping";
 
 import { DeltaMinutesBadge } from "./DeltaMinutesBadge";
 import { PlanExerciseRow } from "./PlanExerciseRow";
+import { PLAN_RATING_COLUMNS, PLAN_RATING_GRID_CLASS } from "./planRatings";
 
 type PlanPhaseSectionProps = {
   phase: PlanPhase;
@@ -26,66 +25,75 @@ export function PlanPhaseSection({
 
   return (
     <Card className="gap-0 rounded-2xl border-border bg-card/30 py-0 shadow-none">
-      <button
-        type="button"
+      <div
         className={cn(
-          "sticky top-16 z-20 flex w-full flex-wrap items-center gap-3 bg-background px-4 py-4 text-left sm:gap-4 sm:px-7 lg:flex-nowrap",
+          "sticky top-16 z-20 bg-background",
           open ? "rounded-t-2xl" : "rounded-2xl",
         )}
-        aria-expanded={open}
-        aria-controls={panelId}
-        onClick={() => setOpen((current) => !current)}
       >
-        <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-4">
-          <ChevronDown
-            className={cn(
-              "size-5 shrink-0 text-muted-foreground transition-transform",
-              open && "rotate-180",
-            )}
-            aria-hidden
-          />
+        <button
+          type="button"
+          className="flex w-full items-center justify-between gap-3 px-3 py-4 text-left sm:gap-4 sm:px-7"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => setOpen((current) => !current)}
+        >
+          <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-3">
+            <ChevronDown
+              className={cn(
+                "size-5 shrink-0 text-muted-foreground transition-transform",
+                open && "rotate-180",
+              )}
+              aria-hidden
+            />
 
-          <div className="min-w-0 flex-1 lg:flex-none">
-            <h3 className="text-base font-semibold leading-tight text-foreground sm:text-lg">
-              {phase.schema.name}
-            </h3>
-            <p className="mt-0.5 text-xs leading-tight text-muted-foreground sm:text-sm">
-              {formatExerciseCount(phase.exercises.length)}
-            </p>
+            <div className="min-w-0">
+              <h3 className="text-base font-semibold leading-tight text-foreground [overflow-wrap:break-word] sm:text-lg">
+                {phase.schema.name}
+              </h3>
+              <p className="mt-0.5 text-xs leading-tight text-muted-foreground sm:text-sm">
+                {formatExerciseCount(phase.exercises.length)}
+              </p>
+            </div>
           </div>
 
-          <CardItemBadge
-            icon={<Clock3 className="size-4 text-primary" aria-hidden />}
-            className="h-7 gap-1 border border-border px-2 text-xs font-medium text-foreground sm:h-8 sm:px-3 sm:text-sm"
-          >
-            {phase.actualMinutes} / {phase.plannedMinutes} min
-          </CardItemBadge>
-          <DeltaMinutesBadge
-            deltaMinutes={phase.deltaMinutes}
-            className="h-7 px-2 text-xs sm:h-8 sm:px-3 sm:text-sm"
-          />
-        </div>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <CardItemBadge
+              icon={<Clock3 className="size-4 text-primary" aria-hidden />}
+              className="h-7 justify-center gap-1 border border-border px-1 text-xs font-medium whitespace-nowrap text-foreground sm:h-8 sm:px-2 sm:text-sm"
+              aria-label={`Czas fazy: ${phase.actualMinutes} z ${phase.plannedMinutes} minut`}
+            >
+              {phase.actualMinutes} / {phase.plannedMinutes}
+            </CardItemBadge>
+            <DeltaMinutesBadge
+              deltaMinutes={phase.deltaMinutes}
+              className="h-7 px-1 text-xs sm:h-8 sm:px-2 sm:text-sm"
+            />
+          </div>
+        </button>
         {open && phase.exercises.length > 0 ? (
-          <div className="grid w-full grid-cols-5 gap-1.5 lg:w-[24rem] lg:shrink-0">
-            {EXERCISE_RATING_COLUMNS.map((column) => (
-              <Badge
-                key={column.key}
-                variant="outline"
-                className={cn(
-                  "h-auto min-h-8 w-full min-w-0 whitespace-normal rounded-md px-0.5 py-1 text-center text-[0.6875rem] leading-tight tracking-tight [overflow-wrap:anywhere]",
-                  column.headerClass,
-                )}
-              >
-                <span className="sm:hidden" aria-hidden>
-                  {column.shortLabel}
+          <div className="border-t border-border px-3 py-2 sm:px-7">
+            <div
+              className={cn(
+                PLAN_RATING_GRID_CLASS,
+                "w-full items-center lg:ml-auto lg:w-[24rem]",
+              )}
+            >
+              {PLAN_RATING_COLUMNS.map((column) => (
+                <span
+                  key={column.key}
+                  className={cn(
+                    "min-w-0 text-center text-[0.625rem] font-medium leading-tight sm:text-[0.6875rem]",
+                    column.headerClass,
+                  )}
+                >
+                  {column.label}
                 </span>
-                <span className="hidden sm:inline">{column.label}</span>
-                <span className="sr-only sm:hidden">{column.label}</span>
-              </Badge>
-            ))}
+              ))}
+            </div>
           </div>
         ) : null}
-      </button>
+      </div>
 
       {open ? (
         <div id={panelId} className="border-t border-border">

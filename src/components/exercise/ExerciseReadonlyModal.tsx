@@ -1,8 +1,9 @@
+import { Dumbbell, Layers3, Tag } from "lucide-react";
+
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedSwitch } from "@/components/shared/CustomizedSwitch";
 import { ExerciseImage } from "@/components/shared/ExerciseImage";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import type { Exercise, ExerciseDetails } from "@/types/exercise";
 
 import { AttributeRow } from "./AttributeRow";
@@ -65,7 +66,7 @@ export function ExerciseReadonlyModal(props: ExerciseReadonlyModalProps) {
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
             <ExerciseStatBlock label="Wiek" value={age} />
             <ExerciseStatBlock
               label="Liczba uczestników"
@@ -73,7 +74,7 @@ export function ExerciseReadonlyModal(props: ExerciseReadonlyModalProps) {
             />
             <ExerciseStatBlock label="Czas trwania" value={duration} />
           </div>
-          <div className="grid grid-cols-2 gap-4 rounded-2xl border-2 p-4 sm:gap-6">
+          <div className="grid grid-cols-1 gap-4 rounded-2xl border-2 p-4 sm:grid-cols-2 sm:gap-6">
             {[
               EXERCISE_RATING_COLUMNS.slice(0, 2),
               EXERCISE_RATING_COLUMNS.slice(2),
@@ -91,31 +92,33 @@ export function ExerciseReadonlyModal(props: ExerciseReadonlyModalProps) {
             ))}
           </div>
 
-          <div className="flex flex-col gap-2 mt-4">
-            <h2 className="text-lg font-semibold text-foreground">
+          <section className="space-y-3 border-y border-foreground/15 py-4">
+            <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+              <span className="h-4 w-1 rounded-full bg-primary" aria-hidden />
               Atrybuty dodatkowe
             </h2>
 
-            <div className="flex flex-col gap-4 border-2 rounded-2xl p-4 mt-4">
+            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <AttributeRow
                 label="Sprzęt"
                 names={equipment}
-                className="border border-foreground/20 bg-muted text-foreground/80"
+                icon={<Dumbbell className="size-5" />}
+                badgeClassName="border border-foreground/20 bg-muted text-foreground/80"
               />
-              <Separator />
               <AttributeRow
                 label="Typ"
                 names={trainingTypes}
-                className="border border-primary/50 bg-primary/10 text-primary"
+                icon={<Tag className="size-5" />}
+                badgeClassName="border border-primary/50 bg-primary/10 text-primary"
               />
-              <Separator />
               <AttributeRow
                 label="Segment"
                 names={segments}
-                className="border border-secondary/50 bg-secondary/10 text-secondary"
+                icon={<Layers3 className="size-5" />}
+                badgeClassName="border border-foreground/20 bg-muted text-foreground/80"
               />
-            </div>
-          </div>
+            </ul>
+          </section>
         </div>
       </ScrollArea>
       <div className="-mx-4 flex shrink-0 flex-col-reverse gap-2 border-t bg-background px-4 py-1 sm:-mx-6 sm:flex-row sm:justify-end sm:px-6">

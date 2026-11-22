@@ -1,4 +1,5 @@
 import { normalizeRatios } from "@/components/ui/hairline/ratio-balancer/use-ratio-balancer";
+import { GROUP_SCHEMA_LIMITS } from "@/lib/constants/group";
 import type { GroupSchemaItem, GroupSchemaWrite } from "@/types/group";
 import type { TrainingSegment } from "@/types/training-segment";
 
@@ -52,7 +53,7 @@ export function initDraftFromSchema(
   );
 }
 
-/** Append an unused catalog segment at 1%, taking that 1% from the largest row. */
+/** Use the free pool first; a fully allocated schema donates from its largest row. */
 export function addSegment(
   items: SchemaDraftItem[],
   segment: TrainingSegment,
@@ -61,15 +62,18 @@ export function addSegment(
     return items;
   }
 
+  const { MIN_PERCENTAGE, TOTAL_PERCENTAGE } = GROUP_SCHEMA_LIMITS;
+  const added: SchemaDraftItem = {
+    segmentId: segment.id,
+    segmentCode: segment.code,
+    segmentName: segment.name,
+    percentage: MIN_PERCENTAGE,
+  };
   if (items.length === 0) {
-    return [
-      {
-        segmentId: segment.id,
-        segmentCode: segment.code,
-        segmentName: segment.name,
-        percentage: 100,
-      },
-    ];
+    return [{ ...added, percentage: TOTAL_PERCENTAGE }];
+  }
+  if (getSchemaTotal(items) + added.percentage <= TOTAL_PERCENTAGE) {
+    return [...items, added];
   }
 
   const next = items.map((item) => ({ ...item }));
@@ -79,18 +83,12 @@ export function addSegment(
       biggest = i;
     }
   }
-  if (next[biggest].percentage <= 1) {
+  if (next[biggest].percentage < MIN_PERCENTAGE + added.percentage) {
     return items;
   }
 
-  next[biggest].percentage -= 1;
-  next.push({
-    segmentId: segment.id,
-    segmentCode: segment.code,
-    segmentName: segment.name,
-    percentage: 1,
-  });
-  return next;
+  next[biggest].percentage -= added.percentage;
+  return [...next, added];
 }
 
 export function removeSegment(
@@ -104,7 +102,7 @@ export function removeSegment(
   if (next.length === items.length) {
     return items;
   }
-  return withNormalizedPercentages(next);
+  return next;
 }
 
 export function applyRatios(
@@ -120,12 +118,43 @@ export function applyRatios(
   }));
 }
 
+/** Edit only this segment, limiting increases to the remaining percentage pool. */
+export function setSegmentPercentage(
+  items: SchemaDraftItem[],
+  segmentId: number,
+  percentage: number,
+): SchemaDraftItem[] {
+  if (!Number.isFinite(percentage)) return items;
+  const target = items.find((item) => item.segmentId === segmentId);
+  if (!target) return items;
+
+  const { MIN_PERCENTAGE, TOTAL_PERCENTAGE } = GROUP_SCHEMA_LIMITS;
+  const bounded = Math.max(
+    MIN_PERCENTAGE,
+    Math.min(
+      TOTAL_PERCENTAGE - getSchemaTotal(items) + target.percentage,
+      Math.round(percentage),
+    ),
+  );
+  if (bounded === target.percentage) return items;
+
+  return items.map((item) =>
+    item.segmentId === segmentId ? { ...item, percentage: bounded } : item,
+  );
+}
+
+export function getSchemaTotal(items: SchemaDraftItem[]): number {
+  return items.reduce((total, item) => total + item.percentage, 0);
+}
+
 export function canSaveSchema(items: SchemaDraftItem[]): boolean {
   if (items.length === 0) {
     return false;
   }
-  const sum = items.reduce((total, item) => total + item.percentage, 0);
-  return sum === 100 && items.every((item) => item.percentage >= 1);
+  return (
+    getSchemaTotal(items) === GROUP_SCHEMA_LIMITS.TOTAL_PERCENTAGE &&
+    items.every((item) => item.percentage >= GROUP_SCHEMA_LIMITS.MIN_PERCENTAGE)
+  );
 }
 
 export function toSchemaWritePayload(

@@ -11,48 +11,44 @@ export type ExerciseRatingKey = keyof Pick<
 
 export type ExerciseRatingColumn = {
   label: string;
-  shortLabel: string;
   key: ExerciseRatingKey;
   fillClass: string;
   headerClass: string;
 };
 
-export const EXERCISE_RATING_COLUMNS: ExerciseRatingColumn[] = [
-  {
+export const EXERCISE_RATINGS = {
+  physical_difficulty: {
     label: "Intensywność",
-    shortLabel: "Intens.",
     key: "physical_difficulty",
     fillClass: "bg-emerald-500",
-    headerClass: "border-emerald-500/50 bg-emerald-500/15 text-emerald-400",
+    headerClass: "text-emerald-400",
   },
-  {
+  technical_difficulty: {
     label: "Trudność",
-    shortLabel: "Trud.",
     key: "technical_difficulty",
     fillClass: "bg-violet-500",
-    headerClass: "border-violet-500/50 bg-violet-500/15 text-violet-300",
+    headerClass: "text-violet-300",
   },
-  {
+  upper_body_load: {
     label: "Górne partie",
-    shortLabel: "Górne",
     key: "upper_body_load",
     fillClass: "bg-orange-600",
-    headerClass: "border-orange-600/50 bg-orange-600/15 text-orange-500",
+    headerClass: "text-orange-500",
   },
-  {
+  lower_body_load: {
     label: "Dolne partie",
-    shortLabel: "Dolne",
     key: "lower_body_load",
     fillClass: "bg-orange-400",
-    headerClass: "border-orange-400/50 bg-orange-400/15 text-orange-400",
+    headerClass: "text-orange-400",
   },
-  {
+  core_load: {
     label: "Core",
-    shortLabel: "Core",
     key: "core_load",
     fillClass: "bg-orange-300",
-    headerClass: "border-orange-300/50 bg-orange-300/15 text-orange-300",
+    headerClass: "text-orange-300",
   },
-];
+} satisfies Record<ExerciseRatingKey, ExerciseRatingColumn>;
+
+export const EXERCISE_RATING_COLUMNS = Object.values(EXERCISE_RATINGS);
 
 export const EXERCISE_RATING_MAX = 5;

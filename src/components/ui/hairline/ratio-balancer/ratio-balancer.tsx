@@ -22,16 +22,13 @@
  * ───────────────────────────────────────────────────────── */
 
 import * as React from "react";
+import { cn } from "cn";
 import { NumberRoll } from "./number-roll";
 import {
   INTERACTION_FOCUS,
   useInteractionReducedMotion,
 } from "./ui-interaction-motion";
-import {
-  normalizeRatios,
-  type RatioSegment,
-  useRatioBalancer,
-} from "./use-ratio-balancer";
+import { type RatioSegment, useRatioBalancer } from "./use-ratio-balancer";
 
 export type { RatioSegment };
 
@@ -80,9 +77,9 @@ export function RatioBalancer({
     React.useState<RatioSegment[]>(defaultSegments);
   const segments = controlledSegments ?? internalSegments;
 
-  const currentRatios = React.useMemo(
-    () => normalizeRatios(segments.map((s) => s.ratio)),
-    [segments],
+  const totalRatio = segments.reduce(
+    (total, segment) => total + segment.ratio,
+    0,
   );
 
   const handleChange = React.useCallback(
@@ -121,14 +118,17 @@ export function RatioBalancer({
       {...props}
       role="region"
       aria-label={label ?? "Podział udziałów"}
-      className={`relative flex w-full max-w-xl select-none flex-col text-foreground ${className}`}
+      className={cn(
+        "relative flex w-full max-w-xl select-none flex-col text-foreground",
+        className,
+      )}
     >
       {/* Label and Total */}
       {label && (
         <div className="mb-3 flex items-center justify-between text-[12px] font-medium text-muted-foreground">
           <span>{label}</span>
           <span className="font-mono text-[11px] tabular-nums text-muted-foreground/80">
-            SUMA 100%
+            SUMA {totalRatio}%
           </span>
         </div>
       )}
@@ -141,7 +141,6 @@ export function RatioBalancer({
         {segments.map((seg, i) => {
           const colorClass = COLORS[i % COLORS.length];
           const isLast = i === segments.length - 1;
-          const ratio = currentRatios[i] ?? seg.ratio;
 
           return (
             <React.Fragment key={seg.id}>
@@ -149,7 +148,7 @@ export function RatioBalancer({
               <div
                 ref={(el) => balancer.attachSegment(i, el)}
                 className={`relative flex min-w-[42px] flex-col justify-between overflow-hidden rounded-[10px] border px-2.5 py-1.5 transition-[flex-grow] will-change-[flex-grow] ${colorClass}`}
-                style={{ flexGrow: ratio }}
+                style={{ flexGrow: seg.ratio }}
               >
                 <div className="flex items-center justify-between">
                   <span className="truncate text-[11px] font-medium tracking-tight">
@@ -166,7 +165,7 @@ export function RatioBalancer({
                     }}
                     className="font-mono text-[13px] font-medium tabular-nums"
                   >
-                    {Math.round(ratio)}%
+                    {Math.round(seg.ratio)}%
                   </span>
                   <span
                     style={{
@@ -176,7 +175,7 @@ export function RatioBalancer({
                     className="font-mono text-[13px] font-medium tabular-nums"
                   >
                     <NumberRoll
-                      value={Math.round(ratio)}
+                      value={Math.round(seg.ratio)}
                       suffix="%"
                       duration={380}
                     />
@@ -221,10 +220,7 @@ export function RatioBalancer({
               >
                 <span>{seg.label}:</span>
                 <span className="font-semibold text-foreground">
-                  {Math.round(
-                    currentRatios[segments.indexOf(seg)] ?? seg.ratio,
-                  )}
-                  %
+                  {Math.round(seg.ratio)}%
                 </span>
               </span>
             ))}

@@ -1,15 +1,19 @@
+import { useEffect, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 
 import { ExerciseAttributesSelector } from "@/components/exercise/ExerciseAttributesSelector";
+import { ExerciseRatingField } from "@/components/exercise/ExerciseRatingField";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInputWithController } from "@/components/shared/CustomizedInputWithController";
 import { DualRangeField } from "@/components/shared/DualRangeField";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
+import { DurationField } from "@/components/shared/DurationField";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCreateExercise } from "@/hooks/exercises/useCreateExercise";
 import { useUpdateExercise } from "@/hooks/exercises/useUpdateExercise";
+import { EXERCISE_DURATION_LIMITS } from "@/lib/constants/exercise";
 import { toExerciseFormValues, toExerciseWrite } from "@/lib/mappers/exercise";
 import {
   exerciseFormSchema,
@@ -17,7 +21,6 @@ import {
   type ExerciseFormValues,
 } from "@/lib/validation/exercise";
 import type { Exercise } from "@/types/exercise";
-import { PLANNING_FILTER_BOUNDS } from "@/types/exercise-list-filters";
 
 type Props = { exercise?: Exercise | null; onClose: () => void };
 
@@ -44,6 +47,26 @@ export function ExerciseForm({ exercise, onClose }: Props) {
   });
   const values = watch();
   const isSubmitting = isCreating || isUpdating;
+  const formContentRef = useRef<HTMLDivElement>(null);
+  const attributeCount =
+    values.equipmentIds.length +
+    values.trainingTypeIds.length +
+    values.segmentIds.length;
+  const previousAttributeCount = useRef(attributeCount);
+
+  useEffect(() => {
+    const attributeAdded = attributeCount > previousAttributeCount.current;
+    previousAttributeCount.current = attributeCount;
+    if (!attributeAdded) return;
+
+    const frame = requestAnimationFrame(() => {
+      formContentRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [attributeCount]);
 
   const submit: SubmitHandler<ExerciseFormOutput> = async (formValues) => {
     try {
@@ -71,24 +94,13 @@ export function ExerciseForm({ exercise, onClose }: Props) {
         type="always"
         className="h-full min-h-0 flex-1 overflow-hidden px-1"
       >
-        <div className="flex flex-col gap-4 pr-4 pb-4">
-          <div className="grid gap-4 sm:grid-cols-[1.35fr_1fr]">
+        <div ref={formContentRef} className="flex flex-col gap-4 pr-4 pb-4">
+          <div className="flex flex-col gap-4">
             <CustomizedInputWithController
               control={control}
               name="name"
               label="Nazwa ćwiczenia"
               placeholder="np. Borek"
-              disabled={isSubmitting}
-            />
-            <DualRangeField
-              label="Wiek"
-              min={1}
-              max={Math.max(99, exercise?.max_age ?? 99)}
-              value={[Number(values.minAge), Number(values.maxAge)]}
-              onValueChange={([min, max]) => {
-                setValue("minAge", String(min), { shouldValidate: true });
-                setValue("maxAge", String(max), { shouldValidate: true });
-              }}
               disabled={isSubmitting}
             />
             <Controller
@@ -109,79 +121,90 @@ export function ExerciseForm({ exercise, onClose }: Props) {
                 </label>
               )}
             />
-            <DualRangeField
-              label="Liczba uczestników"
-              min={1}
-              max={Math.max(99, exercise?.max_participants ?? 99)}
-              value={[
-                Number(values.minParticipants),
-                Number(values.maxParticipants),
-              ]}
-              onValueChange={([min, max]) => {
-                setValue("minParticipants", String(min), {
-                  shouldValidate: true,
-                });
-                setValue("maxParticipants", String(max), {
-                  shouldValidate: true,
-                });
-              }}
-              disabled={isSubmitting}
-            />
+            <div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2">
+              <DualRangeField
+                label="Wiek"
+                min={1}
+                max={Math.max(99, exercise?.max_age ?? 99)}
+                value={[Number(values.minAge), Number(values.maxAge)]}
+                onValueChange={([min, max]) => {
+                  setValue("minAge", String(min), { shouldValidate: true });
+                  setValue("maxAge", String(max), { shouldValidate: true });
+                }}
+                disabled={isSubmitting}
+              />
+              <DualRangeField
+                label="Liczba uczestników"
+                min={1}
+                max={Math.max(99, exercise?.max_participants ?? 99)}
+                value={[
+                  Number(values.minParticipants),
+                  Number(values.maxParticipants),
+                ]}
+                onValueChange={([min, max]) => {
+                  setValue("minParticipants", String(min), {
+                    shouldValidate: true,
+                  });
+                  setValue("maxParticipants", String(max), {
+                    shouldValidate: true,
+                  });
+                }}
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <CustomizedInputWithController
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <ExerciseRatingField
               control={control}
               name="physicalDifficulty"
               label="Intensywność fizyczna"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niska"
+              highLabel="Wysoka"
               disabled={isSubmitting}
             />
-            <CustomizedInputWithController
+            <ExerciseRatingField
               control={control}
               name="technicalDifficulty"
               label="Trudność techniczna"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niska"
+              highLabel="Wysoka"
               disabled={isSubmitting}
             />
-            <CustomizedInputWithController
-              control={control}
-              name="durationMinutes"
-              label="Czas trwania w minutach"
-              type="number"
-              min="1"
-              disabled={isSubmitting}
-            />
-            <CustomizedInputWithController
+            <ExerciseRatingField
               control={control}
               name="upperBodyLoad"
               label="Zaangażowanie górnych partii"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niskie"
+              highLabel="Wysokie"
               disabled={isSubmitting}
             />
-            <CustomizedInputWithController
+            <ExerciseRatingField
               control={control}
               name="lowerBodyLoad"
               label="Zaangażowanie dolnych partii"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niskie"
+              highLabel="Wysokie"
               disabled={isSubmitting}
             />
-            <CustomizedInputWithController
+            <ExerciseRatingField
               control={control}
               name="coreLoad"
               label="Zaangażowanie partii core"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niskie"
+              highLabel="Wysokie"
               disabled={isSubmitting}
             />
+            <div className="min-w-0 sm:col-start-3 sm:row-start-1">
+              <DurationField
+                control={control}
+                name="durationMinutes"
+                label="Czas trwania w minutach"
+                min={EXERCISE_DURATION_LIMITS.min}
+                max={EXERCISE_DURATION_LIMITS.max}
+                step={EXERCISE_DURATION_LIMITS.step}
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
           <ExerciseAttributesSelector
             equipmentIds={values.equipmentIds}

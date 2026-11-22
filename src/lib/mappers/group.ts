@@ -4,6 +4,7 @@ import type {
 } from "@/lib/validation/group";
 import type { Group, GroupSchemaItem, GroupWrite } from "@/types/group";
 import type { PlanSchemaSnapshotItem } from "@/types/plan";
+import { GROUP_LIMITS } from "@/lib/constants/group";
 
 /** Coerce API schema percentages (often Decimal strings) to numbers. */
 export function normalizeGroup(group: Group): Group {
@@ -30,14 +31,18 @@ export function toPlanSchemaSnapshot(
 
 export function toFormValues(group?: Group | null): GroupDetailsFormValues {
   if (!group) {
-    return { name: "", minAge: "", maxAge: "", hours: "0", minutes: "0" };
+    return {
+      name: "",
+      minAge: String(GROUP_LIMITS.MIN_AGE),
+      maxAge: String(GROUP_LIMITS.MAX_AGE),
+      durationMinutes: String(GROUP_LIMITS.DEFAULT_DURATION_MINUTES),
+    };
   }
   return {
     name: group.name,
     minAge: String(group.min_age),
     maxAge: String(group.max_age),
-    hours: String(Math.floor(group.duration_minutes / 60)),
-    minutes: String(group.duration_minutes % 60),
+    durationMinutes: String(group.duration_minutes),
   };
 }
 
@@ -46,6 +51,6 @@ export function toGroupWrite(values: GroupDetailsOutput): GroupWrite {
     name: values.name,
     min_age: values.minAge,
     max_age: values.maxAge,
-    duration_minutes: values.hours * 60 + values.minutes,
+    duration_minutes: values.durationMinutes,
   };
 }

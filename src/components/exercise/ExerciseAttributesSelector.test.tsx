@@ -35,6 +35,7 @@ describe("ExerciseAttributesSelector", () => {
     fireEvent.mouseDown(typeTab, { button: 0, ctrlKey: false });
     fireEvent.click(await screen.findByLabelText("Dodaj typ"));
     fireEvent.click(await screen.findByRole("option", { name: "Technika" }));
+    fireEvent.keyDown(screen.getByRole("listbox"), { key: "Escape" });
 
     expect(onTypeIdsChange).toHaveBeenCalledWith(["t1"]);
   });
@@ -56,5 +57,33 @@ describe("ExerciseAttributesSelector", () => {
     fireEvent.click(screen.getByRole("button", { name: "Usuń Tarcza" }));
 
     expect(onEquipmentIdsChange).toHaveBeenCalledWith([]);
+  });
+
+  it("shows selected types before the picker and keeps validation associated", () => {
+    render(
+      <ExerciseAttributesSelector
+        equipmentIds={[]}
+        typeIds={["t1"]}
+        segmentIds={[]}
+        onEquipmentIdsChange={vi.fn()}
+        onTypeIdsChange={vi.fn()}
+        onSegmentIdsChange={vi.fn()}
+        errors={{ type: "Sprawdź wybrane typy" }}
+      />,
+    );
+    fireEvent.mouseDown(screen.getByRole("tab", { name: /Typ/ }), {
+      button: 0,
+      ctrlKey: false,
+    });
+
+    const selected = screen.getByRole("button", { name: "Usuń Technika" });
+    const picker = screen.getByRole("combobox");
+    expect(screen.getByText("Wybrane typy")).toBeTruthy();
+    expect(
+      selected.compareDocumentPosition(picker) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(picker).toHaveAccessibleDescription("Sprawdź wybrane typy");
+    expect(picker).toHaveAttribute("aria-invalid", "true");
   });
 });

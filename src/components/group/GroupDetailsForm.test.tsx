@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "sonner";
 
@@ -12,6 +18,8 @@ vi.mock("sonner", () => ({
 
 const createGroup = vi.fn();
 const updateGroup = vi.fn();
+let isMobile = false;
+vi.mock("@/hooks/useIsMobile", () => ({ useIsMobile: () => isMobile }));
 
 const createState = {
   createGroup,
@@ -62,22 +70,42 @@ function input(label: string) {
   return screen.getByLabelText(label) as HTMLInputElement;
 }
 
+function setSliderValue(slider: HTMLElement, target: number) {
+  fireEvent.focus(slider);
+  const difference = target - Number(slider.getAttribute("aria-valuenow"));
+  for (let i = 0; i < Math.floor(Math.abs(difference) / 10); i++) {
+    fireEvent.keyDown(slider, { key: difference > 0 ? "PageUp" : "PageDown" });
+  }
+  for (let i = 0; i < Math.abs(difference) % 10; i++) {
+    fireEvent.keyDown(slider, {
+      key: difference > 0 ? "ArrowRight" : "ArrowLeft",
+    });
+  }
+}
+
 function fillForm(values: {
   name: string;
   minAge: string;
   maxAge: string;
-  hours: string;
-  minutes: string;
+  durationMinutes: string;
 }) {
   fireEvent.change(input("Nazwa Grupy"), { target: { value: values.name } });
-  fireEvent.change(input("Minimalny"), { target: { value: values.minAge } });
-  fireEvent.change(input("Maksymalny"), { target: { value: values.maxAge } });
-  fireEvent.change(input("Godziny"), { target: { value: values.hours } });
-  fireEvent.change(input("Minuty"), { target: { value: values.minutes } });
+  const [lower, upper] = screen.getAllByRole("slider", { name: "Wiek" });
+  if (Number(values.minAge) > Number(upper.getAttribute("aria-valuenow"))) {
+    setSliderValue(upper, Number(values.maxAge));
+    setSliderValue(lower, Number(values.minAge));
+  } else {
+    setSliderValue(lower, Number(values.minAge));
+    setSliderValue(upper, Number(values.maxAge));
+  }
+  fireEvent.change(input("Czas trwania (min)"), {
+    target: { value: values.durationMinutes },
+  });
 }
 
 describe("GroupDetailsForm", () => {
   beforeEach(() => {
+    isMobile = false;
     vi.clearAllMocks();
     createGroup.mockReset();
     updateGroup.mockReset();
@@ -92,12 +120,13 @@ describe("GroupDetailsForm", () => {
 
     expect(input("Nazwa Grupy").value).toBe("");
     expect(input("Nazwa Grupy").placeholder).toBe("Grupa wakacyjna");
-    expect(input("Minimalny").value).toBe("");
-    expect(input("Maksymalny").value).toBe("");
-    expect(input("Godziny").value).toBe("0");
-    expect(input("Minuty").value).toBe("0");
+    const [lower, upper] = screen.getAllByRole("slider", { name: "Wiek" });
+    expect(lower).toHaveAttribute("aria-valuenow", "1");
+    expect(upper).toHaveAttribute("aria-valuenow", "99");
+    expect(input("Czas trwania (min)").value).toBe("60");
+    expect(input("Czas trwania (min)")).toHaveAttribute("min", "1");
     expect(screen.getByText("Wiek")).toBeTruthy();
-    expect(screen.getByText("Czas trwania")).toBeTruthy();
+    expect(screen.getByText("Czas trwania (min)")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Utwórz" })).toBeTruthy();
   });
 
@@ -107,22 +136,13 @@ describe("GroupDetailsForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Utwórz" }));
 
     expect(await screen.findByText("Nazwa grupy jest wymagana")).toBeTruthy();
-    expect(screen.getByText("Minimalny wiek jest wymagany")).toBeTruthy();
-    expect(screen.queryByText("Maksymalny wiek jest wymagany")).toBeNull();
+    expect(screen.queryByText("Podaj czas trwania treningu")).toBeNull();
     expect(createGroup).not.toHaveBeenCalled();
   });
 
   it("shows one error under the age pair when max age is lower than min age", async () => {
-    renderForm();
-
-    fillForm({
-      name: "Grupa",
-      minAge: "14",
-      maxAge: "7",
-      hours: "1",
-      minutes: "0",
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Utwórz" }));
+    renderForm({ ...group, min_age: 14, max_age: 7 });
+    fireEvent.click(screen.getByRole("button", { name: "Zapisz zmiany" }));
 
     expect(
       await screen.findByText(
@@ -133,15 +153,14 @@ describe("GroupDetailsForm", () => {
     expect(createGroup).not.toHaveBeenCalled();
   });
 
-  it("shows duration error when hours and minutes are zero", async () => {
+  it("shows a duration error for zero minutes", async () => {
     renderForm();
 
     fillForm({
       name: "Grupa",
       minAge: "7",
       maxAge: "14",
-      hours: "0",
-      minutes: "0",
+      durationMinutes: "0",
     });
     fireEvent.click(screen.getByRole("button", { name: "Utwórz" }));
 
@@ -157,8 +176,7 @@ describe("GroupDetailsForm", () => {
       name: "  Grupa wakacyjna  ",
       minAge: "7",
       maxAge: "14",
-      hours: "1",
-      minutes: "30",
+      durationMinutes: "90",
     });
     fireEvent.click(screen.getByRole("button", { name: "Utwórz" }));
 
@@ -184,8 +202,7 @@ describe("GroupDetailsForm", () => {
       name: "Grupa",
       minAge: "7",
       maxAge: "14",
-      hours: "1",
-      minutes: "0",
+      durationMinutes: "60",
     });
     fireEvent.click(screen.getByRole("button", { name: "Utwórz" }));
 
@@ -203,10 +220,10 @@ describe("GroupDetailsForm", () => {
     renderForm(group);
 
     expect(input("Nazwa Grupy").value).toBe("Młodzież");
-    expect(input("Minimalny").value).toBe("7");
-    expect(input("Maksymalny").value).toBe("14");
-    expect(input("Godziny").value).toBe("1");
-    expect(input("Minuty").value).toBe("30");
+    const [lower, upper] = screen.getAllByRole("slider", { name: "Wiek" });
+    expect(lower).toHaveAttribute("aria-valuenow", "7");
+    expect(upper).toHaveAttribute("aria-valuenow", "14");
+    expect(input("Czas trwania (min)").value).toBe("90");
     expect(screen.getByRole("button", { name: "Zapisz zmiany" })).toBeTruthy();
   });
 
@@ -217,7 +234,7 @@ describe("GroupDetailsForm", () => {
     fireEvent.change(input("Nazwa Grupy"), {
       target: { value: "Młodzież starsza" },
     });
-    fireEvent.change(input("Minuty"), { target: { value: "45" } });
+    fireEvent.change(input("Czas trwania (min)"), { target: { value: "105" } });
     fireEvent.click(screen.getByRole("button", { name: "Zapisz zmiany" }));
 
     await waitFor(() => {
@@ -244,18 +261,51 @@ describe("GroupDetailsForm", () => {
     expect(screen.queryByText("Błąd tworzenia")).toBeNull();
   });
 
+  it("loads one mobile duration carousel and saves the chosen minutes", async () => {
+    isMobile = true;
+    renderForm(group);
+    const duration = screen.getByRole("spinbutton", {
+      name: "Czas trwania (min)",
+    });
+    expect(screen.getAllByRole("spinbutton")).toHaveLength(1);
+    expect(duration).toHaveAttribute("aria-valuenow", "90");
+    expect(duration).toHaveAttribute("aria-valuemin", "1");
+    fireEvent.keyDown(duration, { key: "ArrowRight" });
+    expect(duration).toHaveAttribute("aria-valuenow", "91");
+    fireEvent.keyDown(duration, { key: "Home" });
+    expect(duration).toHaveAttribute("aria-valuenow", "1");
+    fireEvent.keyDown(duration, { key: "ArrowLeft" });
+    expect(duration).toHaveAttribute("aria-valuenow", "1");
+    fireEvent.click(within(duration).getByText("105", { exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Zapisz zmiany" }));
+    await waitFor(() =>
+      expect(updateGroup).toHaveBeenCalledWith(group.id, {
+        name: group.name,
+        min_age: 7,
+        max_age: 14,
+        duration_minutes: 105,
+      }),
+    );
+  });
+
+  it("disables mobile duration options while saving", () => {
+    isMobile = true;
+    createState.isCreating = true;
+    renderForm();
+    expect(
+      screen.getByRole("spinbutton", { name: "Czas trwania (min)" }),
+    ).toHaveAttribute("aria-disabled", "true");
+  });
+
   it("disables all inputs and the submit button while saving", () => {
     createState.isCreating = true;
     renderForm();
 
-    for (const label of [
-      "Nazwa Grupy",
-      "Minimalny",
-      "Maksymalny",
-      "Godziny",
-      "Minuty",
-    ]) {
+    for (const label of ["Nazwa Grupy", "Czas trwania (min)"]) {
       expect(input(label)).toBeDisabled();
+    }
+    for (const slider of screen.getAllByRole("slider", { name: "Wiek" })) {
+      expect(slider).toHaveAttribute("data-disabled");
     }
     expect(screen.getByRole("button", { name: "Utwórz" })).toBeDisabled();
   });

@@ -66,9 +66,7 @@ for (const viewport of [
       "Dolne partie",
       "Core",
     ]) {
-      const badge = firstHeader
-        .locator('[data-slot="badge"]')
-        .filter({ hasText: label });
+      const badge = firstHeader.locator("..").getByText(label, { exact: true });
       const meter = firstRow.getByRole("meter", { name: label });
       const [badgeBox, meterBox] = await Promise.all([
         badge.boundingBox(),

@@ -1,4 +1,10 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { AuthContextValue } from "@/auth/authContext";
@@ -34,6 +40,7 @@ vi.mock("@/hooks/auth/useAuth", () => ({
 describe("AccountPage", () => {
   beforeEach(() => {
     logout.mockReset();
+    vi.mocked(authState.updateName).mockReset();
     authState.isLoggingOut = false;
     authState.user = {
       id: "1",
@@ -50,6 +57,7 @@ describe("AccountPage", () => {
     expect(screen.getByText("jankowalski@gmail.com")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Zmień nazwę" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Zmień hasło" })).toBeTruthy();
+    expect(screen.getByText("Hasło", { exact: true })).toBeTruthy();
   });
 
   it("hides change buttons for a GOOGLE user but still shows the data", () => {
@@ -65,6 +73,24 @@ describe("AccountPage", () => {
     expect(screen.getByText("google@example.com")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Zmień nazwę" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Zmień hasło" })).toBeNull();
+    expect(screen.queryByText("Hasło", { exact: true })).toBeNull();
+  });
+
+  it("closes the name editor after a successful update", async () => {
+    vi.mocked(authState.updateName).mockResolvedValue(undefined);
+    render(<AccountPage />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Zmień nazwę" }));
+    const dialog = screen.getByRole("dialog", {
+      name: "Zmień nazwę użytkownika",
+    });
+    fireEvent.change(within(dialog).getByLabelText("Nazwa użytkownika"), {
+      target: { value: "Nowa nazwa" },
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Zmień dane" }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(authState.updateName).toHaveBeenCalledWith("Nowa nazwa");
   });
 
   it("calls logout after clicking the logout button", () => {

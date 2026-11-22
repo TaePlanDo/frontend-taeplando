@@ -1,5 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
+import { setSliderValue } from "../helpers/setSliderValue";
 
 export type ExerciseFormValues = {
   name: string;
@@ -44,7 +45,7 @@ export class ExercisesPage {
       name: "Wszystkie ćwiczenia",
     });
     this.addExerciseButton = page.getByRole("button", {
-      name: "Dodaj ćwiczenie",
+      name: /^Dodaj(?: ćwiczenie)?$/,
     });
     this.exerciseDialog = page.getByRole("dialog", {
       name: /^(Stwórz ćwiczenie|Edytuj ćwiczenie|Podgląd ćwiczenia)$/,
@@ -229,6 +230,7 @@ export class ExercisesPage {
     await expect(this.filtersDialog).toBeVisible();
     await this.filtersDialog.getByRole("combobox", { name: field }).click();
     await this.page.getByRole("option", { name: value, exact: true }).click();
+    await this.page.keyboard.press("Escape");
     await this.filtersDialog.getByRole("button", { name: "Close" }).click();
     await expect(this.filtersDialog).toHaveCount(0);
   }
@@ -271,6 +273,7 @@ export class ExercisesPage {
       .getByRole("combobox", { name: `Dodaj ${tab.toLowerCase()}` })
       .click();
     await this.page.getByRole("option", { name: value, exact: true }).click();
+    await this.page.keyboard.press("Escape");
   }
 
   async setExcluded(name: string, excluded: boolean): Promise<void> {
@@ -354,25 +357,11 @@ export class ExercisesPage {
     const upper = sliders.nth(1);
     const currentMax = Number(await upper.getAttribute("aria-valuenow"));
     if (min > currentMax) {
-      await this.setSliderValue(upper, max);
-      await this.setSliderValue(lower, min);
+      await setSliderValue(upper, max);
+      await setSliderValue(lower, min);
     } else {
-      await this.setSliderValue(lower, min);
-      await this.setSliderValue(upper, max);
+      await setSliderValue(lower, min);
+      await setSliderValue(upper, max);
     }
-  }
-
-  private async setSliderValue(slider: Locator, target: number): Promise<void> {
-    const current = Number(await slider.getAttribute("aria-valuenow"));
-    const difference = target - current;
-    const pageKey = difference > 0 ? "PageUp" : "PageDown";
-    const arrowKey = difference > 0 ? "ArrowRight" : "ArrowLeft";
-    for (let i = 0; i < Math.floor(Math.abs(difference) / 10); i++) {
-      await slider.press(pageKey);
-    }
-    for (let i = 0; i < Math.abs(difference) % 10; i++) {
-      await slider.press(arrowKey);
-    }
-    await expect(slider).toHaveAttribute("aria-valuenow", String(target));
   }
 }
