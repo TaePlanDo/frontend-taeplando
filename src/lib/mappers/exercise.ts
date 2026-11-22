@@ -1,3 +1,4 @@
+import { EXERCISE_DURATION_LIMITS } from "@/lib/constants/exercise";
 import type {
   ExerciseFormOutput,
   ExerciseFormValues,
@@ -15,7 +16,7 @@ export function toExerciseFormValues(
       maxAge: "99",
       minParticipants: "1",
       maxParticipants: "99",
-      durationMinutes: "1",
+      durationMinutes: String(EXERCISE_DURATION_LIMITS.min),
       physicalDifficulty: "3",
       technicalDifficulty: "3",
       upperBodyLoad: "3",

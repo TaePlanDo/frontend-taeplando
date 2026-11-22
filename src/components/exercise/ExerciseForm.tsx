@@ -4,13 +4,16 @@ import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 
 import { ExerciseAttributesSelector } from "@/components/exercise/ExerciseAttributesSelector";
+import { ExerciseRatingField } from "@/components/exercise/ExerciseRatingField";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInputWithController } from "@/components/shared/CustomizedInputWithController";
 import { DualRangeField } from "@/components/shared/DualRangeField";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
+import { DurationField } from "@/components/shared/DurationField";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCreateExercise } from "@/hooks/exercises/useCreateExercise";
 import { useUpdateExercise } from "@/hooks/exercises/useUpdateExercise";
+import { EXERCISE_DURATION_LIMITS } from "@/lib/constants/exercise";
 import { toExerciseFormValues, toExerciseWrite } from "@/lib/mappers/exercise";
 import {
   exerciseFormSchema,
@@ -18,7 +21,6 @@ import {
   type ExerciseFormValues,
 } from "@/lib/validation/exercise";
 import type { Exercise } from "@/types/exercise";
-import { PLANNING_FILTER_BOUNDS } from "@/types/exercise-list-filters";
 
 type Props = { exercise?: Exercise | null; onClose: () => void };
 
@@ -119,7 +121,7 @@ export function ExerciseForm({ exercise, onClose }: Props) {
                 </label>
               )}
             />
-            <div className="grid grid-cols-2 items-end gap-4">
+            <div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2">
               <DualRangeField
                 label="Wiek"
                 min={1}
@@ -151,60 +153,58 @@ export function ExerciseForm({ exercise, onClose }: Props) {
               />
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <CustomizedInputWithController
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <ExerciseRatingField
               control={control}
               name="physicalDifficulty"
               label="Intensywność fizyczna"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niska"
+              highLabel="Wysoka"
               disabled={isSubmitting}
             />
-            <CustomizedInputWithController
+            <ExerciseRatingField
               control={control}
               name="technicalDifficulty"
               label="Trudność techniczna"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niska"
+              highLabel="Wysoka"
               disabled={isSubmitting}
             />
-            <CustomizedInputWithController
-              control={control}
-              name="durationMinutes"
-              label="Czas trwania w minutach"
-              type="number"
-              min="1"
-              disabled={isSubmitting}
-            />
-            <CustomizedInputWithController
+            <ExerciseRatingField
               control={control}
               name="upperBodyLoad"
               label="Zaangażowanie górnych partii"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niskie"
+              highLabel="Wysokie"
               disabled={isSubmitting}
             />
-            <CustomizedInputWithController
+            <ExerciseRatingField
               control={control}
               name="lowerBodyLoad"
               label="Zaangażowanie dolnych partii"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niskie"
+              highLabel="Wysokie"
               disabled={isSubmitting}
             />
-            <CustomizedInputWithController
+            <ExerciseRatingField
               control={control}
               name="coreLoad"
               label="Zaangażowanie partii core"
-              type="number"
-              min={PLANNING_FILTER_BOUNDS.min}
-              max={PLANNING_FILTER_BOUNDS.max}
+              lowLabel="Niskie"
+              highLabel="Wysokie"
               disabled={isSubmitting}
             />
+            <div className="min-w-0 sm:col-start-3 sm:row-start-1">
+              <DurationField
+                control={control}
+                name="durationMinutes"
+                label="Czas trwania w minutach"
+                min={EXERCISE_DURATION_LIMITS.min}
+                max={EXERCISE_DURATION_LIMITS.max}
+                step={EXERCISE_DURATION_LIMITS.step}
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
           <ExerciseAttributesSelector
             equipmentIds={values.equipmentIds}

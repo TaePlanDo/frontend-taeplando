@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 
 import { Slider } from "@/components/ui/slider";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { NUMBER_SCALE_BOUNDS } from "@/lib/constants/numberScale";
+
+import { NumberScaleField } from "./NumberScaleField";
 
 type RangeHandler = (value: [number, number]) => void;
 
@@ -20,7 +24,50 @@ function pairHandler(handler?: RangeHandler) {
   };
 }
 
-export function DualRangeField({
+export function DualRangeField(props: DualRangeFieldProps) {
+  const isMobile = useIsMobile();
+  if (
+    isMobile &&
+    props.min === NUMBER_SCALE_BOUNDS.min &&
+    props.max === NUMBER_SCALE_BOUNDS.max
+  ) {
+    return <NumberScaleRangeField {...props} />;
+  }
+  return <DualSliderField {...props} />;
+}
+
+function NumberScaleRangeField({
+  label,
+  value: [low, high],
+  onValueChange,
+  onValueCommit,
+  disabled,
+}: DualRangeFieldProps) {
+  function change(value: [number, number]) {
+    onValueChange?.(value);
+    onValueCommit?.(value);
+  }
+
+  return (
+    <fieldset className="min-w-0 space-y-3" disabled={disabled}>
+      <legend className="text-sm font-medium text-foreground">{label}</legend>
+      <NumberScaleField
+        label="Od"
+        value={low}
+        maximum={high}
+        onValueChange={(next) => change([next, high])}
+      />
+      <NumberScaleField
+        label="Do"
+        value={high}
+        minimum={low}
+        onValueChange={(next) => change([low, next])}
+      />
+    </fieldset>
+  );
+}
+
+function DualSliderField({
   label,
   min,
   max,

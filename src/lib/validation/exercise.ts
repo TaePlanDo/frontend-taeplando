@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { EXERCISE_DURATION_LIMITS } from "@/lib/constants/exercise";
 import { PLANNING_FILTER_BOUNDS } from "@/types/exercise-list-filters";
 
 const positiveInteger = (label: string) =>
@@ -33,7 +34,14 @@ export const exerciseFormSchema = z
     maxAge: positiveInteger("Maksymalny wiek"),
     minParticipants: positiveInteger("Minimalna liczba uczestników"),
     maxParticipants: positiveInteger("Maksymalna liczba uczestników"),
-    durationMinutes: positiveInteger("Czas trwania"),
+    durationMinutes: positiveInteger("Czas trwania").pipe(
+      z
+        .number()
+        .max(
+          EXERCISE_DURATION_LIMITS.max,
+          `Czas trwania nie może przekraczać ${EXERCISE_DURATION_LIMITS.max} minut`,
+        ),
+    ),
     physicalDifficulty: planningValue("Intensywność fizyczna"),
     technicalDifficulty: planningValue("Trudność techniczna"),
     upperBodyLoad: planningValue("Zaangażowanie górnych partii"),

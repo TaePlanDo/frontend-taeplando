@@ -1,3 +1,5 @@
+import { NUMBER_SCALE_BOUNDS } from "@/lib/constants/numberScale";
+
 export type ExerciseListFilters = {
   name?: string;
   min_age?: number;
@@ -48,4 +50,4 @@ export const PLANNING_FILTERS = [
 
 export const AGE_FILTER_BOUNDS = { min: 1, max: 99 } as const;
 export const PARTICIPANTS_FILTER_BOUNDS = { min: 1, max: 99 } as const;
-export const PLANNING_FILTER_BOUNDS = { min: 1, max: 5 } as const;
+export const PLANNING_FILTER_BOUNDS = NUMBER_SCALE_BOUNDS;

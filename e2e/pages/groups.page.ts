@@ -1,12 +1,12 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
+import { setSliderValue } from "../helpers/setSliderValue";
 
 export type GroupFormValues = {
   name: string;
   minAge: number;
   maxAge: number;
-  hours: number;
-  minutes: number;
+  durationMinutes: number;
 };
 
 export class GroupsPage {
@@ -17,8 +17,7 @@ export class GroupsPage {
   readonly groupNameInput: Locator;
   readonly minAgeInput: Locator;
   readonly maxAgeInput: Locator;
-  readonly hoursInput: Locator;
-  readonly minutesInput: Locator;
+  readonly durationInput: Locator;
   readonly emptyListMessage: Locator;
 
   constructor(page: Page) {
@@ -31,17 +30,11 @@ export class GroupsPage {
     this.groupNameInput = this.groupDialog.getByRole("textbox", {
       name: "Nazwa Grupy",
     });
-    this.minAgeInput = this.groupDialog.getByRole("spinbutton", {
-      name: "Minimalny",
-    });
-    this.maxAgeInput = this.groupDialog.getByRole("spinbutton", {
-      name: "Maksymalny",
-    });
-    this.hoursInput = this.groupDialog.getByRole("spinbutton", {
-      name: "Godziny",
-    });
-    this.minutesInput = this.groupDialog.getByRole("spinbutton", {
-      name: "Minuty",
+    const ageSliders = this.groupDialog.getByRole("slider", { name: "Wiek" });
+    this.minAgeInput = ageSliders.nth(0);
+    this.maxAgeInput = ageSliders.nth(1);
+    this.durationInput = this.groupDialog.getByRole("spinbutton", {
+      name: "Czas trwania (min)",
     });
     this.emptyListMessage = page.getByText("Jeszcze nie masz żadnych grup");
   }
@@ -181,9 +174,16 @@ export class GroupsPage {
 
   private async fillGroupForm(values: GroupFormValues): Promise<void> {
     await this.groupNameInput.fill(values.name);
-    await this.minAgeInput.fill(String(values.minAge));
-    await this.maxAgeInput.fill(String(values.maxAge));
-    await this.hoursInput.fill(String(values.hours));
-    await this.minutesInput.fill(String(values.minutes));
+    if (
+      values.minAge >
+      Number(await this.maxAgeInput.getAttribute("aria-valuenow"))
+    ) {
+      await setSliderValue(this.maxAgeInput, values.maxAge);
+      await setSliderValue(this.minAgeInput, values.minAge);
+    } else {
+      await setSliderValue(this.minAgeInput, values.minAge);
+      await setSliderValue(this.maxAgeInput, values.maxAge);
+    }
+    await this.durationInput.fill(String(values.durationMinutes));
   }
 }

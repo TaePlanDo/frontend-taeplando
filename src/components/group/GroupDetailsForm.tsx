@@ -4,8 +4,9 @@ import { toast } from "sonner";
 
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInputWithController } from "@/components/shared/CustomizedInputWithController";
-import { CustomizedPairInputWithControllers } from "@/components/shared/CustomizedPairInputWithControllers";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
+import { DualRangeField } from "@/components/shared/DualRangeField";
+import { DurationField } from "@/components/shared/DurationField";
 import { useCreateGroup } from "@/hooks/groups/useCreateGroup";
 import { useUpdateGroup } from "@/hooks/groups/useUpdateGroup";
 import { GROUP_LIMITS } from "@/lib/constants/group";
@@ -27,16 +28,20 @@ export function GroupDetailsForm({ group, onClose }: GroupDetailsFormProps) {
   const { createGroup, isCreating, error: createError } = useCreateGroup();
   const { updateGroup, isUpdating, error: updateError } = useUpdateGroup();
 
-  const { control, handleSubmit } = useForm<
-    GroupDetailsFormValues,
-    unknown,
-    GroupDetailsOutput
-  >({
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<GroupDetailsFormValues, unknown, GroupDetailsOutput>({
     resolver: zodResolver(groupDetailsSchema),
     defaultValues: toFormValues(group),
   });
 
   const isSubmitting = isCreating || isUpdating;
+  const values = watch();
+  const ageError = errors.minAge?.message ?? errors.maxAge?.message;
   const submitError = isEdit ? updateError : createError;
 
   const onSubmit: SubmitHandler<GroupDetailsOutput> = async (values) => {
@@ -58,7 +63,7 @@ export function GroupDetailsForm({ group, onClose }: GroupDetailsFormProps) {
 
   return (
     <form
-      className="flex flex-col gap-4"
+      className="flex min-w-0 flex-col gap-4"
       onSubmit={handleSubmit(onSubmit)}
       noValidate
     >
@@ -71,44 +76,29 @@ export function GroupDetailsForm({ group, onClose }: GroupDetailsFormProps) {
         disabled={isSubmitting}
       />
 
-      <CustomizedPairInputWithControllers
-        title="Wiek"
-        control={control}
-        disabled={isSubmitting}
-        first={{
-          name: "minAge",
-          label: "Minimalny",
-          type: "number",
-          min: GROUP_LIMITS.MIN_AGE,
-          max: GROUP_LIMITS.MAX_AGE,
-        }}
-        second={{
-          name: "maxAge",
-          label: "Maksymalny",
-          type: "number",
-          min: GROUP_LIMITS.MIN_AGE,
-          max: GROUP_LIMITS.MAX_AGE,
-        }}
-      />
+      <div className="flex flex-col gap-1.5">
+        <DualRangeField
+          label="Wiek"
+          min={GROUP_LIMITS.MIN_AGE}
+          max={GROUP_LIMITS.MAX_AGE}
+          value={[Number(values.minAge), Number(values.maxAge)]}
+          onValueChange={([min, max]) => {
+            setValue("minAge", String(min), { shouldValidate: true });
+            setValue("maxAge", String(max), { shouldValidate: true });
+          }}
+          disabled={isSubmitting}
+        />
+        {ageError ? <InputErrorMessage message={ageError} /> : null}
+      </div>
 
-      <CustomizedPairInputWithControllers
-        title="Czas trwania"
+      <DurationField
         control={control}
+        name="durationMinutes"
+        label="Czas trwania (min)"
+        min={GROUP_LIMITS.MIN_DURATION_MINUTES}
+        max={GROUP_LIMITS.MAX_DURATION_MINUTES}
+        step={GROUP_LIMITS.DURATION_STEP_MINUTES}
         disabled={isSubmitting}
-        first={{
-          name: "hours",
-          label: "Godziny",
-          type: "number",
-          min: 0,
-          max: GROUP_LIMITS.MAX_HOURS,
-        }}
-        second={{
-          name: "minutes",
-          label: "Minuty",
-          type: "number",
-          min: 0,
-          max: 59,
-        }}
       />
 
       {submitError ? (

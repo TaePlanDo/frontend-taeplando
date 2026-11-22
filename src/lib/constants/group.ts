@@ -1,12 +1,10 @@
 export const GROUP_LIMITS = {
   MIN_AGE: 1,
   MAX_AGE: 99,
-  MAX_HOURS: 12,
-} as const;
-
-export const DEFAULT_GROUP_DURATION = {
-  HOURS: 1,
-  MINUTES: 0,
+  MIN_DURATION_MINUTES: 1,
+  MAX_DURATION_MINUTES: 12 * 60 + 59,
+  DURATION_STEP_MINUTES: 1,
+  DEFAULT_DURATION_MINUTES: 60,
 } as const;
 
 export const GROUP_SCHEMA_LIMITS = {
