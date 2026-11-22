@@ -153,61 +153,59 @@ export function ExerciseForm({ exercise, onClose }: Props) {
               />
             </div>
           </div>
-          <div className="flex flex-col gap-3">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <ExerciseRatingField
+          <div className="grid gap-3 sm:grid-cols-3">
+            <ExerciseRatingField
+              control={control}
+              name="physicalDifficulty"
+              label="Intensywność fizyczna"
+              lowLabel="Niska"
+              highLabel="Wysoka"
+              disabled={isSubmitting}
+            />
+            <ExerciseRatingField
+              control={control}
+              name="technicalDifficulty"
+              label="Trudność techniczna"
+              lowLabel="Niska"
+              highLabel="Wysoka"
+              disabled={isSubmitting}
+            />
+            <ExerciseRatingField
+              control={control}
+              name="upperBodyLoad"
+              label="Zaangażowanie górnych partii"
+              lowLabel="Niskie"
+              highLabel="Wysokie"
+              disabled={isSubmitting}
+            />
+            <ExerciseRatingField
+              control={control}
+              name="lowerBodyLoad"
+              label="Zaangażowanie dolnych partii"
+              lowLabel="Niskie"
+              highLabel="Wysokie"
+              disabled={isSubmitting}
+            />
+            <ExerciseRatingField
+              control={control}
+              name="coreLoad"
+              label="Zaangażowanie partii core"
+              lowLabel="Niskie"
+              highLabel="Wysokie"
+              disabled={isSubmitting}
+            />
+            <div className="sm:col-start-3 sm:row-start-1">
+              <DurationField
                 control={control}
-                name="physicalDifficulty"
-                label="Intensywność fizyczna"
-                lowLabel="Niska"
-                highLabel="Wysoka"
-                disabled={isSubmitting}
-              />
-              <ExerciseRatingField
-                control={control}
-                name="technicalDifficulty"
-                label="Trudność techniczna"
-                lowLabel="Niska"
-                highLabel="Wysoka"
-                disabled={isSubmitting}
-              />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <ExerciseRatingField
-                control={control}
-                name="upperBodyLoad"
-                label="Zaangażowanie górnych partii"
-                lowLabel="Niskie"
-                highLabel="Wysokie"
-                disabled={isSubmitting}
-              />
-              <ExerciseRatingField
-                control={control}
-                name="lowerBodyLoad"
-                label="Zaangażowanie dolnych partii"
-                lowLabel="Niskie"
-                highLabel="Wysokie"
-                disabled={isSubmitting}
-              />
-              <ExerciseRatingField
-                control={control}
-                name="coreLoad"
-                label="Zaangażowanie partii core"
-                lowLabel="Niskie"
-                highLabel="Wysokie"
+                name="durationMinutes"
+                label="Czas trwania w minutach"
+                min={EXERCISE_DURATION_LIMITS.min}
+                max={EXERCISE_DURATION_LIMITS.max}
+                step={EXERCISE_DURATION_LIMITS.step}
                 disabled={isSubmitting}
               />
             </div>
           </div>
-          <DurationField
-            control={control}
-            name="durationMinutes"
-            label="Czas trwania w minutach"
-            min={EXERCISE_DURATION_LIMITS.min}
-            max={EXERCISE_DURATION_LIMITS.max}
-            step={EXERCISE_DURATION_LIMITS.step}
-            disabled={isSubmitting}
-          />
           <ExerciseAttributesSelector
             equipmentIds={values.equipmentIds}
             typeIds={values.trainingTypeIds}
