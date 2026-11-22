@@ -27,12 +27,15 @@ import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { useTrainingSegments } from "@/hooks/groups/useTrainingSegments";
 import { useUpdateGroupSchema } from "@/hooks/groups/useUpdateGroupSchema";
+import { GROUP_SCHEMA_LIMITS } from "@/lib/constants/group";
 import {
   addSegment,
   applyRatios,
   canSaveSchema,
+  getSchemaTotal,
   initDraftFromSchema,
   removeSegment,
+  setSegmentPercentage,
   toSchemaWritePayload,
   type SchemaDraftItem,
 } from "@/lib/groups/schema-draft";
@@ -115,6 +118,9 @@ function GroupSchemaEditor({
   }));
 
   const saveAllowed = canSaveSchema(items);
+  const totalPercentage = getSchemaTotal(items);
+  const remainingPercentage =
+    GROUP_SCHEMA_LIMITS.TOTAL_PERCENTAGE - totalPercentage;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -166,25 +172,27 @@ function GroupSchemaEditor({
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-foreground/70">
-        Ustaw udział części treningu. Suma zawsze wynosi 100%; każdy segment co
-        najmniej 1%.
+        Ustaw udział części treningu. Do zapisu potrzebne jest 100%; każdy
+        segment co najmniej 1%.
       </p>
 
       {items.length > 0 ? (
-        <RatioBalancer
-          className="max-w-none"
-          label="Schemat treningu"
-          segments={ratioSegments}
-          minRatio={1}
-          showLegend={false}
-          disabled={isUpdating}
-          onValueCommit={(ratios) =>
-            setItems((current) => applyRatios(current, ratios))
-          }
-        />
+        <div className="hidden sm:block">
+          <RatioBalancer
+            className="max-w-none"
+            label="Schemat treningu"
+            segments={ratioSegments}
+            minRatio={GROUP_SCHEMA_LIMITS.MIN_PERCENTAGE}
+            showLegend={false}
+            disabled={isUpdating}
+            onValueCommit={(ratios) =>
+              setItems((current) => applyRatios(current, ratios))
+            }
+          />
+        </div>
       ) : null}
 
-      {items.length > 1 ? (
+      {items.length > 0 ? (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -194,8 +202,18 @@ function GroupSchemaEditor({
             items={items.map((item) => item.segmentCode)}
             strategy={verticalListSortingStrategy}
           >
+            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 sm:hidden">
+              <h3 className="font-semibold">Segmenty treningu</h3>
+              <output
+                aria-label="Łączny udział segmentów"
+                aria-live="polite"
+                className="text-sm tabular-nums text-muted-foreground"
+              >
+                Łącznie: {totalPercentage}% · Wolne: {remainingPercentage}%
+              </output>
+            </div>
             <ul
-              className="flex flex-col gap-1"
+              className="flex flex-col gap-3 sm:gap-1"
               aria-label="Kolejność segmentów"
             >
               {items.map((item) => (
@@ -204,6 +222,12 @@ function GroupSchemaEditor({
                   item={item}
                   canRemove={items.length > 1}
                   disabled={isUpdating}
+                  maxPercentage={item.percentage + remainingPercentage}
+                  onPercentageChange={(percentage) =>
+                    setItems((current) =>
+                      setSegmentPercentage(current, item.segmentId, percentage),
+                    )
+                  }
                   onRemove={() =>
                     setItems((current) =>
                       removeSegment(current, item.segmentId),
@@ -236,10 +260,9 @@ function GroupSchemaEditor({
       ) : null}
 
       {!saveAllowed ? (
-        <InputErrorMessage
-          message="Każdy segment musi mieć udział co najmniej 1%, a suma musi wynosić 100%."
-          className="mx-2"
-        />
+        <p className="mx-2 text-sm text-muted-foreground">
+          Przydziel pozostałe {remainingPercentage}%, aby zapisać schemat.
+        </p>
       ) : null}
 
       {error ? <InputErrorMessage message={error} className="mx-2" /> : null}

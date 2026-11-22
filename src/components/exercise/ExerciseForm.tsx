@@ -93,23 +93,12 @@ export function ExerciseForm({ exercise, onClose }: Props) {
         className="h-full min-h-0 flex-1 overflow-hidden px-1"
       >
         <div ref={formContentRef} className="flex flex-col gap-4 pr-4 pb-4">
-          <div className="grid gap-4 sm:grid-cols-[1.35fr_1fr]">
+          <div className="flex flex-col gap-4">
             <CustomizedInputWithController
               control={control}
               name="name"
               label="Nazwa ćwiczenia"
               placeholder="np. Borek"
-              disabled={isSubmitting}
-            />
-            <DualRangeField
-              label="Wiek"
-              min={1}
-              max={Math.max(99, exercise?.max_age ?? 99)}
-              value={[Number(values.minAge), Number(values.maxAge)]}
-              onValueChange={([min, max]) => {
-                setValue("minAge", String(min), { shouldValidate: true });
-                setValue("maxAge", String(max), { shouldValidate: true });
-              }}
               disabled={isSubmitting}
             />
             <Controller
@@ -130,24 +119,37 @@ export function ExerciseForm({ exercise, onClose }: Props) {
                 </label>
               )}
             />
-            <DualRangeField
-              label="Liczba uczestników"
-              min={1}
-              max={Math.max(99, exercise?.max_participants ?? 99)}
-              value={[
-                Number(values.minParticipants),
-                Number(values.maxParticipants),
-              ]}
-              onValueChange={([min, max]) => {
-                setValue("minParticipants", String(min), {
-                  shouldValidate: true,
-                });
-                setValue("maxParticipants", String(max), {
-                  shouldValidate: true,
-                });
-              }}
-              disabled={isSubmitting}
-            />
+            <div className="grid grid-cols-2 items-end gap-4">
+              <DualRangeField
+                label="Wiek"
+                min={1}
+                max={Math.max(99, exercise?.max_age ?? 99)}
+                value={[Number(values.minAge), Number(values.maxAge)]}
+                onValueChange={([min, max]) => {
+                  setValue("minAge", String(min), { shouldValidate: true });
+                  setValue("maxAge", String(max), { shouldValidate: true });
+                }}
+                disabled={isSubmitting}
+              />
+              <DualRangeField
+                label="Liczba uczestników"
+                min={1}
+                max={Math.max(99, exercise?.max_participants ?? 99)}
+                value={[
+                  Number(values.minParticipants),
+                  Number(values.maxParticipants),
+                ]}
+                onValueChange={([min, max]) => {
+                  setValue("minParticipants", String(min), {
+                    shouldValidate: true,
+                  });
+                  setValue("maxParticipants", String(max), {
+                    shouldValidate: true,
+                  });
+                }}
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <CustomizedInputWithController
