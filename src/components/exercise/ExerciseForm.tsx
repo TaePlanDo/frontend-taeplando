@@ -153,7 +153,7 @@ export function ExerciseForm({ exercise, onClose }: Props) {
               />
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <ExerciseRatingField
               control={control}
               name="physicalDifficulty"
@@ -194,7 +194,7 @@ export function ExerciseForm({ exercise, onClose }: Props) {
               highLabel="Wysokie"
               disabled={isSubmitting}
             />
-            <div className="sm:col-start-3 sm:row-start-1">
+            <div className="min-w-0 sm:col-start-3 sm:row-start-1">
               <DurationField
                 control={control}
                 name="durationMinutes"

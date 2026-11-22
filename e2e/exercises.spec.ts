@@ -282,6 +282,16 @@ test.describe("exercise configuration", () => {
     await exercises.addExerciseButton.click();
     const groups = exercises.exerciseDialog.getByRole("radiogroup");
     await expect(groups).toHaveCount(5);
+    const viewport = exercises.exerciseDialog.locator(
+      '[data-slot="scroll-area-viewport"]',
+    );
+    await expect
+      .poll(() =>
+        viewport.evaluate(
+          (element) => element.scrollWidth - element.clientWidth,
+        ),
+      )
+      .toBeLessThanOrEqual(1);
     for (const group of await groups.all()) {
       await expect(group.getByRole("radio")).toHaveCount(5);
       for (const value of [1, 2, 3, 4, 5]) {
