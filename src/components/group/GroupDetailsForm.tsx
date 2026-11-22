@@ -1,13 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm, type SubmitHandler } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInputWithController } from "@/components/shared/CustomizedInputWithController";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
 import { DualRangeField } from "@/components/shared/DualRangeField";
-import { NumberCarouselField } from "@/components/shared/NumberCarouselField";
-import { useIsMobile } from "@/hooks/useIsMobile";
+import { DurationField } from "@/components/shared/DurationField";
 import { useCreateGroup } from "@/hooks/groups/useCreateGroup";
 import { useUpdateGroup } from "@/hooks/groups/useUpdateGroup";
 import { GROUP_LIMITS } from "@/lib/constants/group";
@@ -41,7 +40,6 @@ export function GroupDetailsForm({ group, onClose }: GroupDetailsFormProps) {
   });
 
   const isSubmitting = isCreating || isUpdating;
-  const isMobile = useIsMobile();
   const values = watch();
   const ageError = errors.minAge?.message ?? errors.maxAge?.message;
   const submitError = isEdit ? updateError : createError;
@@ -93,37 +91,15 @@ export function GroupDetailsForm({ group, onClose }: GroupDetailsFormProps) {
         {ageError ? <InputErrorMessage message={ageError} /> : null}
       </div>
 
-      {isMobile ? (
-        <Controller
-          control={control}
-          name="durationMinutes"
-          render={({ field, fieldState }) => (
-            <NumberCarouselField
-              label="Czas trwania (min)"
-              min={0}
-              max={GROUP_LIMITS.MAX_DURATION_MINUTES}
-              step={GROUP_LIMITS.DURATION_STEP_MINUTES}
-              value={Number(field.value)}
-              onValueChange={(value) => field.onChange(String(value))}
-              onBlur={field.onBlur}
-              fieldRef={field.ref}
-              disabled={isSubmitting}
-              error={fieldState.error?.message}
-            />
-          )}
-        />
-      ) : (
-        <CustomizedInputWithController
-          control={control}
-          name="durationMinutes"
-          label="Czas trwania (min)"
-          type="number"
-          min={0}
-          max={GROUP_LIMITS.MAX_DURATION_MINUTES}
-          step={GROUP_LIMITS.DURATION_STEP_MINUTES}
-          disabled={isSubmitting}
-        />
-      )}
+      <DurationField
+        control={control}
+        name="durationMinutes"
+        label="Czas trwania (min)"
+        min={GROUP_LIMITS.MIN_DURATION_MINUTES}
+        max={GROUP_LIMITS.MAX_DURATION_MINUTES}
+        step={GROUP_LIMITS.DURATION_STEP_MINUTES}
+        disabled={isSubmitting}
+      />
 
       {submitError ? (
         <InputErrorMessage message={submitError} className="mx-2" />

@@ -9,11 +9,10 @@ import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedInputWithController } from "@/components/shared/CustomizedInputWithController";
 import { DualRangeField } from "@/components/shared/DualRangeField";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
-import { NumberCarouselField } from "@/components/shared/NumberCarouselField";
+import { DurationField } from "@/components/shared/DurationField";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCreateExercise } from "@/hooks/exercises/useCreateExercise";
 import { useUpdateExercise } from "@/hooks/exercises/useUpdateExercise";
-import { useIsMobile } from "@/hooks/useIsMobile";
 import { EXERCISE_DURATION_LIMITS } from "@/lib/constants/exercise";
 import { toExerciseFormValues, toExerciseWrite } from "@/lib/mappers/exercise";
 import {
@@ -48,7 +47,6 @@ export function ExerciseForm({ exercise, onClose }: Props) {
   });
   const values = watch();
   const isSubmitting = isCreating || isUpdating;
-  const isMobile = useIsMobile();
   const formContentRef = useRef<HTMLDivElement>(null);
   const attributeCount =
     values.equipmentIds.length +
@@ -201,37 +199,15 @@ export function ExerciseForm({ exercise, onClose }: Props) {
               />
             </div>
           </div>
-          {isMobile ? (
-            <Controller
-              control={control}
-              name="durationMinutes"
-              render={({ field, fieldState }) => (
-                <NumberCarouselField
-                  label="Czas trwania w minutach"
-                  min={EXERCISE_DURATION_LIMITS.min}
-                  max={EXERCISE_DURATION_LIMITS.max}
-                  step={EXERCISE_DURATION_LIMITS.step}
-                  value={Number(field.value)}
-                  onValueChange={(value) => field.onChange(String(value))}
-                  onBlur={field.onBlur}
-                  fieldRef={field.ref}
-                  disabled={isSubmitting}
-                  error={fieldState.error?.message}
-                />
-              )}
-            />
-          ) : (
-            <CustomizedInputWithController
-              control={control}
-              name="durationMinutes"
-              label="Czas trwania w minutach"
-              type="number"
-              min={EXERCISE_DURATION_LIMITS.min}
-              max={EXERCISE_DURATION_LIMITS.max}
-              step={EXERCISE_DURATION_LIMITS.step}
-              disabled={isSubmitting}
-            />
-          )}
+          <DurationField
+            control={control}
+            name="durationMinutes"
+            label="Czas trwania w minutach"
+            min={EXERCISE_DURATION_LIMITS.min}
+            max={EXERCISE_DURATION_LIMITS.max}
+            step={EXERCISE_DURATION_LIMITS.step}
+            disabled={isSubmitting}
+          />
           <ExerciseAttributesSelector
             equipmentIds={values.equipmentIds}
             typeIds={values.trainingTypeIds}

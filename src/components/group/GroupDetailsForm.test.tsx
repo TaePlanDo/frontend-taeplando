@@ -124,6 +124,7 @@ describe("GroupDetailsForm", () => {
     expect(lower).toHaveAttribute("aria-valuenow", "1");
     expect(upper).toHaveAttribute("aria-valuenow", "99");
     expect(input("Czas trwania (min)").value).toBe("60");
+    expect(input("Czas trwania (min)")).toHaveAttribute("min", "1");
     expect(screen.getByText("Wiek")).toBeTruthy();
     expect(screen.getByText("Czas trwania (min)")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Utwórz" })).toBeTruthy();
@@ -268,8 +269,13 @@ describe("GroupDetailsForm", () => {
     });
     expect(screen.getAllByRole("spinbutton")).toHaveLength(1);
     expect(duration).toHaveAttribute("aria-valuenow", "90");
+    expect(duration).toHaveAttribute("aria-valuemin", "1");
     fireEvent.keyDown(duration, { key: "ArrowRight" });
     expect(duration).toHaveAttribute("aria-valuenow", "91");
+    fireEvent.keyDown(duration, { key: "Home" });
+    expect(duration).toHaveAttribute("aria-valuenow", "1");
+    fireEvent.keyDown(duration, { key: "ArrowLeft" });
+    expect(duration).toHaveAttribute("aria-valuenow", "1");
     fireEvent.click(within(duration).getByText("105", { exact: true }));
     fireEvent.click(screen.getByRole("button", { name: "Zapisz zmiany" }));
     await waitFor(() =>

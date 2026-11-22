@@ -42,7 +42,7 @@ export const groupDetailsSchema = z
     }).pipe(
       z
         .number()
-        .min(1, "Podaj czas trwania treningu")
+        .min(GROUP_LIMITS.MIN_DURATION_MINUTES, "Podaj czas trwania treningu")
         .max(
           GROUP_LIMITS.MAX_DURATION_MINUTES,
           `Czas trwania nie może przekraczać ${GROUP_LIMITS.MAX_DURATION_MINUTES} minut`,
