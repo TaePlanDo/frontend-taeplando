@@ -112,7 +112,7 @@ describe("ExerciseForm", () => {
       name: "Czas trwania w minutach",
     });
     expect(duration).toHaveAttribute("aria-valuemin", "1");
-    expect(duration).toHaveAttribute("aria-valuemax", "30");
+    expect(duration).toHaveAttribute("aria-valuemax", "60");
     expect(duration).toHaveAttribute("aria-valuenow", "1");
     for (const name of ratingLabels) {
       const group = within(screen.getByRole("radiogroup", { name }));
@@ -147,7 +147,7 @@ describe("ExerciseForm", () => {
     expect(duration).toHaveAttribute("aria-valuenow", "2");
     fireEvent.keyDown(duration, { key: "End" });
     fireEvent.keyDown(duration, { key: "ArrowRight" });
-    expect(duration).toHaveAttribute("aria-valuenow", "30");
+    expect(duration).toHaveAttribute("aria-valuenow", "60");
     ratingLabels.forEach((name, index) => {
       fireEvent.click(
         within(screen.getByRole("radiogroup", { name })).getByRole("radio", {
@@ -163,7 +163,7 @@ describe("ExerciseForm", () => {
       expect(createExercise).toHaveBeenCalledWith(
         expect.objectContaining({
           min_age: 1,
-          duration_minutes: 30,
+          duration_minutes: 60,
           max_age: 99,
           min_participants: 1,
           max_participants: 99,
@@ -239,7 +239,7 @@ describe("ExerciseForm", () => {
     ).toHaveAttribute("aria-disabled", "true");
   });
 
-  it("keeps the desktop duration input and rejects values above 30 minutes", async () => {
+  it("keeps the desktop duration input and rejects values above 60 minutes", async () => {
     isMobile = false;
     render(<ExerciseForm exercise={exercise} onClose={vi.fn()} />);
     const duration = screen.getByRole("spinbutton", {
@@ -247,11 +247,11 @@ describe("ExerciseForm", () => {
     });
     expect(duration.tagName).toBe("INPUT");
     expect(duration).toHaveAttribute("min", "1");
-    expect(duration).toHaveAttribute("max", "30");
-    fireEvent.change(duration, { target: { value: "31" } });
+    expect(duration).toHaveAttribute("max", "60");
+    fireEvent.change(duration, { target: { value: "61" } });
     fireEvent.click(screen.getByRole("button", { name: "Edytuj ćwiczenie" }));
     expect(
-      await screen.findByText("Czas trwania nie może przekraczać 30 minut"),
+      await screen.findByText("Czas trwania nie może przekraczać 60 minut"),
     ).toBeTruthy();
     expect(updateExercise).not.toHaveBeenCalled();
   });
