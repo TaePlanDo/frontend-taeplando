@@ -8,5 +8,4 @@ export const PLAN_RATING_COLUMNS = [
   EXERCISE_RATINGS.core_load,
 ];
 
-export const PLAN_RATING_GRID_CLASS =
-  "grid grid-cols-[1.35fr_0.9fr_1fr_1fr_0.65fr] gap-1.5";
+export const PLAN_RATING_GRID_CLASS = "grid grid-cols-5 gap-1.5";
