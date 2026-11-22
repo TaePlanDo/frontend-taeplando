@@ -123,7 +123,7 @@ export function ExerciseForm({ exercise, onClose }: Props) {
                 </label>
               )}
             />
-            <div className="grid grid-cols-2 items-end gap-4">
+            <div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2">
               <DualRangeField
                 label="Wiek"
                 min={1}
