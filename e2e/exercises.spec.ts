@@ -234,6 +234,43 @@ test.describe("exercise configuration", () => {
     await exercises.expectValidationError("Wybierz co najmniej jeden Segment");
   });
 
+  test("keeps mobile rating fields visible after selecting every value", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await createLocalTrainerAndLogin(page);
+    const exercises = new ExercisesPage(page);
+    await exercises.goto();
+    await exercises.addExerciseButton.click();
+    const scrollArea = exercises.exerciseDialog.locator(
+      '[data-slot="scroll-area"]',
+    );
+
+    for (const label of [
+      "Intensywność fizyczna",
+      "Trudność techniczna",
+      "Zaangażowanie górnych partii",
+      "Zaangażowanie dolnych partii",
+      "Zaangażowanie partii core",
+    ]) {
+      const group = exercises.exerciseDialog.getByRole("radiogroup", {
+        name: label,
+        exact: true,
+      });
+      for (const value of [1, 2, 3, 4, 5]) {
+        const option = group.getByText(String(value), { exact: true });
+        await option.click();
+        await expect(
+          group.getByRole("radio", { name: String(value), exact: true }),
+        ).toBeChecked();
+        await expect(option).toBeInViewport({ ratio: 1 });
+        await expect
+          .poll(() => scrollArea.evaluate((element) => element.scrollTop))
+          .toBe(0);
+      }
+    }
+  });
+
   test("offers mobile rating buttons and preserves values when resizing", async ({
     page,
   }) => {

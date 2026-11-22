@@ -64,7 +64,7 @@ export function NumberScaleField({
       </legend>
       <div className="grid grid-cols-5 gap-1">
         {options.map((option, index) => (
-          <label key={option} className="min-w-0 cursor-pointer">
+          <label key={option} className="relative min-w-0 cursor-pointer">
             <input
               ref={index === 0 ? inputRef : undefined}
               type="radio"
