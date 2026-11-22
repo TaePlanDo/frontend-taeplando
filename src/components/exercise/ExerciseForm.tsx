@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
@@ -44,6 +45,26 @@ export function ExerciseForm({ exercise, onClose }: Props) {
   });
   const values = watch();
   const isSubmitting = isCreating || isUpdating;
+  const formContentRef = useRef<HTMLDivElement>(null);
+  const attributeCount =
+    values.equipmentIds.length +
+    values.trainingTypeIds.length +
+    values.segmentIds.length;
+  const previousAttributeCount = useRef(attributeCount);
+
+  useEffect(() => {
+    const attributeAdded = attributeCount > previousAttributeCount.current;
+    previousAttributeCount.current = attributeCount;
+    if (!attributeAdded) return;
+
+    const frame = requestAnimationFrame(() => {
+      formContentRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [attributeCount]);
 
   const submit: SubmitHandler<ExerciseFormOutput> = async (formValues) => {
     try {
@@ -71,7 +92,7 @@ export function ExerciseForm({ exercise, onClose }: Props) {
         type="always"
         className="h-full min-h-0 flex-1 overflow-hidden px-1"
       >
-        <div className="flex flex-col gap-4 pr-4 pb-4">
+        <div ref={formContentRef} className="flex flex-col gap-4 pr-4 pb-4">
           <div className="flex flex-col gap-4">
             <CustomizedInputWithController
               control={control}

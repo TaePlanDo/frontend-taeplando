@@ -16,7 +16,7 @@ it("loads the first page of equipment", async () => {
     items: [{ id: "equipment-1", name: "Tarcza treningowa" }],
     total: 1,
     page: 1,
-    page_size: 6,
+    page_size: 20,
     total_pages: 1,
   });
   const client = new QueryClient({
@@ -30,7 +30,7 @@ it("loads the first page of equipment", async () => {
 
   await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-  expect(getEquipmentPageRequest).toHaveBeenCalledWith(1, 6);
+  expect(getEquipmentPageRequest).toHaveBeenCalledWith(1, 20);
   expect(result.current.items).toEqual([
     { id: "equipment-1", name: "Tarcza treningowa" },
   ]);
