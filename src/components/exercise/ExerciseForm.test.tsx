@@ -11,11 +11,12 @@ import { ExerciseForm } from "./ExerciseForm";
 import type { Exercise } from "@/types/exercise";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
-vi.mock("@/hooks/useIsMobile", () => ({ useIsMobile: () => true }));
+vi.mock("@/hooks/useIsMobile", () => ({ useIsMobile: () => isMobile }));
 
 const createExercise = vi.fn();
 const updateExercise = vi.fn();
 let isCreating = false;
+let isMobile = true;
 
 const ratingLabels = [
   "Intensywność fizyczna",
@@ -97,6 +98,7 @@ describe("ExerciseForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     isCreating = false;
+    isMobile = true;
   });
 
   it("renders an empty create form and required attribute warnings", async () => {
@@ -106,6 +108,12 @@ describe("ExerciseForm", () => {
     ).toBe("");
     expect(screen.getByLabelText("Brak wybranego: Typ")).toBeTruthy();
     expect(screen.getByLabelText("Brak wybranego: Segment")).toBeTruthy();
+    const duration = screen.getByRole("spinbutton", {
+      name: "Czas trwania w minutach",
+    });
+    expect(duration).toHaveAttribute("aria-valuemin", "1");
+    expect(duration).toHaveAttribute("aria-valuemax", "30");
+    expect(duration).toHaveAttribute("aria-valuenow", "1");
     for (const name of ratingLabels) {
       const group = within(screen.getByRole("radiogroup", { name }));
       expect(group.getAllByRole("radio")).toHaveLength(5);
@@ -132,9 +140,14 @@ describe("ExerciseForm", () => {
       screen.getByPlaceholderText("Opisz ćwiczenie, zasady, wariant..."),
       { target: { value: "Opis" } },
     );
-    fireEvent.change(screen.getByLabelText("Czas trwania w minutach"), {
-      target: { value: "10" },
+    const duration = screen.getByRole("spinbutton", {
+      name: "Czas trwania w minutach",
     });
+    fireEvent.keyDown(duration, { key: "ArrowRight" });
+    expect(duration).toHaveAttribute("aria-valuenow", "2");
+    fireEvent.keyDown(duration, { key: "End" });
+    fireEvent.keyDown(duration, { key: "ArrowRight" });
+    expect(duration).toHaveAttribute("aria-valuenow", "30");
     ratingLabels.forEach((name, index) => {
       fireEvent.click(
         within(screen.getByRole("radiogroup", { name })).getByRole("radio", {
@@ -150,6 +163,7 @@ describe("ExerciseForm", () => {
       expect(createExercise).toHaveBeenCalledWith(
         expect.objectContaining({
           min_age: 1,
+          duration_minutes: 30,
           max_age: 99,
           min_participants: 1,
           max_participants: 99,
@@ -220,5 +234,25 @@ describe("ExerciseForm", () => {
     for (const radio of screen.getAllByRole("radio")) {
       expect(radio).toBeDisabled();
     }
+    expect(
+      screen.getByRole("spinbutton", { name: "Czas trwania w minutach" }),
+    ).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("keeps the desktop duration input and rejects values above 30 minutes", async () => {
+    isMobile = false;
+    render(<ExerciseForm exercise={exercise} onClose={vi.fn()} />);
+    const duration = screen.getByRole("spinbutton", {
+      name: "Czas trwania w minutach",
+    });
+    expect(duration.tagName).toBe("INPUT");
+    expect(duration).toHaveAttribute("min", "1");
+    expect(duration).toHaveAttribute("max", "30");
+    fireEvent.change(duration, { target: { value: "31" } });
+    fireEvent.click(screen.getByRole("button", { name: "Edytuj ćwiczenie" }));
+    expect(
+      await screen.findByText("Czas trwania nie może przekraczać 30 minut"),
+    ).toBeTruthy();
+    expect(updateExercise).not.toHaveBeenCalled();
   });
 });
