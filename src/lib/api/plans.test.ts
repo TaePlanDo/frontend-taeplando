@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { deletePlanRequest, getPlanRequest, getPlansRequest } from "./plans";
+import {
+  deletePlanExerciseRequest,
+  deletePlanRequest,
+  getPlanExerciseAlternativesRequest,
+  getPlanRequest,
+  getPlansRequest,
+  replacePlanExerciseRequest,
+} from "./plans";
 
 function response(status: number, body: unknown) {
   return { ok: true, status, json: async () => body };
@@ -54,6 +61,42 @@ describe("plans API", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/training-plans/plan-1",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
+  it("fetches alternatives for a plan exercise", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(response(200, []));
+    vi.stubGlobal("fetch", fetchMock);
+    await getPlanExerciseAlternativesRequest("plan-1", "slot-1");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/training-plans/plan-1/exercises/slot-1/alternatives",
+      expect.objectContaining({ method: "GET" }),
+    );
+  });
+
+  it("replaces and deletes a plan exercise", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(response(200, {}));
+    vi.stubGlobal("fetch", fetchMock);
+    await replacePlanExerciseRequest({
+      planId: "plan-1",
+      planExerciseId: "slot-1",
+      exerciseId: "exercise-2",
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/training-plans/plan-1/exercises/slot-1",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ exercise_id: "exercise-2" }),
+      }),
+    );
+    fetchMock.mockResolvedValue(response(204, undefined));
+    await deletePlanExerciseRequest({
+      planId: "plan-1",
+      planExerciseId: "slot-1",
+    });
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "/api/training-plans/plan-1/exercises/slot-1",
       expect.objectContaining({ method: "DELETE" }),
     );
   });

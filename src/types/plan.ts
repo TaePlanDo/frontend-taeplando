@@ -33,6 +33,21 @@ export type PlanExercise = {
   segments_snapshot: TrainingSegment[];
 };
 
+export type PlanExerciseAlternative = {
+  trainer_exercise_id: string;
+  exercise_id: string;
+  name: string;
+  image_url: string | null;
+  physical_difficulty: number;
+  technical_difficulty: number;
+  upper_body_load: number;
+  lower_body_load: number;
+  core_load: number;
+  equipment: CatalogReference[];
+  training_types: CatalogReference[];
+  similarity_score: number;
+};
+
 export type PlanListItem = {
   id: string;
   training_group_id: string;
