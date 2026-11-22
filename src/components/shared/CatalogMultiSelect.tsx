@@ -26,6 +26,8 @@ type CatalogMultiSelectProps = {
   className?: string;
   labelClassName?: string;
   error?: string;
+  selectionPosition?: "above" | "below";
+  selectedLabel?: string;
 };
 
 export function CatalogMultiSelect({
@@ -40,6 +42,8 @@ export function CatalogMultiSelect({
   className,
   labelClassName,
   error,
+  selectionPosition = "below",
+  selectedLabel,
 }: CatalogMultiSelectProps) {
   const id = useId();
   const collisionPadding = useDropdownCollisionPadding();
@@ -59,6 +63,30 @@ export function CatalogMultiSelect({
       },
   );
 
+  const selection = selected.length ? (
+    <div
+      className={
+        selectionPosition === "above"
+          ? "mb-2 flex flex-col gap-2"
+          : "mt-3 flex flex-col gap-2"
+      }
+    >
+      {selectedLabel ? (
+        <p className="text-xs text-muted-foreground">{selectedLabel}</p>
+      ) : null}
+      <SelectedAttributeBadges
+        className="mt-0"
+        items={selected}
+        disabled={unavailable}
+        onRemove={(id) =>
+          onSelectedIdsChange(
+            selectedIds.filter((selectedId) => selectedId !== String(id)),
+          )
+        }
+      />
+    </div>
+  ) : null;
+
   return (
     <div
       className={className}
@@ -66,6 +94,7 @@ export function CatalogMultiSelect({
       onKeyDownCapture={() => setKeyboardNavigation(true)}
     >
       <div className="flex flex-col gap-1">
+        {selectionPosition === "above" ? selection : null}
         <Popover.Root modal open={open && canOpen} onOpenChange={setOpen}>
           <div className="flex flex-col gap-1">
             <label
@@ -194,15 +223,7 @@ export function CatalogMultiSelect({
         {error ? (
           <InputErrorMessage id={`${id}-error`} message={error} />
         ) : null}
-        <SelectedAttributeBadges
-          items={selected}
-          disabled={unavailable}
-          onRemove={(id) =>
-            onSelectedIdsChange(
-              selectedIds.filter((selectedId) => selectedId !== String(id)),
-            )
-          }
-        />
+        {selectionPosition === "below" ? selection : null}
       </div>
     </div>
   );

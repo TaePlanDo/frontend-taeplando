@@ -1,16 +1,56 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ExerciseForm } from "./ExerciseForm";
 import type { Exercise } from "@/types/exercise";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock("@/hooks/useIsMobile", () => ({ useIsMobile: () => isMobile }));
 
 const createExercise = vi.fn();
 const updateExercise = vi.fn();
+let isCreating = false;
+let isMobile = true;
+
+const ratingLabels = [
+  "Intensywność fizyczna",
+  "Trudność techniczna",
+  "Zaangażowanie górnych partii",
+  "Zaangażowanie dolnych partii",
+  "Zaangażowanie partii core",
+];
+
+const exercise: Exercise = {
+  id: "1",
+  owner_user_id: "owner",
+  scope: "PRIVATE",
+  image_url: "https://example.com/image.png",
+  name: "Ap chagi",
+  description: "Opis",
+  min_age: 7,
+  max_age: 14,
+  min_participants: 1,
+  max_participants: 20,
+  duration_minutes: 10,
+  physical_difficulty: 2,
+  technical_difficulty: 4,
+  upper_body_load: 1,
+  lower_body_load: 5,
+  core_load: 3,
+  status: "ACTIVE",
+  equipment: [],
+  training_types: [{ id: "t1", name: "Technika" }],
+  segments: [{ id: 1, code: "WARMUP", name: "Rozgrzewka" }],
+};
 
 vi.mock("@/hooks/exercises/useCreateExercise", () => ({
-  useCreateExercise: () => ({ createExercise, isCreating: false, error: null }),
+  useCreateExercise: () => ({ createExercise, isCreating, error: null }),
 }));
 vi.mock("@/hooks/exercises/useUpdateExercise", () => ({
   useUpdateExercise: () => ({ updateExercise, isUpdating: false, error: null }),
@@ -56,7 +96,11 @@ async function addFromList(tabLabel: string, optionLabel: string) {
 }
 
 describe("ExerciseForm", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    isCreating = false;
+    isMobile = true;
+  });
 
   it("renders an empty create form and required attribute warnings", async () => {
     renderForm();
@@ -65,6 +109,17 @@ describe("ExerciseForm", () => {
     ).toBe("");
     expect(screen.getByLabelText("Brak wybranego: Typ")).toBeTruthy();
     expect(screen.getByLabelText("Brak wybranego: Segment")).toBeTruthy();
+    const duration = screen.getByRole("spinbutton", {
+      name: "Czas trwania w minutach",
+    });
+    expect(duration).toHaveAttribute("aria-valuemin", "1");
+    expect(duration).toHaveAttribute("aria-valuemax", "60");
+    expect(duration).toHaveAttribute("aria-valuenow", "1");
+    for (const name of ratingLabels) {
+      const group = within(screen.getByRole("radiogroup", { name }));
+      expect(group.getAllByRole("radio")).toHaveLength(5);
+      expect(group.getByRole("radio", { name: "3" })).toBeChecked();
+    }
   });
 
   it("shows field errors and does not submit an incomplete form", async () => {
@@ -86,8 +141,20 @@ describe("ExerciseForm", () => {
       screen.getByPlaceholderText("Opisz ćwiczenie, zasady, wariant..."),
       { target: { value: "Opis" } },
     );
-    fireEvent.change(screen.getByLabelText("Czas trwania w minutach"), {
-      target: { value: "10" },
+    const duration = screen.getByRole("spinbutton", {
+      name: "Czas trwania w minutach",
+    });
+    fireEvent.keyDown(duration, { key: "ArrowRight" });
+    expect(duration).toHaveAttribute("aria-valuenow", "2");
+    fireEvent.keyDown(duration, { key: "End" });
+    fireEvent.keyDown(duration, { key: "ArrowRight" });
+    expect(duration).toHaveAttribute("aria-valuenow", "60");
+    ratingLabels.forEach((name, index) => {
+      fireEvent.click(
+        within(screen.getByRole("radiogroup", { name })).getByRole("radio", {
+          name: String(index + 1),
+        }),
+      );
     });
     await addFromList("Typ", "Technika");
     await addFromList("Segment", "Rozgrzewka");
@@ -97,14 +164,15 @@ describe("ExerciseForm", () => {
       expect(createExercise).toHaveBeenCalledWith(
         expect.objectContaining({
           min_age: 1,
+          duration_minutes: 60,
           max_age: 99,
           min_participants: 1,
           max_participants: 99,
-          physical_difficulty: 3,
-          technical_difficulty: 3,
+          physical_difficulty: 1,
+          technical_difficulty: 2,
           upper_body_load: 3,
-          lower_body_load: 3,
-          core_load: 3,
+          lower_body_load: 4,
+          core_load: 5,
         }),
       ),
     );
@@ -112,29 +180,14 @@ describe("ExerciseForm", () => {
   });
 
   it("renders edit values and sends an update", async () => {
-    const exercise: Exercise = {
-      id: "1",
-      owner_user_id: "owner",
-      scope: "PRIVATE",
-      image_url: "https://example.com/image.png",
-      name: "Ap chagi",
-      description: "Opis",
-      min_age: 7,
-      max_age: 14,
-      min_participants: 1,
-      max_participants: 20,
-      duration_minutes: 10,
-      physical_difficulty: 2,
-      technical_difficulty: 4,
-      upper_body_load: 1,
-      lower_body_load: 5,
-      core_load: 3,
-      status: "ACTIVE",
-      equipment: [],
-      training_types: [{ id: "t1", name: "Technika" }],
-      segments: [{ id: 1, code: "WARMUP", name: "Rozgrzewka" }],
-    };
     render(<ExerciseForm exercise={exercise} onClose={vi.fn()} />);
+    ratingLabels.forEach((name, index) => {
+      expect(
+        within(screen.getByRole("radiogroup", { name })).getByRole("radio", {
+          name: String([2, 4, 1, 5, 3][index]),
+        }),
+      ).toBeChecked();
+    });
     expect(
       (screen.getByLabelText("Nazwa ćwiczenia") as HTMLInputElement).value,
     ).toBe("Ap chagi");
@@ -158,14 +211,49 @@ describe("ExerciseForm", () => {
   });
 
   it("rejects planning values outside the allowed range", async () => {
-    renderForm();
-    fireEvent.change(screen.getByLabelText("Intensywność fizyczna"), {
-      target: { value: "6" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Stwórz ćwiczenie" }));
+    render(
+      <ExerciseForm
+        exercise={{ ...exercise, physical_difficulty: 6 }}
+        onClose={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Edytuj ćwiczenie" }));
     expect(
       await screen.findByText("Intensywność fizyczna musi być w zakresie 1–5"),
     ).toBeTruthy();
-    expect(createExercise).not.toHaveBeenCalled();
+    expect(updateExercise).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("radiogroup", { name: "Intensywność fizyczna" }),
+    ).toHaveAccessibleDescription(
+      /Intensywność fizyczna musi być w zakresie 1–5/,
+    );
+  });
+
+  it("disables all rating options while saving", () => {
+    isCreating = true;
+    renderForm();
+    for (const radio of screen.getAllByRole("radio")) {
+      expect(radio).toBeDisabled();
+    }
+    expect(
+      screen.getByRole("spinbutton", { name: "Czas trwania w minutach" }),
+    ).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("keeps the desktop duration input and rejects values above 60 minutes", async () => {
+    isMobile = false;
+    render(<ExerciseForm exercise={exercise} onClose={vi.fn()} />);
+    const duration = screen.getByRole("spinbutton", {
+      name: "Czas trwania w minutach",
+    });
+    expect(duration.tagName).toBe("INPUT");
+    expect(duration).toHaveAttribute("min", "1");
+    expect(duration).toHaveAttribute("max", "60");
+    fireEvent.change(duration, { target: { value: "61" } });
+    fireEvent.click(screen.getByRole("button", { name: "Edytuj ćwiczenie" }));
+    expect(
+      await screen.findByText("Czas trwania nie może przekraczać 60 minut"),
+    ).toBeTruthy();
+    expect(updateExercise).not.toHaveBeenCalled();
   });
 });

@@ -6,8 +6,7 @@ const validValues: GroupDetailsFormValues = {
   name: "Grupa wakacyjna",
   minAge: "7",
   maxAge: "14",
-  hours: "1",
-  minutes: "30",
+  durationMinutes: "90",
 };
 
 function errorsFor(values: Partial<GroupDetailsFormValues>) {
@@ -31,8 +30,7 @@ describe("groupDetailsSchema", () => {
       name: "Grupa wakacyjna",
       minAge: 7,
       maxAge: 14,
-      hours: 1,
-      minutes: 30,
+      durationMinutes: 90,
     });
   });
 
@@ -65,7 +63,10 @@ describe("groupDetailsSchema", () => {
   );
 
   it("returns only one error for an empty number field", () => {
-    const result = groupDetailsSchema.safeParse({ ...validValues, hours: "" });
+    const result = groupDetailsSchema.safeParse({
+      ...validValues,
+      durationMinutes: "",
+    });
 
     expect(result.success).toBe(false);
     expect(result.error?.issues).toHaveLength(1);
@@ -88,28 +89,26 @@ describe("groupDetailsSchema", () => {
     });
   });
 
-  it("rejects too many hours and minutes above 59", () => {
-    expect(errorsFor({ hours: "13", minutes: "60" })).toEqual({
-      hours: "Godziny nie mogą przekraczać 12",
-      minutes: "Minuty muszą być w zakresie 0-59",
+  it("rejects a duration above the existing limit in minutes", () => {
+    expect(errorsFor({ durationMinutes: "780" })).toEqual({
+      durationMinutes: "Czas trwania nie może przekraczać 779 minut",
     });
   });
 
-  it("requires hours and minutes to be filled", () => {
-    expect(errorsFor({ hours: "", minutes: "" })).toEqual({
-      hours: "Podaj liczbę godzin",
-      minutes: "Podaj liczbę minut",
+  it("requires the duration to be filled", () => {
+    expect(errorsFor({ durationMinutes: "" })).toEqual({
+      durationMinutes: "Podaj czas trwania treningu",
     });
   });
 
   it("rejects a duration of zero", () => {
-    expect(errorsFor({ hours: "0", minutes: "0" })).toEqual({
-      hours: "Podaj czas trwania treningu",
+    expect(errorsFor({ durationMinutes: "0" })).toEqual({
+      durationMinutes: "Podaj czas trwania treningu",
     });
   });
 
-  it("accepts duration made only from minutes or only from hours", () => {
-    expect(errorsFor({ hours: "0", minutes: "45" })).toEqual({});
-    expect(errorsFor({ hours: "2", minutes: "0" })).toEqual({});
+  it("accepts both short and multi-hour durations in minutes", () => {
+    expect(errorsFor({ durationMinutes: "45" })).toEqual({});
+    expect(errorsFor({ durationMinutes: "120" })).toEqual({});
   });
 });

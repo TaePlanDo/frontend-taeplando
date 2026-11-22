@@ -2,7 +2,7 @@ import { seedSystemData } from "./helpers/backend";
 import { createEquipment } from "./helpers/createEquipment";
 import { createLocalTrainerAndLogin } from "./helpers/createLocalTrainer";
 import { ExercisesPage } from "./pages/exercises.page";
-import { test } from "./playwright";
+import { expect, test } from "./playwright";
 
 const exercise = {
   name: "E2E kopnięcie frontalne",
@@ -121,6 +121,77 @@ test.describe("exercise search and filters", () => {
       training_type_ids: /^[0-9a-f-]{36}$/i,
     });
   });
+
+  test("uses mobile buttons for rating ranges and desktop sliders after resizing", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await createLocalTrainerAndLogin(page);
+    const exercises = new ExercisesPage(page);
+    await exercises.goto();
+    await page.getByRole("button", { name: /Filtruj/ }).click();
+    const range = exercises.filtersDialog.getByRole("group", {
+      name: "Intensywność fizyczna",
+      exact: true,
+    });
+    await range
+      .getByRole("radiogroup", { name: "Od" })
+      .getByText("2", { exact: true })
+      .click();
+    await expect(
+      range
+        .getByRole("radiogroup", { name: "Od" })
+        .getByRole("radio", { name: "2" }),
+    ).toBeChecked();
+    await range
+      .getByRole("radiogroup", { name: "Do" })
+      .getByText("4", { exact: true })
+      .click();
+    await exercises.expectListQuery({
+      min_physical_difficulty: /^2$/,
+      max_physical_difficulty: /^4$/,
+    });
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await expect(exercises.filtersDialog.getByRole("radiogroup")).toHaveCount(
+      0,
+    );
+    const sliders = exercises.filtersDialog.getByRole("slider", {
+      name: "Intensywność fizyczna",
+      exact: true,
+    });
+    await expect(sliders.nth(0)).toHaveAttribute("aria-valuenow", "2");
+    await expect(sliders.nth(1)).toHaveAttribute("aria-valuenow", "4");
+    await exercises.filtersDialog
+      .getByRole("button", { name: "Close" })
+      .click();
+    await exercises.expectActiveFilterChip("Intensywność fizyczna: 2–4");
+    await page.reload();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.getByRole("button", { name: /Filtruj/ }).click();
+    await expect(
+      range
+        .getByRole("radiogroup", { name: "Od" })
+        .getByRole("radio", { name: "2" }),
+    ).toBeChecked();
+    await expect(
+      range
+        .getByRole("radiogroup", { name: "Do" })
+        .getByRole("radio", { name: "4" }),
+    ).toBeChecked();
+    await exercises.filtersDialog
+      .getByRole("button", { name: "Wyczyść" })
+      .click();
+    await expect(
+      range
+        .getByRole("radiogroup", { name: "Od" })
+        .getByRole("radio", { name: "1" }),
+    ).toBeChecked();
+    await expect(
+      range
+        .getByRole("radiogroup", { name: "Do" })
+        .getByRole("radio", { name: "5" }),
+    ).toBeChecked();
+  });
 });
 
 test.describe("exercise configuration", () => {
@@ -163,21 +234,96 @@ test.describe("exercise configuration", () => {
     await exercises.expectValidationError("Wybierz co najmniej jeden Segment");
   });
 
-  test("shows validation feedback for an out-of-range intensity", async ({
+  test("keeps mobile rating fields visible after selecting every value", async ({
     page,
   }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await createLocalTrainerAndLogin(page);
+    const exercises = new ExercisesPage(page);
+    await exercises.goto();
+    await exercises.addExerciseButton.click();
+    const scrollArea = exercises.exerciseDialog.locator(
+      '[data-slot="scroll-area"]',
+    );
+
+    for (const label of [
+      "Intensywność fizyczna",
+      "Trudność techniczna",
+      "Zaangażowanie górnych partii",
+      "Zaangażowanie dolnych partii",
+      "Zaangażowanie partii core",
+    ]) {
+      const group = exercises.exerciseDialog.getByRole("radiogroup", {
+        name: label,
+        exact: true,
+      });
+      for (const value of [1, 2, 3, 4, 5]) {
+        const option = group.getByText(String(value), { exact: true });
+        await option.click();
+        await expect(
+          group.getByRole("radio", { name: String(value), exact: true }),
+        ).toBeChecked();
+        await expect(option).toBeInViewport({ ratio: 1 });
+        await expect
+          .poll(() => scrollArea.evaluate((element) => element.scrollTop))
+          .toBe(0);
+      }
+    }
+  });
+
+  test("offers mobile rating buttons and preserves values when resizing", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
     await createLocalTrainerAndLogin(page);
 
     const exercises = new ExercisesPage(page);
     await exercises.goto();
-    await exercises.submitExerciseWithoutAttributes({
-      ...exercise,
-      physicalDifficulty: 6,
-    });
-
-    await exercises.expectValidationError(
-      "Intensywność fizyczna musi być w zakresie 1–5",
+    await exercises.addExerciseButton.click();
+    const groups = exercises.exerciseDialog.getByRole("radiogroup");
+    await expect(groups).toHaveCount(5);
+    const viewport = exercises.exerciseDialog.locator(
+      '[data-slot="scroll-area-viewport"]',
     );
+    await expect
+      .poll(() =>
+        viewport.evaluate(
+          (element) => element.scrollWidth - element.clientWidth,
+        ),
+      )
+      .toBeLessThanOrEqual(1);
+    for (const group of await groups.all()) {
+      await expect(group.getByRole("radio")).toHaveCount(5);
+      for (const value of [1, 2, 3, 4, 5]) {
+        await expect(
+          group.getByRole("radio", { name: String(value), exact: true }),
+        ).toHaveAttribute("value", String(value));
+      }
+      const selected = group.getByRole("radio", { name: "3", exact: true });
+      await expect(selected).toBeChecked();
+      await selected.focus();
+      await selected.press("ArrowRight");
+      await expect(group.getByRole("radio", { name: "4" })).toBeChecked();
+      await expect(group.getByRole("radio", { checked: true })).toHaveCount(1);
+    }
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await expect(groups).toHaveCount(0);
+    for (const label of [
+      "Intensywność fizyczna",
+      "Trudność techniczna",
+      "Zaangażowanie górnych partii",
+      "Zaangażowanie dolnych partii",
+      "Zaangażowanie partii core",
+    ]) {
+      await expect(
+        exercises.exerciseDialog.getByRole("spinbutton", { name: label }),
+      ).toHaveValue("4");
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(groups).toHaveCount(5);
+    for (const group of await groups.all()) {
+      await expect(group.getByRole("radio", { name: "4" })).toBeChecked();
+    }
   });
 });
 

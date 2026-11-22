@@ -91,10 +91,9 @@ export function useRatioBalancer(options: Options) {
 
   const commit = React.useCallback(
     (next: number[], animate = true) => {
-      const clean = normalizeRatios(next);
-      paint(clean, animate);
-      optionsRef.current.onChange?.(clean);
-      optionsRef.current.onCommit?.(clean);
+      paint(next, animate);
+      optionsRef.current.onChange?.(next);
+      optionsRef.current.onCommit?.(next);
     },
     [paint],
   );
