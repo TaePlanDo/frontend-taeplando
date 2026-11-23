@@ -12,6 +12,10 @@ const query = vi.hoisted(() => ({
   isFetching: false,
   refetch: vi.fn(),
 }));
+const viewport = vi.hoisted(() => ({ desktop: false }));
+vi.mock("@/hooks/useIsDesktop", () => ({
+  useIsDesktop: () => viewport.desktop,
+}));
 vi.mock("@/hooks/plans/usePlanExerciseAlternatives", () => ({
   usePlanExerciseAlternatives: () => query,
 }));
@@ -53,6 +57,7 @@ describe("PlanExerciseAlternativesSheet", () => {
     query.isError = false;
     query.isFetching = false;
     query.refetch.mockReset();
+    viewport.desktop = false;
   });
 
   it("shows loading and empty states", () => {
@@ -102,5 +107,16 @@ describe("PlanExerciseAlternativesSheet", () => {
     fireEvent.click(screen.getByRole("radio", { name: "Wybierz Kopnięcia" }));
     fireEvent.click(submit);
     expect(onReplace).toHaveBeenCalledWith("exercise-2");
+  });
+
+  it("uses a modal overlay with a wider panel on desktop", () => {
+    viewport.desktop = true;
+    query.data = [];
+    renderSheet();
+    const dialog = screen.getByRole("dialog", { name: "Wymień ćwiczenie" });
+    expect(dialog).toHaveStyle({ width: "min(100%, 480px)" });
+    expect(
+      document.querySelector('[data-slot="sheet-overlay"]'),
+    ).not.toHaveClass("lg:hidden");
   });
 });

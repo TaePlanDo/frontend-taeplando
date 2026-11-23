@@ -54,7 +54,12 @@ export function CustomizedAlertDialog({
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!submitting) setOpen(next);
+      }}
+    >
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
       <AlertDialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col border-foreground/10 bg-background text-foreground">
         <AlertDialogHeader className="flex min-h-0 flex-1 flex-col">
@@ -70,6 +75,7 @@ export function CustomizedAlertDialog({
             type="button"
             variant="outline"
             onClick={handleCancel}
+            disabled={submitting}
             className="w-32 px-6"
           >
             {cancelText}

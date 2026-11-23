@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "cn";
 import { formatExerciseCount } from "@/lib/format/plural";
 import { type PlanPhase } from "@/lib/plan/phaseGrouping";
+import type { PlanExercise } from "@/types/plan";
 
 import { DeltaMinutesBadge } from "./DeltaMinutesBadge";
 import { PlanExerciseRow } from "./PlanExerciseRow";
@@ -14,11 +15,19 @@ import { PLAN_RATING_COLUMNS, PLAN_RATING_GRID_CLASS } from "./planRatings";
 type PlanPhaseSectionProps = {
   phase: PlanPhase;
   defaultOpen?: boolean;
+  onReplace: (exercise: PlanExercise, number: number) => void;
+  onRemove: (exercise: PlanExercise) => Promise<void>;
+  disabled?: boolean;
+  replacingExerciseId?: string;
 };
 
 export function PlanPhaseSection({
   phase,
   defaultOpen = true,
+  onReplace,
+  onRemove,
+  disabled,
+  replacingExerciseId,
 }: PlanPhaseSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
   const panelId = `phase-${phase.schema.position}`;
@@ -57,7 +66,11 @@ export function PlanPhaseSection({
             </div>
           </div>
 
-          <div className="flex shrink-0 flex-col items-end gap-1">
+          <div className="flex shrink-0 items-center gap-1">
+            <DeltaMinutesBadge
+              deltaMinutes={phase.deltaMinutes}
+              className="h-7 px-1 text-xs sm:h-8 sm:px-2 sm:text-sm"
+            />
             <CardItemBadge
               icon={<Clock3 className="size-4 text-primary" aria-hidden />}
               className="h-7 justify-center gap-1 border border-border px-1 text-xs font-medium whitespace-nowrap text-foreground sm:h-8 sm:px-2 sm:text-sm"
@@ -65,10 +78,6 @@ export function PlanPhaseSection({
             >
               {phase.actualMinutes} / {phase.plannedMinutes}
             </CardItemBadge>
-            <DeltaMinutesBadge
-              deltaMinutes={phase.deltaMinutes}
-              className="h-7 px-1 text-xs sm:h-8 sm:px-2 sm:text-sm"
-            />
           </div>
         </button>
         {open && phase.exercises.length > 0 ? (
@@ -76,7 +85,7 @@ export function PlanPhaseSection({
             <div
               className={cn(
                 PLAN_RATING_GRID_CLASS,
-                "w-full items-center lg:ml-auto lg:w-[24rem]",
+                "w-full items-center lg:ml-auto lg:mr-[5.25rem] lg:w-[23rem]",
               )}
             >
               {PLAN_RATING_COLUMNS.map((column) => (
@@ -103,6 +112,10 @@ export function PlanPhaseSection({
                 key={exercise.id}
                 exercise={exercise}
                 number={index + 1}
+                onReplace={onReplace}
+                onRemove={onRemove}
+                disabled={disabled}
+                isReplacing={exercise.id === replacingExerciseId}
               />
             ))
           ) : (

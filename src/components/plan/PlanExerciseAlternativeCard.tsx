@@ -30,8 +30,51 @@ export function PlanExerciseAlternativeCard({
   similarity,
   selection,
 }: CardProps) {
+  const ratingMeters = (
+    <div
+      className={`${PLAN_RATING_GRID_CLASS} lg:max-w-96 lg:[&_[role=meter]>span]:h-1`}
+    >
+      {PLAN_RATING_COLUMNS.map((column) => (
+        <RatingMeter
+          key={column.key}
+          label={column.label}
+          value={ratings[column.key]}
+          fillClass={column.fillClass}
+          showLabel={false}
+        />
+      ))}
+    </div>
+  );
+  const badges = (
+    <>
+      {trainingTypes.map((item) => (
+        <CardItemBadge
+          key={item.id}
+          icon={<Tag className="size-3" aria-hidden />}
+          className="border border-border px-2 py-0.5 text-xs text-foreground"
+        >
+          {item.name}
+        </CardItemBadge>
+      ))}
+      {equipment.length ? (
+        equipment.map((item) => (
+          <CardItemBadge
+            key={item.id}
+            icon={<Dumbbell className="size-3" aria-hidden />}
+            className="border border-primary/60 px-2 py-0.5 text-xs text-primary"
+          >
+            {item.name}
+          </CardItemBadge>
+        ))
+      ) : (
+        <CardItemBadge className="border border-border px-2 py-0.5 text-xs text-muted-foreground">
+          Brak sprzętu
+        </CardItemBadge>
+      )}
+    </>
+  );
   const content = (
-    <div className="flex min-w-0 flex-1 flex-col gap-2">
+    <div className="flex min-w-0 flex-1 self-start flex-col gap-2">
       <div className="flex items-start justify-between gap-2">
         <span className="break-words font-semibold text-foreground">
           {name}
@@ -50,53 +93,16 @@ export function PlanExerciseAlternativeCard({
           </span>
         ) : null}
       </div>
-      <div className="flex flex-wrap gap-1">
-        {trainingTypes.map((item) => (
-          <CardItemBadge
-            key={item.id}
-            icon={<Tag className="size-3" aria-hidden />}
-            className="border border-border px-2 py-0.5 text-xs text-foreground"
-          >
-            {item.name}
-          </CardItemBadge>
-        ))}
-        {equipment.length ? (
-          equipment.map((item) => (
-            <CardItemBadge
-              key={item.id}
-              icon={<Dumbbell className="size-3" aria-hidden />}
-              className="border border-primary/60 px-2 py-0.5 text-xs text-primary"
-            >
-              {item.name}
-            </CardItemBadge>
-          ))
-        ) : (
-          <CardItemBadge className="border border-border px-2 py-0.5 text-xs text-muted-foreground">
-            Brak sprzętu
-          </CardItemBadge>
-        )}
-      </div>
-      <div className={PLAN_RATING_GRID_CLASS}>
-        {PLAN_RATING_COLUMNS.map((column) => (
-          <RatingMeter
-            key={column.key}
-            label={column.label}
-            value={ratings[column.key]}
-            fillClass={column.fillClass}
-            showLabel={false}
-          />
-        ))}
-      </div>
     </div>
   );
   const inner = (
     <>
-      <span className="shrink-0 text-sm font-semibold text-primary">
+      <span className="flex h-14 w-5 shrink-0 items-center justify-center self-start text-sm font-semibold text-primary">
         {number}
       </span>
       <ExerciseImage
         src={imageUrl}
-        className="size-14 shrink-0 rounded-xl bg-muted object-cover"
+        className="size-14 shrink-0 self-start rounded-xl bg-muted object-cover"
       />
       {content}
       {selection ? (
@@ -113,12 +119,16 @@ export function PlanExerciseAlternativeCard({
     </>
   );
   return selection ? (
-    <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-card p-3">
-      {inner}
+    <label className="flex cursor-pointer flex-col gap-3 rounded-xl border border-border bg-card p-3">
+      <div className="flex items-center gap-1.5 lg:gap-3">{inner}</div>
+      <div className="flex flex-wrap gap-1">{badges}</div>
+      {ratingMeters}
     </label>
   ) : (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
-      {inner}
+    <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-3">
+      <div className="flex items-center gap-3">{inner}</div>
+      <div className="flex flex-wrap gap-1">{badges}</div>
+      {ratingMeters}
     </div>
   );
 }
