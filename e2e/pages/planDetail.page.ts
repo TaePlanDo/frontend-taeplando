@@ -1,10 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
-export function planNameForGroup(groupName: string): string {
-  return `Plan treningowy – ${groupName}`;
-}
-
 export class PlanDetailPage {
   readonly page: Page;
   readonly regenerateButton: Locator;
@@ -26,6 +22,10 @@ export class PlanDetailPage {
       throw new Error(`Expected a plan detail URL, got ${this.page.url()}`);
     }
     return match[1];
+  }
+
+  async planName(): Promise<string> {
+    return this.page.getByRole("heading", { level: 1 }).innerText();
   }
 
   async expectPlan(groupName: string): Promise<void> {
