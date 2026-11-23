@@ -8,13 +8,13 @@ import { queryKeys } from "@/lib/queryKeys";
 export function usePlanExerciseMutations() {
   const replace = useEntityMutation({
     mutationFn: replacePlanExerciseRequest,
-    invalidateKey: queryKeys.plans.all,
+    invalidateKey: queryKeys.plans.lists(),
     fallbackMessage: "Nie udało się wymienić ćwiczenia. Spróbuj ponownie.",
     networkMode: "always",
   });
   const remove = useEntityMutation({
     mutationFn: deletePlanExerciseRequest,
-    invalidateKey: queryKeys.plans.all,
+    invalidateKey: queryKeys.plans.lists(),
     fallbackMessage: "Nie udało się usunąć ćwiczenia. Spróbuj ponownie.",
     networkMode: "always",
   });

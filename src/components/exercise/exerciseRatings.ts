@@ -20,32 +20,32 @@ export const EXERCISE_RATINGS = {
   physical_difficulty: {
     label: "Intensywność",
     key: "physical_difficulty",
-    fillClass: "bg-emerald-500 light:bg-[#008765]",
-    headerClass: "text-emerald-400 light:text-[#008765]",
+    fillClass: "bg-emerald-500 light:bg-rating-physical",
+    headerClass: "text-emerald-400 light:text-rating-physical",
   },
   technical_difficulty: {
     label: "Trudność",
     key: "technical_difficulty",
-    fillClass: "bg-violet-500 light:bg-[#7540c9]",
-    headerClass: "text-violet-300 light:text-[#7540c9]",
+    fillClass: "bg-violet-500 light:bg-rating-technical",
+    headerClass: "text-violet-300 light:text-rating-technical",
   },
   upper_body_load: {
     label: "Górne partie",
     key: "upper_body_load",
-    fillClass: "bg-orange-600 light:bg-[#c43d20]",
-    headerClass: "text-orange-500 light:text-[#c43d20]",
+    fillClass: "bg-orange-600 light:bg-rating-upper",
+    headerClass: "text-orange-500 light:text-rating-upper",
   },
   lower_body_load: {
     label: "Dolne partie",
     key: "lower_body_load",
-    fillClass: "bg-orange-400 light:bg-[#ce5f00]",
-    headerClass: "text-orange-400 light:text-[#b85300]",
+    fillClass: "bg-orange-400 light:bg-rating-lower",
+    headerClass: "text-orange-400 light:text-rating-lower-text",
   },
   core_load: {
     label: "Core",
     key: "core_load",
-    fillClass: "bg-orange-300 light:bg-[#ac7600]",
-    headerClass: "text-orange-300 light:text-[#946500]",
+    fillClass: "bg-orange-300 light:bg-rating-core",
+    headerClass: "text-orange-300 light:text-rating-core-text",
   },
 } satisfies Record<ExerciseRatingKey, ExerciseRatingColumn>;
 

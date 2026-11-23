@@ -24,7 +24,7 @@ export function PlanDetailPage() {
   const { planId } = useParams<{ planId: string }>();
   const navigate = useNavigate();
   const backTo: string = useLocation().state?.backTo ?? "/plans";
-  const { plan, isLoading, isError, refetch } = usePlan(planId);
+  const { plan, isLoading, isFetching, isError, refetch } = usePlan(planId);
   const { deletePlan } = useDeletePlan();
   const { replace, remove } = usePlanExerciseMutations();
   const [regenerateOpen, setRegenerateOpen] = useState(false);
@@ -32,39 +32,19 @@ export function PlanDetailPage() {
     exercise: PlanExercise;
     number: number;
   } | null>(null);
-  const [syncing, setSyncing] = useState(false);
-  const [syncError, setSyncError] = useState(false);
-
-  async function refreshPlan() {
-    setSyncing(true);
-    try {
-      const result = await refetch();
-      setSyncError(result.isError);
-      return result.data;
-    } finally {
-      setSyncing(false);
-    }
-  }
-
   async function handleReplace(exerciseId: string) {
     if (!plan || !selected) return;
-    const slot = selected.exercise;
     try {
       await replace.mutate({
         planId: plan.id,
-        planExerciseId: slot.id,
+        planExerciseId: selected.exercise.id,
         exerciseId,
       });
       setSelected(null);
-      await refreshPlan();
       toast.success("Ćwiczenie zostało wymienione");
+      await refetch();
     } catch {
-      const current = await refreshPlan();
-      const updated = current?.exercises.find((item) => item.id === slot.id);
-      if (current && (!updated || updated.exercise_id !== slot.exercise_id)) {
-        setSelected(null);
-        toast.error("Plan uległ zmianie. Sprawdź aktualną listę ćwiczeń.");
-      }
+      // The mutation error is displayed in the alternatives panel.
     }
   }
 
@@ -72,36 +52,14 @@ export function PlanDetailPage() {
     if (!plan) return;
     try {
       await remove.mutate({ planId: plan.id, planExerciseId: exercise.id });
-      await refreshPlan();
       toast.success("Ćwiczenie zostało usunięte z planu");
+      await refetch();
     } catch (error) {
-      const current = await refreshPlan();
-      if (
-        current &&
-        !current.exercises.some((item) => item.id === exercise.id)
-      ) {
-        toast.error("Plan uległ zmianie. Sprawdź aktualną listę ćwiczeń.");
-      } else {
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : "Nie udało się usunąć ćwiczenia.",
-        );
-      }
-    }
-  }
-
-  async function refreshSelectedPlan() {
-    const current = await refreshPlan();
-    const updated = current?.exercises.find(
-      (item) => item.id === selected?.exercise.id,
-    );
-    if (
-      current &&
-      (!updated || updated.exercise_id !== selected?.exercise.exercise_id)
-    ) {
-      setSelected(null);
-      toast.error("Plan uległ zmianie. Sprawdź aktualną listę ćwiczeń.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Nie udało się usunąć ćwiczenia.",
+      );
     }
   }
 
@@ -123,7 +81,7 @@ export function PlanDetailPage() {
     return <CenteredLoading label="Ładowanie planu…" />;
   }
 
-  if (!plan && (isError || !isLoading)) {
+  if (!plan) {
     return (
       <CenteredStatus
         message="Nie udało się wczytać planu treningowego."
@@ -143,15 +101,11 @@ export function PlanDetailPage() {
     );
   }
 
-  if (!plan) return null;
-
   const phases = groupPlanPhases(plan);
 
   return (
-    <div className="flex flex-1 justify-center px-3 py-6 sm:px-6">
-      <div
-        className={`mb-12 flex w-full max-w-96 flex-col gap-8 transition-transform duration-300 lg:max-w-220 ${selected ? "lg:translate-x-[clamp(0px,calc(944px_-_50vw),480px)]" : ""}`}
-      >
+    <div className="flex flex-1 justify-center px-3 py-6 lg:px-6">
+      <div className="mb-12 flex w-full max-w-96 flex-col gap-8 lg:max-w-220">
         <PlanDetailHeader
           plan={plan}
           backTo={backTo}
@@ -163,25 +117,6 @@ export function PlanDetailPage() {
         <PlanSummaryCards plan={plan} />
 
         <PlanEquipmentSection equipment={plan.available_equipment_snapshot} />
-
-        {syncError ? (
-          <div
-            role="alert"
-            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive p-4 text-sm text-destructive"
-          >
-            <span>
-              Nie udało się odświeżyć planu. Odśwież go przed kolejną zmianą.
-            </span>
-            <CustomizedButton
-              type="button"
-              className="w-auto"
-              disabled={syncing}
-              onClick={() => void refreshPlan()}
-            >
-              Odśwież plan
-            </CustomizedButton>
-          </div>
-        ) : null}
 
         <div className="flex flex-col gap-3">
           {phases.map((phase) => (
@@ -198,8 +133,8 @@ export function PlanDetailPage() {
                 selected !== null ||
                 replace.isPending ||
                 remove.isPending ||
-                syncing ||
-                syncError
+                isFetching ||
+                isError
               }
             />
           ))}
@@ -211,16 +146,19 @@ export function PlanDetailPage() {
           number={selected?.number ?? 0}
           open={selected !== null}
           onOpenChange={(open) => {
-            if (!open && !replace.isPending && !syncing) {
+            if (!open && !replace.isPending) {
               setSelected(null);
               replace.reset();
             }
           }}
           onReplace={(exerciseId) => void handleReplace(exerciseId)}
-          isReplacing={replace.isPending || syncing}
-          replaceError={replace.error}
-          refreshRequired={syncError}
-          onRefreshPlan={() => void refreshSelectedPlan()}
+          isReplacing={replace.isPending}
+          disabled={isFetching || isError}
+          replaceError={
+            isError
+              ? "Nie udało się odświeżyć planu. Zamknij panel i spróbuj ponownie."
+              : replace.error
+          }
         />
 
         <RegeneratePlanDialog
@@ -230,6 +168,29 @@ export function PlanDetailPage() {
           onStarted={(jobId) => navigate(`/plans/generation/${jobId}`)}
         />
       </div>
+      {isError ? (
+        <div
+          role="alert"
+          className="fixed right-4 bottom-4 z-40 flex flex-wrap items-center gap-3 rounded-xl border border-destructive bg-background p-4 text-sm text-destructive shadow-lg"
+        >
+          <span>Nie udało się odświeżyć planu.</span>
+          <CustomizedButton
+            type="button"
+            className="w-auto"
+            disabled={isFetching}
+            onClick={() => void refetch()}
+          >
+            Spróbuj ponownie
+          </CustomizedButton>
+        </div>
+      ) : isFetching ? (
+        <div
+          role="status"
+          className="fixed right-4 bottom-4 z-40 rounded-xl border border-border bg-background p-4 text-sm shadow-lg"
+        >
+          Odświeżanie planu…
+        </div>
+      ) : null}
     </div>
   );
 }

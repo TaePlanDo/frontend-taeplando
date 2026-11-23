@@ -19,7 +19,6 @@ vi.mock("@/hooks/useIsDesktop", () => ({
 vi.mock("@/hooks/plans/usePlanExerciseAlternatives", () => ({
   usePlanExerciseAlternatives: () => query,
 }));
-vi.mock("@/hooks/useOnlineState", () => ({ useOnlineState: () => true }));
 
 const alternative: PlanExerciseAlternative = {
   trainer_exercise_id: "trainer-2",

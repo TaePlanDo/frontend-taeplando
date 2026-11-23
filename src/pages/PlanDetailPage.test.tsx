@@ -243,9 +243,8 @@ describe("PlanDetailPage", () => {
     await waitFor(() => expect(refetchPlan).toHaveBeenCalled());
   });
 
-  it("blocks further changes when the plan cannot be refreshed after a failed removal", async () => {
+  it("shows the removal error without refreshing the plan", async () => {
     removeExercise.mockRejectedValue(new Error("Błąd usuwania"));
-    refetchPlan.mockResolvedValue({ data: planFixture, isError: true });
     renderPage();
     fireEvent.click(
       screen.getByRole("button", { name: "Usuń ćwiczenie Bieg" }),
@@ -256,20 +255,50 @@ describe("PlanDetailPage", () => {
       }),
     );
     await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: "Wymień ćwiczenie Bieg" }),
-      ).toBeDisabled(),
+      expect(toast.error).toHaveBeenCalledWith("Błąd usuwania"),
     );
+    expect(refetchPlan).not.toHaveBeenCalled();
+  });
+
+  it("keeps the plan visible but blocks changes after a failed refresh", () => {
+    usePlan.mockReturnValue({
+      plan: planFixture,
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+      refetch: refetchPlan,
+    });
+    renderPage();
     expect(
-      screen.getByText(/Nie udało się odświeżyć planu/),
-    ).toBeInTheDocument();
-    refetchPlan.mockResolvedValue({ data: planFixture, isError: false });
-    fireEvent.click(screen.getByRole("button", { name: "Odśwież plan" }));
-    await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: "Wymień ćwiczenie Bieg" }),
-      ).toBeEnabled(),
+      screen.getByRole("button", { name: "Wymień ćwiczenie Bieg" }),
+    ).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Spróbuj ponownie" }));
+    expect(refetchPlan).toHaveBeenCalledOnce();
+  });
+
+  it("keeps the plan and its state while refreshing", () => {
+    const view = renderPage();
+    fireEvent.click(screen.getByRole("button", { name: /Rozgrzewka/ }));
+    expect(screen.queryByText("Bieg")).toBeNull();
+    usePlan.mockReturnValue({
+      plan: planFixture,
+      isLoading: false,
+      isFetching: true,
+      isError: false,
+      refetch: refetchPlan,
+    });
+    view.rerender(
+      <MemoryRouter initialEntries={["/plans/plan-1"]}>
+        <Routes>
+          <Route path="/plans/:planId" element={<PlanDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
     );
+    expect(screen.getByRole("status")).toHaveTextContent("Odświeżanie planu");
+    expect(screen.queryByText("Bieg")).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Wymień ćwiczenie Sparing" }),
+    ).toBeDisabled();
   });
 
   it("labels back navigation toward the generation form", () => {

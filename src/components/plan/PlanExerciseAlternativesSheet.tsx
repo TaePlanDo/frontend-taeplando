@@ -1,12 +1,12 @@
 import { useState } from "react";
 
-import { ListStateView } from "@/components/shared/ListStateView";
+import { EmptyListView } from "@/components/shared/EmptyListView";
+import { ErrorListView } from "@/components/shared/ErrorListView";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedSheet } from "@/components/shared/CustomizedSheet";
 import { InputErrorMessage } from "@/components/shared/InputErrorMessage";
-import { getPaginatedListState } from "@/hooks/pagination/listState";
 import { usePlanExerciseAlternatives } from "@/hooks/plans/usePlanExerciseAlternatives";
-import { useOnlineState } from "@/hooks/useOnlineState";
 import { mapPlanExerciseToSnapshot } from "@/lib/mappers/plan";
 import type { PlanExercise } from "@/types/plan";
 import { PlanExerciseAlternativeCard } from "./PlanExerciseAlternativeCard";
@@ -19,9 +19,8 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   onReplace: (exerciseId: string) => void;
   isReplacing?: boolean;
+  disabled?: boolean;
   replaceError?: string | null;
-  refreshRequired?: boolean;
-  onRefreshPlan?: () => void;
 };
 
 export function PlanExerciseAlternativesSheet({
@@ -57,26 +56,18 @@ function AlternativesContent({
   onOpenChange,
   onReplace,
   isReplacing = false,
+  disabled = false,
   replaceError,
-  refreshRequired = false,
-  onRefreshPlan,
 }: Omit<Props, "open"> & { exercise: PlanExercise }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const query = usePlanExerciseAlternatives(planId, exercise.id);
-  const isOnline = useOnlineState();
   const alternatives = query.data ?? [];
-  const state = getPaginatedListState({
-    hasData: query.data !== undefined,
-    isOnline,
-    isLoading: query.isPending,
-    isError: query.isError,
-    isEmpty: alternatives.length === 0,
-  });
   const canReplace =
-    state.kind === "ready" &&
+    !query.isError &&
+    !query.isFetching &&
+    !disabled &&
     alternatives.some((item) => item.exercise_id === selectedId) &&
-    !isReplacing &&
-    !refreshRequired;
+    !isReplacing;
   const source = mapPlanExerciseToSnapshot(exercise);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -99,16 +90,25 @@ function AlternativesContent({
           Propozycje{query.data ? ` (${alternatives.length})` : ""}
         </h3>
         <div className="min-h-0 flex-1 overflow-y-auto pb-4">
-          <ListStateView
-            state={state}
-            errorTitle="Nie udało się pobrać ćwiczeń zamiennych"
-            errorMessage="Spróbuj ponownie za chwilę."
-            onRetry={() => void query.refetch()}
-            isRetrying={query.isFetching}
-            emptyTitle="Brak ćwiczeń zamiennych"
-            emptyMessage="Nie znaleziono ćwiczeń pasujących do tego planu."
-          >
-            <fieldset className="flex flex-col gap-2" disabled={isReplacing}>
+          {query.isPending || (query.isFetching && !query.isError) ? (
+            <LoadingSpinner className="h-92" />
+          ) : query.isError ? (
+            <ErrorListView
+              title="Nie udało się pobrać ćwiczeń zamiennych"
+              message="Spróbuj ponownie za chwilę."
+              onRetry={() => void query.refetch()}
+              isRetrying={query.isFetching}
+            />
+          ) : alternatives.length === 0 ? (
+            <EmptyListView
+              title="Brak ćwiczeń zamiennych"
+              message="Nie znaleziono ćwiczeń pasujących do tego planu."
+            />
+          ) : (
+            <fieldset
+              className="flex flex-col gap-2"
+              disabled={isReplacing || disabled}
+            >
               <legend className="sr-only">Wybierz ćwiczenie zamienne</legend>
               {alternatives.map((item, index) => (
                 <PlanExerciseAlternativeCard
@@ -123,31 +123,16 @@ function AlternativesContent({
                   selection={{
                     checked: selectedId === item.exercise_id,
                     onChange: () => setSelectedId(item.exercise_id),
-                    disabled: isReplacing || state.kind !== "ready",
+                    disabled: isReplacing || disabled,
                   }}
                 />
               ))}
             </fieldset>
-          </ListStateView>
+          )}
         </div>
       </div>
       <div className="flex shrink-0 flex-col gap-3 border-t border-border pt-4">
         {replaceError ? <InputErrorMessage message={replaceError} /> : null}
-        {refreshRequired ? (
-          <div role="alert" className="space-y-2">
-            <p className="text-sm text-destructive">
-              Nie udało się odświeżyć planu. Odśwież go przed kolejną zmianą.
-            </p>
-            <CustomizedButton
-              type="button"
-              className="w-full"
-              disabled={isReplacing}
-              onClick={onRefreshPlan}
-            >
-              Odśwież plan
-            </CustomizedButton>
-          </div>
-        ) : null}
         <div className="flex gap-3">
           <CustomizedButton
             type="button"
