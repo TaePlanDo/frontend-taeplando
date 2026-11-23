@@ -12,7 +12,11 @@ import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog
 import { Button } from "@/components/ui/button";
 import { mapPlanExerciseToSnapshot } from "@/lib/mappers/plan";
 import type { PlanExercise } from "@/types/plan";
-import { PLAN_RATING_COLUMNS, PLAN_RATING_GRID_CLASS } from "./planRatings";
+import {
+  PLAN_EXERCISE_LAYOUT_CLASS,
+  PLAN_RATING_COLUMNS,
+  PLAN_RATING_GRID_CLASS,
+} from "./planRatings";
 
 type PlanExerciseRowProps = {
   exercise: PlanExercise;
@@ -36,12 +40,17 @@ export function PlanExerciseRow({
 
   return (
     <>
-      <div className="relative border-b border-border">
+      <div
+        className={cn(
+          "relative border-b border-border lg:items-center lg:px-7",
+          PLAN_EXERCISE_LAYOUT_CLASS,
+        )}
+      >
         <button
           type="button"
           aria-label={`Podgląd ćwiczenia ${exercise.name_snapshot}`}
           onClick={() => setOpen(true)}
-          className="flex w-full min-w-0 cursor-pointer flex-col gap-4 rounded-2xl border border-transparent px-3 py-4 text-left transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:px-7 lg:flex-row lg:items-center lg:gap-6 lg:pr-28"
+          className="flex w-full min-w-0 cursor-pointer flex-col gap-4 rounded-2xl border border-transparent px-3 py-4 text-left transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:col-span-2 lg:grid lg:grid-cols-subgrid lg:items-center lg:px-0"
         >
           <div className="flex w-full min-w-0 flex-1 items-center gap-3 pr-10 lg:gap-4 lg:pr-0">
             <div className="relative shrink-0 self-start">
@@ -91,12 +100,7 @@ export function PlanExerciseRow({
               {exercise.duration_minutes_snapshot} min
             </span>
           </div>
-          <div
-            className={cn(
-              PLAN_RATING_GRID_CLASS,
-              "w-full lg:w-[23rem] lg:shrink-0",
-            )}
-          >
+          <div className={cn(PLAN_RATING_GRID_CLASS, "w-full")}>
             {PLAN_RATING_COLUMNS.map((column) => (
               <RatingMeter
                 key={column.key}
@@ -108,7 +112,7 @@ export function PlanExerciseRow({
             ))}
           </div>
         </button>
-        <div className="absolute top-4 right-3 bottom-[2.375rem] flex flex-col justify-center gap-1 lg:right-7 lg:flex-row lg:items-center lg:top-0 lg:bottom-0">
+        <div className="absolute top-4 right-3 bottom-[2.375rem] flex flex-col justify-center gap-1 lg:static lg:col-start-3 lg:flex-row lg:items-center">
           <Button
             type="button"
             variant="outline"

@@ -10,7 +10,11 @@ import type { PlanExercise } from "@/types/plan";
 
 import { DeltaMinutesBadge } from "./DeltaMinutesBadge";
 import { PlanExerciseRow } from "./PlanExerciseRow";
-import { PLAN_RATING_COLUMNS, PLAN_RATING_GRID_CLASS } from "./planRatings";
+import {
+  PLAN_EXERCISE_LAYOUT_CLASS,
+  PLAN_RATING_COLUMNS,
+  PLAN_RATING_GRID_CLASS,
+} from "./planRatings";
 
 type PlanPhaseSectionProps = {
   phase: PlanPhase;
@@ -81,11 +85,16 @@ export function PlanPhaseSection({
           </div>
         </button>
         {open && phase.exercises.length > 0 ? (
-          <div className="border-t border-border px-3 py-2 lg:px-7">
+          <div
+            className={cn(
+              "border-t border-border px-3 py-2 lg:px-7",
+              PLAN_EXERCISE_LAYOUT_CLASS,
+            )}
+          >
             <div
               className={cn(
                 PLAN_RATING_GRID_CLASS,
-                "w-full items-center lg:ml-auto lg:mr-[5.25rem] lg:w-[23rem]",
+                "w-full items-center lg:col-start-2",
               )}
             >
               {PLAN_RATING_COLUMNS.map((column) => (

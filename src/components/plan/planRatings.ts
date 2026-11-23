@@ -9,3 +9,6 @@ export const PLAN_RATING_COLUMNS = [
 ];
 
 export const PLAN_RATING_GRID_CLASS = "grid grid-cols-5 gap-1.5";
+
+export const PLAN_EXERCISE_LAYOUT_CLASS =
+  "lg:grid lg:grid-cols-[minmax(0,1fr)_23rem_4.25rem] lg:gap-x-4";
