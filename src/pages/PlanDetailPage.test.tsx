@@ -214,7 +214,7 @@ describe("PlanDetailPage", () => {
         exerciseId: "replacement",
       }),
     );
-    await waitFor(() => expect(refetchPlan).toHaveBeenCalled());
+    expect(refetchPlan).not.toHaveBeenCalled();
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith(
         "Ćwiczenie zostało wymienione",
@@ -222,7 +222,7 @@ describe("PlanDetailPage", () => {
     );
   });
 
-  it("confirms removal and refreshes the plan", async () => {
+  it("confirms removal", async () => {
     removeExercise.mockResolvedValue(undefined);
     renderPage();
     fireEvent.click(
@@ -240,7 +240,7 @@ describe("PlanDetailPage", () => {
         planExerciseId: "ex-1",
       }),
     );
-    await waitFor(() => expect(refetchPlan).toHaveBeenCalled());
+    expect(refetchPlan).not.toHaveBeenCalled();
   });
 
   it("shows the removal error without refreshing the plan", async () => {

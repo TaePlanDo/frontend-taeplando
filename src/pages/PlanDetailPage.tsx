@@ -42,7 +42,6 @@ export function PlanDetailPage() {
       });
       setSelected(null);
       toast.success("Ćwiczenie zostało wymienione");
-      await refetch();
     } catch {
       // The mutation error is displayed in the alternatives panel.
     }
@@ -53,7 +52,6 @@ export function PlanDetailPage() {
     try {
       await remove.mutate({ planId: plan.id, planExerciseId: exercise.id });
       toast.success("Ćwiczenie zostało usunięte z planu");
-      await refetch();
     } catch (error) {
       toast.error(
         error instanceof Error
