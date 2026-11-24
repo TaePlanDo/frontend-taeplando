@@ -13,7 +13,7 @@ type EntityMutationOptions<TVariables, TResult> = {
   fallbackMessage: string;
   statusMessages?: Partial<Record<number, string>>;
   networkMode?: NetworkMode;
-  onSuccess?: (variables: TVariables) => void;
+  onSuccess?: (variables: TVariables, result: TResult) => void | Promise<void>;
 };
 
 export function useEntityMutation<TVariables, TResult>({
@@ -36,11 +36,11 @@ export function useEntityMutation<TVariables, TResult>({
         throw new Error(message ?? fallbackMessage);
       }
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: (data, variables) => {
       if (invalidateKey) {
         void queryClient.invalidateQueries({ queryKey: invalidateKey });
       }
-      onSuccess?.(variables);
+      return onSuccess?.(variables, data);
     },
   });
 

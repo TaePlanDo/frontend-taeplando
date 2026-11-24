@@ -10,18 +10,17 @@ import type { PlanDetail } from "@/types/plan";
 
 export function usePlanUpdateMutations() {
   const queryClient = useQueryClient();
-  const refreshPlan = ({ planId }: { planId: string }) => {
-    void queryClient.invalidateQueries({
-      queryKey: queryKeys.plans.detail(planId),
-      exact: true,
-    });
+  const savePlan = async ({ planId }: { planId: string }, plan: PlanDetail) => {
+    const key = queryKeys.plans.detail(planId);
+    await queryClient.cancelQueries({ queryKey: key, exact: true });
+    queryClient.setQueryData(key, plan);
   };
   const rename = useEntityMutation({
     mutationFn: updatePlanNameRequest,
     invalidateKey: queryKeys.plans.lists(),
     fallbackMessage: "Nie udało się zmienić nazwy planu. Spróbuj ponownie.",
     networkMode: "always",
-    onSuccess: refreshPlan,
+    onSuccess: savePlan,
   });
   const reorder = useMutation({
     networkMode: "always",
@@ -59,10 +58,9 @@ export function usePlanUpdateMutations() {
           context.previous,
         );
     },
-    onSuccess: (updatedPlan, { planId }) => {
-      queryClient.setQueryData(queryKeys.plans.detail(planId), updatedPlan);
+    onSuccess: async (updatedPlan, variables) => {
+      await savePlan(variables, updatedPlan);
       void queryClient.invalidateQueries({ queryKey: queryKeys.plans.lists() });
-      refreshPlan({ planId });
     },
   });
 

@@ -27,20 +27,13 @@ vi.mock("@/lib/api/plans", async (importOriginal) => ({
   updatePlanNameRequest: vi.fn(),
 }));
 
-it("renames a plan and blocks actions until its refresh finishes", async () => {
+it("renames a plan and blocks actions until saving finishes", async () => {
   let finishSave!: (plan: PlanDetail) => void;
-  let finishRefresh!: (plan: PlanDetail) => void;
   const save = new Promise<PlanDetail>((resolve) => {
     finishSave = resolve;
   });
-  const refresh = new Promise<PlanDetail>((resolve) => {
-    finishRefresh = resolve;
-  });
   const updated = { ...planFixture, name: "Nowa nazwa" };
-  vi.mocked(getPlanRequest)
-    .mockReset()
-    .mockResolvedValueOnce(planFixture)
-    .mockReturnValueOnce(refresh);
+  vi.mocked(getPlanRequest).mockReset().mockResolvedValueOnce(planFixture);
   vi.mocked(updatePlanNameRequest).mockReturnValueOnce(save);
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -77,17 +70,13 @@ it("renames a plan and blocks actions until its refresh finishes", async () => {
     screen.getByRole("button", { name: "Wymień ćwiczenie Bieg" }),
   ).toBeDisabled();
   await act(async () => finishSave(updated));
-  expect(await screen.findByText("Odświeżanie planu…")).toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: "Edytuj nazwę planu" }),
-  ).toBeDisabled();
-  await act(async () => finishRefresh(updated));
   expect(
     await screen.findByRole("button", { name: "Nowa nazwa" }),
   ).toBeEnabled();
   expect(
     screen.getByRole("button", { name: "Wymień ćwiczenie Bieg" }),
   ).toBeEnabled();
+  expect(getPlanRequest).toHaveBeenCalledTimes(1);
 });
 
 it("replaces an exercise and displays the refreshed plan", async () => {

@@ -24,10 +24,11 @@ describe("usePlanUpdateMutations", () => {
   beforeEach(() => vi.resetAllMocks());
 
   it.each(["rename", "reorder"] as const)(
-    "refreshes only the affected plan and lists after %s",
+    "uses the response for the affected plan and refreshes lists after %s",
     async (operation) => {
-      vi.mocked(updatePlanNameRequest).mockResolvedValue({} as never);
-      vi.mocked(updatePlanStructureRequest).mockResolvedValue(planFixture);
+      const updated = { ...planFixture, name: "after" };
+      vi.mocked(updatePlanNameRequest).mockResolvedValue(updated);
+      vi.mocked(updatePlanStructureRequest).mockResolvedValue(updated);
       const client = new QueryClient({
         defaultOptions: {
           queries: { retry: false },
@@ -77,8 +78,8 @@ describe("usePlanUpdateMutations", () => {
           });
       });
       await waitFor(() => expect(result.current.plan.data?.name).toBe("after"));
-      expect(fetchPlan).toHaveBeenCalledTimes(2);
-      expect(fetchList).toHaveBeenCalledTimes(2);
+      expect(fetchPlan).toHaveBeenCalledTimes(1);
+      await waitFor(() => expect(fetchList).toHaveBeenCalledTimes(2));
       expect(fetchOther).toHaveBeenCalledTimes(1);
     },
   );

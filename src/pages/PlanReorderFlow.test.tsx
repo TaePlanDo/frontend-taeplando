@@ -90,9 +90,8 @@ function renderPage() {
   );
 }
 
-it("displays the new order while saving and accepts the refreshed order", async () => {
+it("displays the new order while saving and keeps the saved order", async () => {
   let finish!: (value: typeof plan) => void;
-  let finishRefresh!: (value: typeof plan) => void;
   const updated = {
     ...plan,
     exercises: [
@@ -101,11 +100,6 @@ it("displays the new order while saving and accepts the refreshed order", async 
       plan.exercises[2],
     ],
   };
-  getPlan.mockResolvedValueOnce(plan).mockReturnValueOnce(
-    new Promise<typeof plan>((resolve) => {
-      finishRefresh = resolve;
-    }),
-  );
   reorder.mockReturnValue(
     new Promise<typeof plan>((resolve) => {
       finish = resolve;
@@ -128,20 +122,14 @@ it("displays the new order while saving and accepts the refreshed order", async 
   );
   expect(await screen.findByText("Zapisywanie zmian…")).toBeInTheDocument();
   await act(async () => finish(updated));
-  expect(await screen.findByText("Odświeżanie planu…")).toBeInTheDocument();
-  expect(
-    within(screen.getByTestId("phase-1"))
-      .getAllByText(/Bieg|Skok/)
-      .map((element) => element.textContent),
-  ).toEqual(["Skok", "Bieg"]);
-  await act(async () => finishRefresh(plan));
   await waitFor(() =>
     expect(
       within(screen.getByTestId("phase-1"))
         .getAllByText(/Bieg|Skok/)
         .map((element) => element.textContent),
-    ).toEqual(["Bieg", "Skok"]),
+    ).toEqual(["Skok", "Bieg"]),
   );
+  expect(getPlan).toHaveBeenCalledTimes(1);
 });
 
 it("restores the old order and reports a failed save", async () => {
