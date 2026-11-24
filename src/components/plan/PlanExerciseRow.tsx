@@ -50,7 +50,7 @@ export function PlanExerciseRow({
           type="button"
           aria-label={`Podgląd ćwiczenia ${exercise.name_snapshot}`}
           onClick={() => setOpen(true)}
-          className="flex w-full min-w-0 cursor-pointer flex-col gap-4 border border-transparent px-3 py-4 text-left before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:border before:border-transparent before:transition-colors hover:before:border-primary focus-visible:outline-none focus-visible:before:border-primary focus-visible:before:ring-2 focus-visible:before:ring-ring lg:col-span-2 lg:grid lg:grid-cols-subgrid lg:items-center lg:px-0"
+          className="flex w-full min-w-0 cursor-pointer flex-col gap-4 px-3 py-4 text-left before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:border before:border-transparent before:transition-colors hover:before:border-primary focus-visible:outline-none focus-visible:before:border-primary focus-visible:before:ring-2 focus-visible:before:ring-ring lg:col-span-2 lg:grid lg:grid-cols-subgrid lg:items-center lg:gap-x-8 lg:px-0"
         >
           <div className="flex w-full min-w-0 flex-1 items-center gap-3 pr-10 lg:gap-6 lg:pr-0">
             <div className="relative shrink-0 self-start">
