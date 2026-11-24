@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
+import { PlanNameEditor } from "@/components/plan/PlanNameEditor";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { Button } from "@/components/ui/button";
 import { formatMediumDate } from "@/lib/format/date-to-text";
@@ -24,6 +25,8 @@ type PlanDetailHeaderProps = {
   onBack: () => void;
   onRegenerate: () => void;
   onDelete: () => void | Promise<void>;
+  onRename: (name: string) => Promise<void>;
+  disabled: boolean;
 };
 
 export function PlanDetailHeader({
@@ -32,6 +35,8 @@ export function PlanDetailHeader({
   onBack,
   onRegenerate,
   onDelete,
+  onRename,
+  disabled,
 }: PlanDetailHeaderProps) {
   const primaryType = plan.training_types_snapshot[0]?.name;
 
@@ -50,14 +55,17 @@ export function PlanDetailHeader({
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="min-w-0 text-2xl font-bold text-primary">
-            {plan.name}
-          </h1>
+          <PlanNameEditor
+            name={plan.name}
+            disabled={disabled}
+            onSave={onRename}
+          />
           <div className="flex shrink-0 flex-wrap items-center gap-2">
             <CustomizedButton
               variant="outline"
               className="w-auto px-4 text-sm"
               onClick={onRegenerate}
+              disabled={disabled}
             >
               Wygeneruj ponownie
             </CustomizedButton>
@@ -66,6 +74,7 @@ export function PlanDetailHeader({
                 <CustomizedButton
                   variant="danger"
                   className="w-auto gap-2 px-4 text-sm"
+                  disabled={disabled}
                 >
                   <Trash2 className="size-4" aria-hidden />
                   Usuń

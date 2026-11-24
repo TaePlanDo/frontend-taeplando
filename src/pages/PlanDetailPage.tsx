@@ -17,6 +17,7 @@ import { HomeLink } from "@/components/shared/HomeLink";
 import { useDeletePlan } from "@/hooks/plans/useDeletePlan";
 import { usePlan } from "@/hooks/plans/usePlan";
 import { usePlanExerciseMutations } from "@/hooks/plans/usePlanExerciseMutations";
+import { usePlanUpdateMutations } from "@/hooks/plans/usePlanUpdateMutations";
 import { groupPlanPhases } from "@/lib/plan/phaseGrouping";
 import type { PlanExercise } from "@/types/plan";
 
@@ -27,11 +28,24 @@ export function PlanDetailPage() {
   const { plan, isLoading, isFetching, isError, refetch } = usePlan(planId);
   const { deletePlan } = useDeletePlan();
   const { replace, remove } = usePlanExerciseMutations();
+  const { rename, isPending: isUpdating } = usePlanUpdateMutations();
   const [regenerateOpen, setRegenerateOpen] = useState(false);
   const [selected, setSelected] = useState<{
     exercise: PlanExercise;
     number: number;
   } | null>(null);
+  async function handleRename(name: string) {
+    if (!plan) return;
+    try {
+      await rename.mutate({ planId: plan.id, name });
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Nie udało się zmienić nazwy planu.",
+      );
+    }
+  }
   async function handleReplace(exerciseId: string) {
     if (!plan || !selected) return;
     try {
@@ -100,6 +114,13 @@ export function PlanDetailPage() {
   }
 
   const phases = groupPlanPhases(plan);
+  const planActionsDisabled =
+    selected !== null ||
+    replace.isPending ||
+    remove.isPending ||
+    isUpdating ||
+    isFetching ||
+    isError;
 
   return (
     <div className="flex flex-1 justify-center px-3 py-6 lg:px-6">
@@ -110,6 +131,8 @@ export function PlanDetailPage() {
           onBack={() => navigate(backTo)}
           onRegenerate={() => setRegenerateOpen(true)}
           onDelete={handleDelete}
+          onRename={handleRename}
+          disabled={planActionsDisabled}
         />
 
         <PlanSummaryCards plan={plan} />
@@ -127,13 +150,7 @@ export function PlanDetailPage() {
               }}
               onRemove={handleRemove}
               replacingExerciseId={selected?.exercise.id}
-              disabled={
-                selected !== null ||
-                replace.isPending ||
-                remove.isPending ||
-                isFetching ||
-                isError
-              }
+              disabled={planActionsDisabled}
             />
           ))}
         </div>
