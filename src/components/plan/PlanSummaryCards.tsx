@@ -18,9 +18,9 @@ export function PlanSummaryCards({ plan }: PlanSummaryCardsProps) {
   const delta = actual - planned;
 
   return (
-    <div className="grid items-start gap-4 lg:grid-cols-[fit-content(21rem)_minmax(0,1fr)]">
+    <div className="grid gap-4 lg:grid-cols-[fit-content(21rem)_minmax(0,1fr)]">
       <Card className="gap-4 rounded-2xl border-border bg-card/40 p-4 shadow-none sm:p-5">
-        <CardTitle className="text-base text-foreground [overflow-wrap:anywhere]">
+        <CardTitle className="text-base text-foreground wrap-anywhere">
           {plan.group_name_snapshot}
         </CardTitle>
         <CardContent className="flex flex-wrap gap-3 px-0">

@@ -50,9 +50,9 @@ export function PlanExerciseRow({
           type="button"
           aria-label={`Podgląd ćwiczenia ${exercise.name_snapshot}`}
           onClick={() => setOpen(true)}
-          className="flex w-full min-w-0 cursor-pointer flex-col gap-4 rounded-2xl border border-transparent px-3 py-4 text-left transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:col-span-2 lg:grid lg:grid-cols-subgrid lg:items-center lg:px-0"
+          className="flex w-full min-w-0 cursor-pointer flex-col gap-4 border border-transparent px-3 py-4 text-left before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:border before:border-transparent before:transition-colors hover:before:border-primary focus-visible:outline-none focus-visible:before:border-primary focus-visible:before:ring-2 focus-visible:before:ring-ring lg:col-span-2 lg:grid lg:grid-cols-subgrid lg:items-center lg:px-0"
         >
-          <div className="flex w-full min-w-0 flex-1 items-center gap-3 pr-10 lg:gap-4 lg:pr-0">
+          <div className="flex w-full min-w-0 flex-1 items-center gap-3 pr-10 lg:gap-6 lg:pr-0">
             <div className="relative shrink-0 self-start">
               <ExerciseImage
                 src={exercise.image_url_snapshot}
@@ -112,7 +112,7 @@ export function PlanExerciseRow({
             ))}
           </div>
         </button>
-        <div className="absolute top-4 right-3 bottom-[2.375rem] flex flex-col justify-center gap-1 lg:static lg:col-start-3 lg:flex-row lg:items-center">
+        <div className="absolute top-4 right-3 bottom-[2.375rem] flex flex-col justify-center gap-2 lg:static lg:col-start-3 lg:items-center">
           <Button
             type="button"
             variant="outline"
