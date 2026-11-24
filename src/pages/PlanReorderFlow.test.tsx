@@ -17,7 +17,6 @@ import { PlanDetailPage } from "./PlanDetailPage";
 const reorder = vi.fn();
 const getPlan = vi.fn();
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
-vi.mock("@/hooks/plans/usePlan", () => ({ usePlan: () => getPlan() }));
 vi.mock("@/hooks/plans/usePlanExerciseMutations", () => ({
   usePlanExerciseMutations: () => ({
     replace: { isPending: false, reset: vi.fn() },
@@ -26,6 +25,7 @@ vi.mock("@/hooks/plans/usePlanExerciseMutations", () => ({
 }));
 vi.mock("@/lib/api/plans", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/api/plans")>()),
+  getPlanRequest: (...args: unknown[]) => getPlan(...args),
   updatePlanStructureRequest: (...args: unknown[]) => reorder(...args),
 }));
 vi.mock("@/components/plan/PlanPhaseSection", () => ({
@@ -72,12 +72,7 @@ const plan = {
 beforeEach(() => {
   reorder.mockReset();
   vi.mocked(toast.error).mockReset();
-  getPlan.mockReturnValue({
-    plan,
-    isLoading: false,
-    isFetching: false,
-    isError: false,
-  });
+  getPlan.mockReset().mockResolvedValue(plan);
 });
 
 function renderPage() {
@@ -95,20 +90,36 @@ function renderPage() {
   );
 }
 
-it("displays the new order immediately and sends the full plan order", async () => {
-  let finish!: () => void;
+it("displays the new order while saving and accepts the refreshed order", async () => {
+  let finish!: (value: typeof plan) => void;
+  let finishRefresh!: (value: typeof plan) => void;
+  const updated = {
+    ...plan,
+    exercises: [
+      { ...plan.exercises[1], position: 1 },
+      { ...plan.exercises[0], position: 2 },
+      plan.exercises[2],
+    ],
+  };
+  getPlan.mockResolvedValueOnce(plan).mockReturnValueOnce(
+    new Promise<typeof plan>((resolve) => {
+      finishRefresh = resolve;
+    }),
+  );
   reorder.mockReturnValue(
-    new Promise<void>((resolve) => {
+    new Promise<typeof plan>((resolve) => {
       finish = resolve;
     }),
   );
   renderPage();
-  fireEvent.click(screen.getByRole("button", { name: "Przenieś" }));
-  expect(
-    within(screen.getByTestId("phase-1"))
-      .getAllByText(/Bieg|Skok/)
-      .map((element) => element.textContent),
-  ).toEqual(["Skok", "Bieg"]);
+  fireEvent.click(await screen.findByRole("button", { name: "Przenieś" }));
+  await waitFor(() =>
+    expect(
+      within(screen.getByTestId("phase-1"))
+        .getAllByText(/Bieg|Skok/)
+        .map((element) => element.textContent),
+    ).toEqual(["Skok", "Bieg"]),
+  );
   await waitFor(() =>
     expect(reorder).toHaveBeenCalledWith({
       planId: "plan-1",
@@ -116,9 +127,20 @@ it("displays the new order immediately and sends the full plan order", async () 
     }),
   );
   expect(await screen.findByText("Zapisywanie zmian…")).toBeInTheDocument();
-  await act(async () => finish());
+  await act(async () => finish(updated));
+  expect(await screen.findByText("Odświeżanie planu…")).toBeInTheDocument();
+  expect(
+    within(screen.getByTestId("phase-1"))
+      .getAllByText(/Bieg|Skok/)
+      .map((element) => element.textContent),
+  ).toEqual(["Skok", "Bieg"]);
+  await act(async () => finishRefresh(plan));
   await waitFor(() =>
-    expect(screen.queryByText("Zapisywanie zmian…")).not.toBeInTheDocument(),
+    expect(
+      within(screen.getByTestId("phase-1"))
+        .getAllByText(/Bieg|Skok/)
+        .map((element) => element.textContent),
+    ).toEqual(["Bieg", "Skok"]),
   );
 });
 
@@ -130,7 +152,15 @@ it("restores the old order and reports a failed save", async () => {
     }),
   );
   renderPage();
-  fireEvent.click(screen.getByRole("button", { name: "Przenieś" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Przenieś" }));
+  await waitFor(() => expect(reorder).toHaveBeenCalled());
+  await waitFor(() =>
+    expect(
+      within(screen.getByTestId("phase-1"))
+        .getAllByText(/Bieg|Skok/)
+        .map((element) => element.textContent),
+    ).toEqual(["Skok", "Bieg"]),
+  );
   await act(async () => fail(new Error("Błąd zapisu")));
   await waitFor(() =>
     expect(toast.error).toHaveBeenCalledWith(

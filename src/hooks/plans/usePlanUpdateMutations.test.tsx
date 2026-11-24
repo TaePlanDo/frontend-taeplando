@@ -12,6 +12,7 @@ import {
   updatePlanStructureRequest,
 } from "@/lib/api/plans";
 import { queryKeys } from "@/lib/queryKeys";
+import { planFixture } from "@/test/planFixture";
 import { usePlanUpdateMutations } from "./usePlanUpdateMutations";
 
 vi.mock("@/lib/api/plans", () => ({
@@ -26,7 +27,7 @@ describe("usePlanUpdateMutations", () => {
     "refreshes only the affected plan and lists after %s",
     async (operation) => {
       vi.mocked(updatePlanNameRequest).mockResolvedValue({} as never);
-      vi.mocked(updatePlanStructureRequest).mockResolvedValue({} as never);
+      vi.mocked(updatePlanStructureRequest).mockResolvedValue(planFixture);
       const client = new QueryClient({
         defaultOptions: {
           queries: { retry: false },
@@ -35,8 +36,8 @@ describe("usePlanUpdateMutations", () => {
       });
       const fetchPlan = vi
         .fn()
-        .mockResolvedValueOnce("before")
-        .mockResolvedValue("after");
+        .mockResolvedValueOnce(planFixture)
+        .mockResolvedValue({ ...planFixture, name: "after" });
       const fetchOther = vi.fn().mockResolvedValue("other");
       const fetchList = vi.fn().mockResolvedValue([]);
       const wrapper = ({ children }: { children: ReactNode }) => (
@@ -59,7 +60,9 @@ describe("usePlanUpdateMutations", () => {
         { wrapper },
       );
 
-      await waitFor(() => expect(result.current.plan.data).toBe("before"));
+      await waitFor(() =>
+        expect(result.current.plan.data).toEqual(planFixture),
+      );
       await waitFor(() => expect(fetchList).toHaveBeenCalledTimes(1));
       await act(async () => {
         if (operation === "rename")
@@ -70,10 +73,10 @@ describe("usePlanUpdateMutations", () => {
         else
           await result.current.mutations.reorder.mutate({
             planId: "plan-1",
-            planExerciseIds: ["slot-2", "slot-1"],
+            optimisticPlan: planFixture,
           });
       });
-      await waitFor(() => expect(result.current.plan.data).toBe("after"));
+      await waitFor(() => expect(result.current.plan.data?.name).toBe("after"));
       expect(fetchPlan).toHaveBeenCalledTimes(2);
       expect(fetchList).toHaveBeenCalledTimes(2);
       expect(fetchOther).toHaveBeenCalledTimes(1);
@@ -103,7 +106,7 @@ describe("usePlanUpdateMutations", () => {
             ? result.current.rename.mutate({ planId: "plan-1", name: "Nowa" })
             : result.current.reorder.mutate({
                 planId: "plan-1",
-                planExerciseIds: ["slot-1"],
+                optimisticPlan: planFixture,
               });
         await expect(request).rejects.toThrow(
           operation === "rename"

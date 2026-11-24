@@ -88,7 +88,7 @@ export function PlanExerciseRow({
                 {number}
               </span>
             </div>
-            <h4 className="min-w-0 self-center break-words text-base font-semibold text-foreground lg:self-start lg:text-xl">
+            <h4 className="min-w-0 self-start break-words text-base font-semibold text-foreground lg:text-xl">
               {exercise.name_snapshot}
             </h4>
             <div className="col-span-2 flex min-w-0 flex-wrap items-center gap-1 lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:self-end lg:gap-1.5">
