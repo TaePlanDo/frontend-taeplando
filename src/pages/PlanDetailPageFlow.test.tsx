@@ -76,9 +76,7 @@ it("renames a plan and blocks actions until its refresh finishes", async () => {
     screen.getByRole("button", { name: "Wymień ćwiczenie Bieg" }),
   ).toBeDisabled();
   await act(async () => finishSave(updated));
-  expect(await screen.findByRole("status")).toHaveTextContent(
-    "Odświeżanie planu",
-  );
+  expect(await screen.findByText("Odświeżanie planu…")).toBeInTheDocument();
   expect(
     screen.getByRole("button", { name: "Edytuj nazwę planu" }),
   ).toBeDisabled();
@@ -154,9 +152,7 @@ it("replaces an exercise and displays the refreshed plan", async () => {
       exerciseId: "replacement",
     }),
   );
-  expect(await screen.findByRole("status")).toHaveTextContent(
-    "Odświeżanie planu",
-  );
+  expect(await screen.findByText("Odświeżanie planu…")).toBeInTheDocument();
   expect(
     screen.getByRole("button", { name: "Wymień ćwiczenie Bieg" }),
   ).toBeDisabled();

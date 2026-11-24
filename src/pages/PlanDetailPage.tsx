@@ -19,16 +19,29 @@ import { usePlan } from "@/hooks/plans/usePlan";
 import { usePlanExerciseMutations } from "@/hooks/plans/usePlanExerciseMutations";
 import { usePlanUpdateMutations } from "@/hooks/plans/usePlanUpdateMutations";
 import { groupPlanPhases } from "@/lib/plan/phaseGrouping";
-import type { PlanExercise } from "@/types/plan";
+import { reorderPlanExercises } from "@/lib/plan/reorderPlanExercises";
+import type { PlanDetail, PlanExercise } from "@/types/plan";
 
 export function PlanDetailPage() {
   const { planId } = useParams<{ planId: string }>();
   const navigate = useNavigate();
   const backTo: string = useLocation().state?.backTo ?? "/plans";
-  const { plan, isLoading, isFetching, isError, refetch } = usePlan(planId);
+  const {
+    plan: fetchedPlan,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = usePlan(planId);
   const { deletePlan } = useDeletePlan();
   const { replace, remove } = usePlanExerciseMutations();
-  const { rename, isPending: isUpdating } = usePlanUpdateMutations();
+  const { rename, reorder, isPending: isUpdating } = usePlanUpdateMutations();
+  const [reorderedPlan, setReorderedPlan] = useState<{
+    source: PlanDetail;
+    value: PlanDetail;
+  } | null>(null);
+  const plan =
+    reorderedPlan?.source === fetchedPlan ? reorderedPlan.value : fetchedPlan;
   const [regenerateOpen, setRegenerateOpen] = useState(false);
   const [selected, setSelected] = useState<{
     exercise: PlanExercise;
@@ -43,6 +56,25 @@ export function PlanDetailPage() {
         error instanceof Error
           ? error.message
           : "Nie udało się zmienić nazwy planu.",
+      );
+    }
+  }
+  async function handleReorder(activeId: string, overId: string) {
+    if (!plan || !fetchedPlan || planActionsDisabled) return;
+    const updated = reorderPlanExercises(plan, activeId, overId);
+    if (!updated) return;
+    setReorderedPlan({ source: fetchedPlan, value: updated });
+    try {
+      await reorder.mutate({
+        planId: plan.id,
+        planExerciseIds: updated.exercises.map((exercise) => exercise.id),
+      });
+    } catch (error) {
+      setReorderedPlan(null);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Nie udało się zmienić kolejności ćwiczeń.",
       );
     }
   }
@@ -149,6 +181,9 @@ export function PlanDetailPage() {
                 setSelected({ exercise, number });
               }}
               onRemove={handleRemove}
+              onReorder={(activeId, overId) =>
+                void handleReorder(activeId, overId)
+              }
               replacingExerciseId={selected?.exercise.id}
               disabled={planActionsDisabled}
             />

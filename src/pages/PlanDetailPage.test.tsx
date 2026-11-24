@@ -320,7 +320,7 @@ describe("PlanDetailPage", () => {
         </Routes>
       </MemoryRouter>,
     );
-    expect(screen.getByRole("status")).toHaveTextContent("Odświeżanie planu");
+    expect(screen.getByText("Odświeżanie planu…")).toBeInTheDocument();
     expect(screen.queryByText("Bieg")).toBeNull();
     expect(
       screen.getByRole("button", { name: "Wymień ćwiczenie Sparing" }),

@@ -1,5 +1,8 @@
 ﻿import { Clock3, Dumbbell, Users } from "lucide-react";
 import { useState } from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical } from "lucide-react";
 import { ArrowLeftRight, Trash2 } from "lucide-react";
 
 import { cn } from "cn";
@@ -25,6 +28,7 @@ type PlanExerciseRowProps = {
   onRemove: (exercise: PlanExercise) => Promise<void>;
   disabled?: boolean;
   isReplacing?: boolean;
+  canReorder?: boolean;
 };
 
 export function PlanExerciseRow({
@@ -34,23 +38,45 @@ export function PlanExerciseRow({
   onRemove,
   disabled,
   isReplacing = false,
+  canReorder = false,
 }: PlanExerciseRowProps) {
   const [open, setOpen] = useState(false);
   const snapshot = mapPlanExerciseToSnapshot(exercise);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: exercise.id, disabled: disabled || !canReorder });
 
   return (
     <>
       <div
+        ref={setNodeRef}
+        style={{ transform: CSS.Transform.toString(transform), transition }}
         className={cn(
           "relative border-b border-border lg:items-center lg:px-7",
           PLAN_EXERCISE_LAYOUT_CLASS,
+          isDragging && "z-30 bg-background shadow-lg",
         )}
       >
         <button
           type="button"
+          {...attributes}
+          {...listeners}
+          aria-label={`Przenieś ćwiczenie ${exercise.name_snapshot}`}
+          disabled={disabled || !canReorder}
+          className="absolute top-4 left-0 z-10 flex h-16 w-8 touch-none items-center justify-center text-muted-foreground cursor-grab active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-40 lg:top-1/2 lg:h-10 lg:w-7 lg:-translate-y-1/2"
+        >
+          <GripVertical className="size-5" aria-hidden />
+        </button>
+        <button
+          type="button"
           aria-label={`Podgląd ćwiczenia ${exercise.name_snapshot}`}
           onClick={() => setOpen(true)}
-          className="flex w-full min-w-0 cursor-pointer flex-col gap-4 px-3 py-4 text-left before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:border before:border-transparent before:transition-colors hover:before:border-primary focus-visible:outline-none focus-visible:before:border-primary focus-visible:before:ring-2 focus-visible:before:ring-ring lg:col-span-2 lg:grid lg:grid-cols-subgrid lg:items-center lg:gap-x-8 lg:px-0"
+          className="flex w-full min-w-0 cursor-pointer flex-col gap-4 py-4 pr-3 pl-9 text-left before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:border before:border-transparent before:transition-colors hover:before:border-primary focus-visible:outline-none focus-visible:before:border-primary focus-visible:before:ring-2 focus-visible:before:ring-ring lg:col-span-2 lg:grid lg:grid-cols-subgrid lg:items-center lg:gap-x-8 lg:px-0"
         >
           <div className="flex w-full min-w-0 flex-1 items-center gap-3 pr-10 lg:gap-6 lg:pr-0">
             <div className="relative shrink-0 self-start">
