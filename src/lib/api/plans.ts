@@ -2,7 +2,12 @@ import { apiUrl } from "@/config/env";
 import { appendFilters } from "@/lib/filters/definition";
 import { planFilters } from "@/lib/plans/plan-filter-list";
 import type { PlanListFilters } from "@/types/plan-list-filters";
-import type { PlanDetail, PlanListItem } from "@/types/plan";
+import type {
+  PlanDetail,
+  PlanExercise,
+  PlanExerciseAlternative,
+  PlanListItem,
+} from "@/types/plan";
 import type { PaginatedResponse } from "@/types/pagination";
 
 import { apiJson } from "./client";
@@ -33,4 +38,52 @@ export function deletePlanRequest(planId: string): Promise<void> {
   return apiJson<void>(apiUrl(`/training-plans/${planId}`), {
     method: "DELETE",
   });
+}
+
+export function getPlanExerciseAlternativesRequest(
+  planId: string,
+  planExerciseId: string,
+): Promise<PlanExerciseAlternative[]> {
+  return apiJson(
+    apiUrl(
+      `/training-plans/${planId}/exercises/${planExerciseId}/alternatives`,
+    ),
+    {
+      method: "GET",
+    },
+  );
+}
+
+export function replacePlanExerciseRequest({
+  planId,
+  planExerciseId,
+  exerciseId,
+}: {
+  planId: string;
+  planExerciseId: string;
+  exerciseId: string;
+}): Promise<PlanExercise> {
+  return apiJson(
+    apiUrl(`/training-plans/${planId}/exercises/${planExerciseId}`),
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ exercise_id: exerciseId }),
+    },
+  );
+}
+
+export function deletePlanExerciseRequest({
+  planId,
+  planExerciseId,
+}: {
+  planId: string;
+  planExerciseId: string;
+}): Promise<void> {
+  return apiJson(
+    apiUrl(`/training-plans/${planId}/exercises/${planExerciseId}`),
+    {
+      method: "DELETE",
+    },
+  );
 }

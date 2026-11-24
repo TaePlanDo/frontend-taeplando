@@ -6,19 +6,32 @@ import { Card } from "@/components/ui/card";
 import { cn } from "cn";
 import { formatExerciseCount } from "@/lib/format/plural";
 import { type PlanPhase } from "@/lib/plan/phaseGrouping";
+import type { PlanExercise } from "@/types/plan";
 
 import { DeltaMinutesBadge } from "./DeltaMinutesBadge";
 import { PlanExerciseRow } from "./PlanExerciseRow";
-import { PLAN_RATING_COLUMNS, PLAN_RATING_GRID_CLASS } from "./planRatings";
+import {
+  PLAN_EXERCISE_LAYOUT_CLASS,
+  PLAN_RATING_COLUMNS,
+  PLAN_RATING_GRID_CLASS,
+} from "./planRatings";
 
 type PlanPhaseSectionProps = {
   phase: PlanPhase;
   defaultOpen?: boolean;
+  onReplace: (exercise: PlanExercise, number: number) => void;
+  onRemove: (exercise: PlanExercise) => Promise<void>;
+  disabled?: boolean;
+  replacingExerciseId?: string;
 };
 
 export function PlanPhaseSection({
   phase,
   defaultOpen = true,
+  onReplace,
+  onRemove,
+  disabled,
+  replacingExerciseId,
 }: PlanPhaseSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
   const panelId = `phase-${phase.schema.position}`;
@@ -33,12 +46,12 @@ export function PlanPhaseSection({
       >
         <button
           type="button"
-          className="flex w-full items-center justify-between gap-3 px-3 py-4 text-left sm:gap-4 sm:px-7"
+          className="flex w-full items-center justify-between gap-3 px-3 py-4 text-left lg:gap-4 lg:px-7"
           aria-expanded={open}
           aria-controls={panelId}
           onClick={() => setOpen((current) => !current)}
         >
-          <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-1.5 lg:gap-3">
             <ChevronDown
               className={cn(
                 "size-5 shrink-0 text-muted-foreground transition-transform",
@@ -48,42 +61,47 @@ export function PlanPhaseSection({
             />
 
             <div className="min-w-0">
-              <h3 className="text-base font-semibold leading-tight text-foreground [overflow-wrap:break-word] sm:text-lg">
+              <h3 className="text-base font-semibold leading-tight text-foreground [overflow-wrap:break-word] lg:text-lg">
                 {phase.schema.name}
               </h3>
-              <p className="mt-0.5 text-xs leading-tight text-muted-foreground sm:text-sm">
+              <p className="mt-0.5 text-xs leading-tight text-muted-foreground lg:text-sm">
                 {formatExerciseCount(phase.exercises.length)}
               </p>
             </div>
           </div>
 
-          <div className="flex shrink-0 flex-col items-end gap-1">
+          <div className="flex shrink-0 items-center gap-1">
+            <DeltaMinutesBadge
+              deltaMinutes={phase.deltaMinutes}
+              className="h-7 px-1 text-xs lg:h-8 lg:px-2 lg:text-sm"
+            />
             <CardItemBadge
               icon={<Clock3 className="size-4 text-primary" aria-hidden />}
-              className="h-7 justify-center gap-1 border border-border px-1 text-xs font-medium whitespace-nowrap text-foreground sm:h-8 sm:px-2 sm:text-sm"
+              className="h-7 justify-center gap-1 border border-border px-1 text-xs font-medium whitespace-nowrap text-foreground lg:h-8 lg:px-2 lg:text-sm"
               aria-label={`Czas fazy: ${phase.actualMinutes} z ${phase.plannedMinutes} minut`}
             >
               {phase.actualMinutes} / {phase.plannedMinutes}
             </CardItemBadge>
-            <DeltaMinutesBadge
-              deltaMinutes={phase.deltaMinutes}
-              className="h-7 px-1 text-xs sm:h-8 sm:px-2 sm:text-sm"
-            />
           </div>
         </button>
         {open && phase.exercises.length > 0 ? (
-          <div className="border-t border-border px-3 py-2 sm:px-7">
+          <div
+            className={cn(
+              "border-t border-border px-3 py-2 lg:px-7",
+              PLAN_EXERCISE_LAYOUT_CLASS,
+            )}
+          >
             <div
               className={cn(
                 PLAN_RATING_GRID_CLASS,
-                "w-full items-center lg:ml-auto lg:w-[24rem]",
+                "w-full items-center lg:col-start-2",
               )}
             >
               {PLAN_RATING_COLUMNS.map((column) => (
                 <span
                   key={column.key}
                   className={cn(
-                    "min-w-0 text-center text-[0.625rem] font-medium leading-tight sm:text-[0.6875rem]",
+                    "min-w-0 text-center text-[0.625rem] font-medium leading-tight lg:text-[0.6875rem]",
                     column.headerClass,
                   )}
                 >
@@ -103,10 +121,14 @@ export function PlanPhaseSection({
                 key={exercise.id}
                 exercise={exercise}
                 number={index + 1}
+                onReplace={onReplace}
+                onRemove={onRemove}
+                disabled={disabled}
+                isReplacing={exercise.id === replacingExerciseId}
               />
             ))
           ) : (
-            <p className="px-4 py-4 text-sm text-muted-foreground sm:px-5">
+            <p className="px-4 py-4 text-sm text-muted-foreground lg:px-5">
               Brak ćwiczeń w tej fazie
             </p>
           )}

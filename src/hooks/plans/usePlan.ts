@@ -13,6 +13,7 @@ export function usePlan(planId: string | undefined) {
   return {
     plan: query.data ?? null,
     isLoading: query.isLoading,
+    isFetching: query.isFetching,
     isError: query.isError,
     error: query.error,
     refetch: query.refetch,

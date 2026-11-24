@@ -33,6 +33,8 @@ export const queryKeys = {
     lists: () => [...queryKeys.plans.all, "list"] as const,
     detail: (planId: string) =>
       [...queryKeys.plans.all, "detail", planId] as const,
+    alternatives: (planId: string, planExerciseId: string) =>
+      [...queryKeys.plans.all, "alternatives", planId, planExerciseId] as const,
   },
   planGeneration: {
     all: ["plan-generation"] as const,

@@ -8,7 +8,7 @@ type PlanEquipmentSectionProps = {
 
 export function PlanEquipmentSection({ equipment }: PlanEquipmentSectionProps) {
   return (
-    <Card className="gap-4 rounded-2xl border-border bg-card/40 p-4 shadow-none sm:p-5">
+    <Card className="gap-4 rounded-2xl border-border bg-card/40 p-4 shadow-none lg:p-5">
       <CardTitle className="text-base text-foreground">
         Sprzęt dostępny na sali
       </CardTitle>

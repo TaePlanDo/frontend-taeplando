@@ -20,6 +20,50 @@ vi.mock("sonner", () => ({
 const usePlan = vi.fn();
 const startPlanGeneration = vi.fn();
 const deletePlan = vi.fn();
+const replaceExercise = vi.fn();
+const removeExercise = vi.fn();
+const refetchPlan = vi.fn();
+
+vi.mock("@/hooks/plans/usePlanExerciseMutations", () => ({
+  usePlanExerciseMutations: () => ({
+    replace: {
+      mutate: replaceExercise,
+      isPending: false,
+      error: null,
+      reset: vi.fn(),
+    },
+    remove: {
+      mutate: removeExercise,
+      isPending: false,
+      error: null,
+      reset: vi.fn(),
+    },
+  }),
+}));
+vi.mock("@/hooks/plans/usePlanExerciseAlternatives", () => ({
+  usePlanExerciseAlternatives: () => ({
+    data: [
+      {
+        exercise_id: "replacement",
+        trainer_exercise_id: "trainer-replacement",
+        name: "Kopnięcia",
+        image_url: null,
+        physical_difficulty: 2,
+        technical_difficulty: 2,
+        lower_body_load: 2,
+        upper_body_load: 2,
+        core_load: 2,
+        equipment: [],
+        training_types: [],
+        similarity_score: 0.9,
+      },
+    ],
+    isPending: false,
+    isError: false,
+    isFetching: false,
+    refetch: vi.fn(),
+  }),
+}));
 
 vi.mock("@/hooks/plans/usePlan", () => ({
   usePlan: (...args: unknown[]) => usePlan(...args),
@@ -75,6 +119,10 @@ describe("PlanDetailPage", () => {
     usePlan.mockReset();
     startPlanGeneration.mockReset();
     deletePlan.mockReset();
+    replaceExercise.mockReset();
+    removeExercise.mockReset();
+    refetchPlan.mockReset();
+    refetchPlan.mockResolvedValue({ data: planFixture, isError: false });
     vi.mocked(toast.success).mockReset();
     vi.mocked(toast.error).mockReset();
     usePlan.mockReturnValue({
@@ -82,7 +130,7 @@ describe("PlanDetailPage", () => {
       isLoading: false,
       isError: false,
       error: null,
-      refetch: vi.fn(),
+      refetch: refetchPlan,
     });
   });
 
@@ -110,7 +158,7 @@ describe("PlanDetailPage", () => {
     expect(
       within(phaseHeader.parentElement!).getByText("Intensywność"),
     ).not.toHaveClass("bg-emerald-500/15");
-    const row = screen.getByRole("button", { name: /Bieg/ });
+    const row = screen.getByRole("button", { name: "Podgląd ćwiczenia Bieg" });
     expect(within(row).getByText("2+")).toBeTruthy();
     expect(within(row).getAllByRole("meter")).toHaveLength(5);
     expect(
@@ -118,14 +166,18 @@ describe("PlanDetailPage", () => {
     ).toHaveAttribute("aria-valuenow", "2");
     expect(within(row).getByText("1")).toBeTruthy();
     expect(
-      within(screen.getByRole("button", { name: /Sparing/ })).getByText("1"),
+      within(
+        screen.getByRole("button", { name: "Podgląd ćwiczenia Sparing" }),
+      ).getByText("1"),
     ).toBeTruthy();
   });
 
   it("opens exercise snapshot details from a plan row", () => {
     renderPage();
 
-    fireEvent.click(screen.getByRole("button", { name: /Bieg/ }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Podgląd ćwiczenia Bieg" }),
+    );
     expect(screen.getByRole("dialog")).toBeTruthy();
     expect(
       screen.getByText(planFixture.exercises[0].description_snapshot),
@@ -144,6 +196,109 @@ describe("PlanDetailPage", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Zamknij" }));
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("replaces an exercise selected in the panel", async () => {
+    replaceExercise.mockResolvedValue({});
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Wymień ćwiczenie Bieg" }),
+    );
+    expect(screen.queryByText("Rozgrzewka biegowa")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("radio", { name: "Wybierz Kopnięcia" }));
+    fireEvent.click(screen.getByRole("button", { name: "Wymień ćwiczenie" }));
+    await waitFor(() =>
+      expect(replaceExercise).toHaveBeenCalledWith({
+        planId: "plan-1",
+        planExerciseId: "ex-1",
+        exerciseId: "replacement",
+      }),
+    );
+    expect(refetchPlan).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith(
+        "Ćwiczenie zostało wymienione",
+      ),
+    );
+  });
+
+  it("confirms removal", async () => {
+    removeExercise.mockResolvedValue(undefined);
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Usuń ćwiczenie Bieg" }),
+    );
+    expect(removeExercise).not.toHaveBeenCalled();
+    fireEvent.click(
+      within(screen.getByRole("alertdialog")).getByRole("button", {
+        name: "Usuń",
+      }),
+    );
+    await waitFor(() =>
+      expect(removeExercise).toHaveBeenCalledWith({
+        planId: "plan-1",
+        planExerciseId: "ex-1",
+      }),
+    );
+    expect(refetchPlan).not.toHaveBeenCalled();
+  });
+
+  it("shows the removal error without refreshing the plan", async () => {
+    removeExercise.mockRejectedValue(new Error("Błąd usuwania"));
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Usuń ćwiczenie Bieg" }),
+    );
+    fireEvent.click(
+      within(screen.getByRole("alertdialog")).getByRole("button", {
+        name: "Usuń",
+      }),
+    );
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("Błąd usuwania"),
+    );
+    expect(refetchPlan).not.toHaveBeenCalled();
+  });
+
+  it("keeps the plan visible but blocks changes after a failed refresh", () => {
+    usePlan.mockReturnValue({
+      plan: planFixture,
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+      refetch: refetchPlan,
+    });
+    renderPage();
+    expect(
+      screen.getByRole("button", { name: "Wymień ćwiczenie Bieg" }),
+    ).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Spróbuj ponownie" }));
+    expect(refetchPlan).toHaveBeenCalledOnce();
+  });
+
+  it("keeps the plan and its state while refreshing", () => {
+    const view = renderPage();
+    fireEvent.click(screen.getByRole("button", { name: /Rozgrzewka/ }));
+    expect(screen.queryByText("Bieg")).toBeNull();
+    usePlan.mockReturnValue({
+      plan: planFixture,
+      isLoading: false,
+      isFetching: true,
+      isError: false,
+      refetch: refetchPlan,
+    });
+    view.rerender(
+      <MemoryRouter initialEntries={["/plans/plan-1"]}>
+        <Routes>
+          <Route path="/plans/:planId" element={<PlanDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole("status")).toHaveTextContent("Odświeżanie planu");
+    expect(screen.queryByText("Bieg")).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Wymień ćwiczenie Sparing" }),
+    ).toBeDisabled();
   });
 
   it("labels back navigation toward the generation form", () => {

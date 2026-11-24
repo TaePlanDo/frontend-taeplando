@@ -23,6 +23,13 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-rating-physical: var(--rating-physical);
+  --color-rating-technical: var(--rating-technical);
+  --color-rating-upper: var(--rating-upper);
+  --color-rating-lower: var(--rating-lower);
+  --color-rating-lower-text: var(--rating-lower-text);
+  --color-rating-core: var(--rating-core);
+  --color-rating-core-text: var(--rating-core-text);
   --color-plan-rating-core: var(--plan-rating-core);
   --color-plan-rating-core-foreground: var(--plan-rating-core-foreground);
   --color-plan-schema-peach: var(--plan-schema-peach);
@@ -90,6 +97,13 @@
 }
 
 :root.light {
+  --rating-physical: #008765;
+  --rating-technical: #7540c9;
+  --rating-upper: #c43d20;
+  --rating-lower: #ce5f00;
+  --rating-lower-text: #b85300;
+  --rating-core: #ac7600;
+  --rating-core-text: #946500;
   --background: #f7f1e8;
   --foreground: #1d1b22;
   --card: #ffffff;

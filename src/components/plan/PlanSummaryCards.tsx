@@ -18,9 +18,9 @@ export function PlanSummaryCards({ plan }: PlanSummaryCardsProps) {
   const delta = actual - planned;
 
   return (
-    <div className="grid items-start gap-4 lg:grid-cols-[fit-content(21rem)_minmax(0,1fr)]">
+    <div className="grid gap-4 lg:grid-cols-[fit-content(21rem)_minmax(0,1fr)]">
       <Card className="gap-4 rounded-2xl border-border bg-card/40 p-4 shadow-none sm:p-5">
-        <CardTitle className="text-base text-foreground [overflow-wrap:anywhere]">
+        <CardTitle className="text-base text-foreground wrap-anywhere">
           {plan.group_name_snapshot}
         </CardTitle>
         <CardContent className="flex flex-wrap gap-3 px-0">
@@ -39,12 +39,12 @@ export function PlanSummaryCards({ plan }: PlanSummaryCardsProps) {
         </CardContent>
       </Card>
 
-      <Card className="min-w-0 gap-4 rounded-2xl border-border bg-card/40 p-4 shadow-none sm:p-5">
+      <Card className="min-w-0 gap-4 rounded-2xl border-border bg-card/40 p-4 shadow-none lg:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle className="text-base text-foreground">
             Schematy grupy
           </CardTitle>
-          <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:flex-1 sm:justify-end sm:gap-3">
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-2 lg:w-auto lg:flex-1 lg:justify-end lg:gap-3">
             <p
               className="inline-flex items-center gap-2 text-sm text-foreground"
               aria-label={`Czas trwania: ${actual} z ${planned} minut`}
