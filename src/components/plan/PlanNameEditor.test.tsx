@@ -51,12 +51,12 @@ describe("PlanNameEditor", () => {
     expect(screen.getByRole("button", { name: "Plan" })).toBeInTheDocument();
   });
 
-  it("rejects an empty name and limits length to 255 characters", () => {
+  it("rejects an empty name and limits length to 100 characters", () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     render(<PlanNameEditor name="Plan" disabled={false} onSave={onSave} />);
     fireEvent.click(screen.getByRole("button", { name: "Plan" }));
     const input = screen.getByRole("textbox");
-    expect(input).toHaveAttribute("maxLength", "255");
+    expect(input).toHaveAttribute("maxLength", "100");
     fireEvent.change(input, { target: { value: "   " } });
     fireEvent.blur(input);
     expect(screen.getByRole("alert")).toHaveTextContent(
