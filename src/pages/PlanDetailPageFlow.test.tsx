@@ -72,6 +72,7 @@ it("renames a plan and blocks actions until its refresh finishes", async () => {
       screen.getByRole("button", { name: "Edytuj nazwę planu" }),
     ).toBeDisabled(),
   );
+  expect(screen.getByText("Zapisywanie zmian…")).toBeInTheDocument();
   expect(
     screen.getByRole("button", { name: "Wymień ćwiczenie Bieg" }),
   ).toBeDisabled();

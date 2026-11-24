@@ -24,12 +24,9 @@ vi.mock("@/hooks/plans/usePlanExerciseMutations", () => ({
     remove: { isPending: false },
   }),
 }));
-vi.mock("@/hooks/plans/usePlanUpdateMutations", () => ({
-  usePlanUpdateMutations: () => ({
-    rename: {},
-    reorder: { mutate: reorder },
-    isPending: false,
-  }),
+vi.mock("@/lib/api/plans", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/api/plans")>()),
+  updatePlanStructureRequest: (...args: unknown[]) => reorder(...args),
 }));
 vi.mock("@/components/plan/PlanPhaseSection", () => ({
   PlanPhaseSection: ({
@@ -112,11 +109,17 @@ it("displays the new order immediately and sends the full plan order", async () 
       .getAllByText(/Bieg|Skok/)
       .map((element) => element.textContent),
   ).toEqual(["Skok", "Bieg"]);
-  expect(reorder).toHaveBeenCalledWith({
-    planId: "plan-1",
-    planExerciseIds: ["ex-3", "ex-1", "ex-2"],
-  });
+  await waitFor(() =>
+    expect(reorder).toHaveBeenCalledWith({
+      planId: "plan-1",
+      planExerciseIds: ["ex-3", "ex-1", "ex-2"],
+    }),
+  );
+  expect(await screen.findByText("Zapisywanie zmian…")).toBeInTheDocument();
   await act(async () => finish());
+  await waitFor(() =>
+    expect(screen.queryByText("Zapisywanie zmian…")).not.toBeInTheDocument(),
+  );
 });
 
 it("restores the old order and reports a failed save", async () => {
@@ -129,7 +132,11 @@ it("restores the old order and reports a failed save", async () => {
   renderPage();
   fireEvent.click(screen.getByRole("button", { name: "Przenieś" }));
   await act(async () => fail(new Error("Błąd zapisu")));
-  await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Błąd zapisu"));
+  await waitFor(() =>
+    expect(toast.error).toHaveBeenCalledWith(
+      "Nie udało się zmienić kolejności ćwiczeń. Spróbuj ponownie.",
+    ),
+  );
   expect(
     within(screen.getByTestId("phase-1"))
       .getAllByText(/Bieg|Skok/)

@@ -55,7 +55,7 @@ export function PlanExerciseRow({
     <>
       <div
         ref={setNodeRef}
-        style={{ transform: CSS.Transform.toString(transform), transition }}
+        style={{ transform: CSS.Translate.toString(transform), transition }}
         className={cn(
           "relative border-b border-border lg:items-center lg:px-7",
           PLAN_EXERCISE_LAYOUT_CLASS,

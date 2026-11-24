@@ -41,7 +41,7 @@ export function PlanNameEditor({
   }
 
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 max-w-full">
       {editing ? (
         <div>
           <Input
@@ -81,12 +81,12 @@ export function PlanNameEditor({
         </div>
       ) : (
         <div className="flex min-w-0 items-center gap-2">
-          <h1 className="min-w-0 text-2xl font-bold text-primary">
+          <h1 className="min-w-0 max-w-[30ch] text-2xl font-bold text-primary">
             <button
               type="button"
               disabled={disabled}
               onClick={startEditing}
-              className="cursor-pointer break-words text-left disabled:cursor-not-allowed"
+              className="cursor-pointer text-left [overflow-wrap:anywhere] disabled:cursor-not-allowed"
             >
               {name}
             </button>

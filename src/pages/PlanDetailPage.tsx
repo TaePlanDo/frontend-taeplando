@@ -233,12 +233,12 @@ export function PlanDetailPage() {
             Spróbuj ponownie
           </CustomizedButton>
         </div>
-      ) : isFetching ? (
+      ) : isFetching || isUpdating ? (
         <div
           role="status"
           className="fixed right-4 bottom-4 z-40 rounded-xl border border-border bg-background p-4 text-sm shadow-lg"
         >
-          Odświeżanie planu…
+          {isFetching ? "Odświeżanie planu…" : "Zapisywanie zmian…"}
         </div>
       ) : null}
     </div>
