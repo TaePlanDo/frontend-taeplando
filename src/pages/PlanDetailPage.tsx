@@ -20,16 +20,24 @@ import { usePlanExerciseMutations } from "@/hooks/plans/usePlanExerciseMutations
 import { usePlanUpdateMutations } from "@/hooks/plans/usePlanUpdateMutations";
 import { groupPlanPhases } from "@/lib/plan/phaseGrouping";
 import { reorderPlanExercises } from "@/lib/plan/reorderPlanExercises";
-import type { PlanExercise } from "@/types/plan";
+import type { PlanDetail, PlanExercise } from "@/types/plan";
 
 export function PlanDetailPage() {
   const { planId } = useParams<{ planId: string }>();
   const navigate = useNavigate();
   const backTo: string = useLocation().state?.backTo ?? "/plans";
-  const { plan, isLoading, isFetching, isError, refetch } = usePlan(planId);
+  const {
+    plan: fetchedPlan,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = usePlan(planId);
   const { deletePlan } = useDeletePlan();
   const { replace, remove } = usePlanExerciseMutations();
   const { rename, reorder, isPending: isUpdating } = usePlanUpdateMutations();
+  const [reorderedPlan, setReorderedPlan] = useState<PlanDetail | null>(null);
+  const plan = reorderedPlan ?? fetchedPlan;
   const [regenerateOpen, setRegenerateOpen] = useState(false);
   const [selected, setSelected] = useState<{
     exercise: PlanExercise;
@@ -48,13 +56,14 @@ export function PlanDetailPage() {
     }
   }
   async function handleReorder(activeId: string, overId: string) {
-    if (!plan || planActionsDisabled) return;
+    if (!plan || !fetchedPlan || planActionsDisabled) return;
     const updated = reorderPlanExercises(plan, activeId, overId);
     if (!updated) return;
+    setReorderedPlan(updated);
     try {
       await reorder.mutate({
         planId: plan.id,
-        optimisticPlan: updated,
+        planExerciseIds: updated.exercises.map((exercise) => exercise.id),
       });
     } catch (error) {
       toast.error(
@@ -62,6 +71,8 @@ export function PlanDetailPage() {
           ? error.message
           : "Nie udało się zmienić kolejności ćwiczeń.",
       );
+    } finally {
+      setReorderedPlan(null);
     }
   }
   async function handleReplace(exerciseId: string) {

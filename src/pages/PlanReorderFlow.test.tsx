@@ -11,6 +11,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { toast } from "sonner";
 import { beforeEach, expect, it, vi } from "vitest";
 import type { PlanPhase } from "@/lib/plan/phaseGrouping";
+import { queryKeys } from "@/lib/queryKeys";
 import { planFixture } from "@/test/planFixture";
 import { PlanDetailPage } from "./PlanDetailPage";
 
@@ -88,6 +89,7 @@ function renderPage() {
       </MemoryRouter>
     </QueryClientProvider>,
   );
+  return client;
 }
 
 it("displays the new order while saving and keeps the saved order", async () => {
@@ -95,7 +97,7 @@ it("displays the new order while saving and keeps the saved order", async () => 
   const updated = {
     ...plan,
     exercises: [
-      { ...plan.exercises[1], position: 1 },
+      { ...plan.exercises[1], position: 1, name_snapshot: "Skok z serwera" },
       { ...plan.exercises[0], position: 2 },
       plan.exercises[2],
     ],
@@ -105,7 +107,7 @@ it("displays the new order while saving and keeps the saved order", async () => 
       finish = resolve;
     }),
   );
-  renderPage();
+  const client = renderPage();
   fireEvent.click(await screen.findByRole("button", { name: "Przenieś" }));
   await waitFor(() =>
     expect(
@@ -121,13 +123,17 @@ it("displays the new order while saving and keeps the saved order", async () => 
     }),
   );
   expect(await screen.findByText("Zapisywanie zmian…")).toBeInTheDocument();
+  expect(client.getQueryData(queryKeys.plans.detail("plan-1"))).toEqual(plan);
   await act(async () => finish(updated));
+  expect(client.getQueryData(queryKeys.plans.detail("plan-1"))).toEqual(
+    updated,
+  );
   await waitFor(() =>
     expect(
       within(screen.getByTestId("phase-1"))
         .getAllByText(/Bieg|Skok/)
         .map((element) => element.textContent),
-    ).toEqual(["Skok", "Bieg"]),
+    ).toEqual(["Skok z serwera", "Bieg"]),
   );
   expect(getPlan).toHaveBeenCalledTimes(1);
 });

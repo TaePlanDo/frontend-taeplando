@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { useEntityMutation } from "@/hooks/useEntityMutation";
 import {
@@ -22,51 +22,18 @@ export function usePlanUpdateMutations() {
     networkMode: "always",
     onSuccess: savePlan,
   });
-  const reorder = useMutation({
+  const reorder = useEntityMutation({
+    mutationFn: updatePlanStructureRequest,
+    invalidateKey: queryKeys.plans.lists(),
+    fallbackMessage:
+      "Nie udało się zmienić kolejności ćwiczeń. Spróbuj ponownie.",
     networkMode: "always",
-    mutationFn: async ({
-      planId,
-      optimisticPlan,
-    }: {
-      planId: string;
-      optimisticPlan: PlanDetail;
-    }) => {
-      try {
-        return await updatePlanStructureRequest({
-          planId,
-          planExerciseIds: optimisticPlan.exercises.map(
-            (exercise) => exercise.id,
-          ),
-        });
-      } catch {
-        throw new Error(
-          "Nie udało się zmienić kolejności ćwiczeń. Spróbuj ponownie.",
-        );
-      }
-    },
-    onMutate: async ({ planId, optimisticPlan }) => {
-      const key = queryKeys.plans.detail(planId);
-      await queryClient.cancelQueries({ queryKey: key, exact: true });
-      const previous = queryClient.getQueryData<PlanDetail>(key);
-      queryClient.setQueryData(key, optimisticPlan);
-      return { previous };
-    },
-    onError: (_error, { planId }, context) => {
-      if (context?.previous)
-        queryClient.setQueryData(
-          queryKeys.plans.detail(planId),
-          context.previous,
-        );
-    },
-    onSuccess: async (updatedPlan, variables) => {
-      await savePlan(variables, updatedPlan);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.plans.lists() });
-    },
+    onSuccess: savePlan,
   });
 
   return {
     rename,
-    reorder: { mutate: reorder.mutateAsync, isPending: reorder.isPending },
+    reorder,
     isPending: rename.isPending || reorder.isPending,
   };
 }

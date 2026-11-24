@@ -74,7 +74,9 @@ describe("usePlanUpdateMutations", () => {
         else
           await result.current.mutations.reorder.mutate({
             planId: "plan-1",
-            optimisticPlan: planFixture,
+            planExerciseIds: planFixture.exercises.map(
+              (exercise) => exercise.id,
+            ),
           });
       });
       await waitFor(() => expect(result.current.plan.data?.name).toBe("after"));
@@ -107,7 +109,9 @@ describe("usePlanUpdateMutations", () => {
             ? result.current.rename.mutate({ planId: "plan-1", name: "Nowa" })
             : result.current.reorder.mutate({
                 planId: "plan-1",
-                optimisticPlan: planFixture,
+                planExerciseIds: planFixture.exercises.map(
+                  (exercise) => exercise.id,
+                ),
               });
         await expect(request).rejects.toThrow(
           operation === "rename"
