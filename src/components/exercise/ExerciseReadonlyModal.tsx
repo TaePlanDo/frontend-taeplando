@@ -2,12 +2,12 @@ import { Dumbbell, Layers3, Tag } from "lucide-react";
 
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedSwitch } from "@/components/shared/CustomizedSwitch";
-import { ExerciseImage } from "@/components/shared/ExerciseImage";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Exercise, ExerciseDetails } from "@/types/exercise";
 
 import { AttributeRow } from "./AttributeRow";
 import { ExerciseStatBlock } from "./ExerciseStatBlock";
+import { ExercisePreviewMedia } from "./ExercisePreviewMedia";
 import { EXERCISE_RATING_COLUMNS } from "./exerciseRatings";
 import { RatingMeter } from "./RatingMeter";
 
@@ -42,11 +42,8 @@ export function ExerciseReadonlyModal(props: ExerciseReadonlyModalProps) {
         className="h-full min-h-0 flex-1 overflow-hidden px-1"
       >
         <div className="flex flex-col gap-4 pr-4 pb-4">
-          <div className="flex flex-row gap-3 sm:gap-6">
-            <ExerciseImage
-              src={exercise.image_url}
-              className="size-28 shrink-0 self-start rounded-2xl bg-muted object-cover sm:size-32"
-            />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
+            <ExercisePreviewMedia exercise={exercise} />
             <div className="flex min-w-0 flex-1 flex-col">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <h1 className="text-2xl font-semibold text-foreground">

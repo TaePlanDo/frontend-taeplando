@@ -309,6 +309,24 @@ describe("ExerciseListPage", () => {
     ).toBeTruthy();
   });
 
+  it("shows the exercise animation in the preview", async () => {
+    state.items = [
+      {
+        ...exercise,
+        animation_url: "animation.webp",
+        animation_url_light: "animation.webp",
+      },
+    ];
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    const dialog = await screen.findByRole("dialog");
+    expect(
+      dialog.querySelector('img[src="animation.webp"]'),
+    ).toBeInTheDocument();
+  });
+
   it("closes the exercise preview", async () => {
     renderPage();
     fireEvent.click(
