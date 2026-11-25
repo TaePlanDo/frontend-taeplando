@@ -10,7 +10,7 @@ import { RatingMeter } from "@/components/exercise/RatingMeter";
 import { ExerciseReadonlyModal } from "@/components/exercise/ExerciseReadonlyModal";
 import { CardItemBadge } from "@/components/shared/CardItemBadge";
 import { CustomizedDialog } from "@/components/shared/CustomizedDialog";
-import { ExerciseImage } from "@/components/shared/ExerciseImage";
+import { ExerciseThumbnail } from "@/components/exercise/ExerciseThumbnail";
 import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
 import { Button } from "@/components/ui/button";
 import { mapPlanExerciseToSnapshot } from "@/lib/mappers/plan";
@@ -80,9 +80,10 @@ export function PlanExerciseRow({
         >
           <div className="grid w-full min-w-0 grid-cols-[4rem_minmax(0,1fr)] gap-x-3 gap-y-2 pr-10 pl-6 lg:grid-cols-[5rem_minmax(0,1fr)_auto] lg:gap-x-6 lg:pr-0 lg:pl-0">
             <div className="relative self-start lg:row-span-2">
-              <ExerciseImage
-                src={exercise.image_url_snapshot}
-                className="size-16 rounded-xl bg-muted object-cover lg:size-20"
+              <ExerciseThumbnail
+                darkUrl={exercise.image_url_snapshot}
+                lightUrl={exercise.image_url_light_snapshot}
+                className="size-16 rounded-xl lg:size-20"
               />
               <span className="absolute -left-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
                 {number}

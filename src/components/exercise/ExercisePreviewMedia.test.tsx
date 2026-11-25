@@ -37,9 +37,9 @@ describe("ExercisePreviewMedia", () => {
     expect(
       container.querySelector('img[src="thumb-light.webp"]'),
     ).toBeVisible();
-    expect(
-      container.querySelector('img[src="anim-light.webp"]'),
-    ).toHaveClass("invisible");
+    expect(container.querySelector('img[src="anim-light.webp"]')).toHaveClass(
+      "invisible",
+    );
   });
 
   it("keeps the thumbnail when the animation fails and shows a placeholder if the thumbnail fails", () => {

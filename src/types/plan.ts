@@ -41,6 +41,7 @@ export type PlanExerciseAlternative = {
   exercise_id: string;
   name: string;
   image_url: string | null;
+  image_url_light: string | null;
   physical_difficulty: number;
   technical_difficulty: number;
   upper_body_load: number;

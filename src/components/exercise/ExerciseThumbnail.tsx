@@ -1,17 +1,20 @@
 import { useState } from "react";
+import { cn } from "cn";
 
 import { useTheme } from "@/hooks/useTheme";
 
 type ExerciseThumbnailProps = {
   darkUrl: string | null;
   lightUrl: string | null;
-  isOffline: boolean;
+  isOffline?: boolean;
+  className?: string;
 };
 
 export function ExerciseThumbnail({
   darkUrl,
   lightUrl,
-  isOffline,
+  isOffline = false,
+  className,
 }: ExerciseThumbnailProps) {
   const { theme } = useTheme();
   const placeholder = `/exercise-placeholder-${theme}.svg`;
@@ -22,6 +25,7 @@ export function ExerciseThumbnail({
       key={`${src ?? ""}:${placeholder}`}
       src={src}
       placeholder={placeholder}
+      className={className}
     />
   );
 }
@@ -29,9 +33,11 @@ export function ExerciseThumbnail({
 function ThumbnailImage({
   src,
   placeholder,
+  className,
 }: {
   src: string | null;
   placeholder: string;
+  className?: string;
 }) {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">(
     src ? "loading" : "loaded",
@@ -39,7 +45,12 @@ function ThumbnailImage({
   const showPlaceholder = !src || status === "error";
 
   return (
-    <div className="pointer-events-none relative size-22 shrink-0 overflow-hidden rounded-2xl bg-muted">
+    <div
+      className={cn(
+        "pointer-events-none relative shrink-0 overflow-hidden bg-muted",
+        className,
+      )}
+    >
       {status === "loading" && (
         <div
           aria-hidden="true"

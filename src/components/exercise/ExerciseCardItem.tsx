@@ -41,6 +41,7 @@ export function ExerciseCardItem({
         darkUrl={exercise.image_url}
         lightUrl={exercise.image_url_light}
         isOffline={isOffline}
+        className="size-22 rounded-2xl"
       />
       <div className="pointer-events-none flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-2">

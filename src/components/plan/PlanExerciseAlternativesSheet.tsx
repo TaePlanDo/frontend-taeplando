@@ -79,6 +79,7 @@ function AlternativesContent({
           <PlanExerciseAlternativeCard
             name={source.name}
             imageUrl={source.image_url}
+            imageUrlLight={source.image_url_light}
             number={number}
             equipment={source.equipment}
             trainingTypes={source.training_types}
@@ -115,6 +116,7 @@ function AlternativesContent({
                   key={item.exercise_id}
                   name={item.name}
                   imageUrl={item.image_url}
+                  imageUrlLight={item.image_url_light}
                   number={index + 1}
                   equipment={item.equipment}
                   trainingTypes={item.training_types}
