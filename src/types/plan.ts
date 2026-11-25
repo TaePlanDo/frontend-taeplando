@@ -18,6 +18,9 @@ export type PlanExercise = {
   name_snapshot: string;
   description_snapshot: string;
   image_url_snapshot: string | null;
+  animation_url_snapshot: string | null;
+  image_url_light_snapshot: string | null;
+  animation_url_light_snapshot: string | null;
   min_age_snapshot: number;
   max_age_snapshot: number;
   min_participants_snapshot: number;
