@@ -1,5 +1,17 @@
 import { ChevronDown, Clock3 } from "lucide-react";
 import { useState } from "react";
+import {
+  DndContext,
+  PointerSensor,
+  pointerWithin,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 import { CardItemBadge } from "@/components/shared/CardItemBadge";
 import { Card } from "@/components/ui/card";
@@ -21,6 +33,7 @@ type PlanPhaseSectionProps = {
   defaultOpen?: boolean;
   onReplace: (exercise: PlanExercise, number: number) => void;
   onRemove: (exercise: PlanExercise) => Promise<void>;
+  onReorder: (activeId: string, overId: string) => void;
   disabled?: boolean;
   replacingExerciseId?: string;
 };
@@ -30,11 +43,19 @@ export function PlanPhaseSection({
   defaultOpen = true,
   onReplace,
   onRemove,
+  onReorder,
   disabled,
   replacingExerciseId,
 }: PlanPhaseSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
   const panelId = `phase-${phase.schema.position}`;
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+  );
+  function handleDragEnd({ active, over }: DragEndEvent) {
+    if (!disabled && over && active.id !== over.id)
+      onReorder(String(active.id), String(over.id));
+  }
 
   return (
     <Card className="gap-0 rounded-2xl border-border bg-card/30 py-0 shadow-none">
@@ -116,17 +137,29 @@ export function PlanPhaseSection({
       {open ? (
         <div id={panelId} className="border-t border-border">
           {phase.exercises.length ? (
-            phase.exercises.map((exercise, index) => (
-              <PlanExerciseRow
-                key={exercise.id}
-                exercise={exercise}
-                number={index + 1}
-                onReplace={onReplace}
-                onRemove={onRemove}
-                disabled={disabled}
-                isReplacing={exercise.id === replacingExerciseId}
-              />
-            ))
+            <DndContext
+              sensors={sensors}
+              collisionDetection={pointerWithin}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={phase.exercises.map((exercise) => exercise.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {phase.exercises.map((exercise, index) => (
+                  <PlanExerciseRow
+                    key={exercise.id}
+                    exercise={exercise}
+                    number={index + 1}
+                    onReplace={onReplace}
+                    onRemove={onRemove}
+                    disabled={disabled}
+                    isReplacing={exercise.id === replacingExerciseId}
+                    canReorder={phase.exercises.length > 1}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
           ) : (
             <p className="px-4 py-4 text-sm text-muted-foreground lg:px-5">
               Brak ćwiczeń w tej fazie

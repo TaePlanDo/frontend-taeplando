@@ -17,21 +17,64 @@ import { HomeLink } from "@/components/shared/HomeLink";
 import { useDeletePlan } from "@/hooks/plans/useDeletePlan";
 import { usePlan } from "@/hooks/plans/usePlan";
 import { usePlanExerciseMutations } from "@/hooks/plans/usePlanExerciseMutations";
+import { usePlanUpdateMutations } from "@/hooks/plans/usePlanUpdateMutations";
 import { groupPlanPhases } from "@/lib/plan/phaseGrouping";
-import type { PlanExercise } from "@/types/plan";
+import { reorderPlanExercises } from "@/lib/plan/reorderPlanExercises";
+import type { PlanDetail, PlanExercise } from "@/types/plan";
 
 export function PlanDetailPage() {
   const { planId } = useParams<{ planId: string }>();
   const navigate = useNavigate();
   const backTo: string = useLocation().state?.backTo ?? "/plans";
-  const { plan, isLoading, isFetching, isError, refetch } = usePlan(planId);
+  const {
+    plan: fetchedPlan,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = usePlan(planId);
   const { deletePlan } = useDeletePlan();
   const { replace, remove } = usePlanExerciseMutations();
+  const { rename, reorder, isPending: isUpdating } = usePlanUpdateMutations();
+  const [reorderedPlan, setReorderedPlan] = useState<PlanDetail | null>(null);
+  const plan = reorderedPlan ?? fetchedPlan;
   const [regenerateOpen, setRegenerateOpen] = useState(false);
   const [selected, setSelected] = useState<{
     exercise: PlanExercise;
     number: number;
   } | null>(null);
+  async function handleRename(name: string) {
+    if (!plan) return;
+    try {
+      await rename.mutate({ planId: plan.id, name });
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Nie udało się zmienić nazwy planu.",
+      );
+    }
+  }
+  async function handleReorder(activeId: string, overId: string) {
+    if (!plan || !fetchedPlan || planActionsDisabled) return;
+    const updated = reorderPlanExercises(plan, activeId, overId);
+    if (!updated) return;
+    setReorderedPlan(updated);
+    try {
+      await reorder.mutate({
+        planId: plan.id,
+        planExerciseIds: updated.exercises.map((exercise) => exercise.id),
+      });
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Nie udało się zmienić kolejności ćwiczeń.",
+      );
+    } finally {
+      setReorderedPlan(null);
+    }
+  }
   async function handleReplace(exerciseId: string) {
     if (!plan || !selected) return;
     try {
@@ -100,6 +143,13 @@ export function PlanDetailPage() {
   }
 
   const phases = groupPlanPhases(plan);
+  const planActionsDisabled =
+    selected !== null ||
+    replace.isPending ||
+    remove.isPending ||
+    isUpdating ||
+    isFetching ||
+    isError;
 
   return (
     <div className="flex flex-1 justify-center px-3 py-6 lg:px-6">
@@ -110,6 +160,8 @@ export function PlanDetailPage() {
           onBack={() => navigate(backTo)}
           onRegenerate={() => setRegenerateOpen(true)}
           onDelete={handleDelete}
+          onRename={handleRename}
+          disabled={planActionsDisabled}
         />
 
         <PlanSummaryCards plan={plan} />
@@ -126,14 +178,11 @@ export function PlanDetailPage() {
                 setSelected({ exercise, number });
               }}
               onRemove={handleRemove}
-              replacingExerciseId={selected?.exercise.id}
-              disabled={
-                selected !== null ||
-                replace.isPending ||
-                remove.isPending ||
-                isFetching ||
-                isError
+              onReorder={(activeId, overId) =>
+                void handleReorder(activeId, overId)
               }
+              replacingExerciseId={selected?.exercise.id}
+              disabled={planActionsDisabled}
             />
           ))}
         </div>
@@ -181,12 +230,12 @@ export function PlanDetailPage() {
             Spróbuj ponownie
           </CustomizedButton>
         </div>
-      ) : isFetching ? (
+      ) : isFetching || isUpdating ? (
         <div
           role="status"
           className="fixed right-4 bottom-4 z-40 rounded-xl border border-border bg-background p-4 text-sm shadow-lg"
         >
-          Odświeżanie planu…
+          {isFetching ? "Odświeżanie planu…" : "Zapisywanie zmian…"}
         </div>
       ) : null}
     </div>

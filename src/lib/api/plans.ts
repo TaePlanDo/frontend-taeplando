@@ -40,6 +40,34 @@ export function deletePlanRequest(planId: string): Promise<void> {
   });
 }
 
+export function updatePlanNameRequest({
+  planId,
+  name,
+}: {
+  planId: string;
+  name: string;
+}): Promise<PlanDetail> {
+  return apiJson(apiUrl(`/training-plans/${planId}`), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+}
+
+export function updatePlanStructureRequest({
+  planId,
+  planExerciseIds,
+}: {
+  planId: string;
+  planExerciseIds: string[];
+}): Promise<PlanDetail> {
+  return apiJson(apiUrl(`/training-plans/${planId}/structure`), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plan_exercise_ids: planExerciseIds }),
+  });
+}
+
 export function getPlanExerciseAlternativesRequest(
   planId: string,
   planExerciseId: string,

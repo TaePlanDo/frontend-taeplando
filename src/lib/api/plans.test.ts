@@ -7,6 +7,8 @@ import {
   getPlanRequest,
   getPlansRequest,
   replacePlanExerciseRequest,
+  updatePlanNameRequest,
+  updatePlanStructureRequest,
 } from "./plans";
 
 function response(status: number, body: unknown) {
@@ -62,6 +64,43 @@ describe("plans API", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/training-plans/plan-1",
       expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
+  it("updates the plan name and returns the updated plan", async () => {
+    const plan = { id: "plan-1", name: "Nowa nazwa" };
+    const fetchMock = vi.fn().mockResolvedValue(response(200, plan));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      updatePlanNameRequest({ planId: "plan-1", name: "Nowa nazwa" }),
+    ).resolves.toEqual(plan);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/training-plans/plan-1",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ name: "Nowa nazwa" }),
+      }),
+    );
+  });
+
+  it("updates the order using plan exercise ids", async () => {
+    const plan = { id: "plan-1", exercises: [] };
+    const fetchMock = vi.fn().mockResolvedValue(response(200, plan));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      updatePlanStructureRequest({
+        planId: "plan-1",
+        planExerciseIds: ["slot-2", "slot-1"],
+      }),
+    ).resolves.toEqual(plan);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/training-plans/plan-1/structure",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ plan_exercise_ids: ["slot-2", "slot-1"] }),
+      }),
     );
   });
 

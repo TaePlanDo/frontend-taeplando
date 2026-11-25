@@ -23,6 +23,14 @@ const deletePlan = vi.fn();
 const replaceExercise = vi.fn();
 const removeExercise = vi.fn();
 const refetchPlan = vi.fn();
+const renamePlan = vi.fn();
+
+vi.mock("@/hooks/plans/usePlanUpdateMutations", () => ({
+  usePlanUpdateMutations: () => ({
+    rename: { mutate: renamePlan },
+    isPending: false,
+  }),
+}));
 
 vi.mock("@/hooks/plans/usePlanExerciseMutations", () => ({
   usePlanExerciseMutations: () => ({
@@ -122,6 +130,7 @@ describe("PlanDetailPage", () => {
     replaceExercise.mockReset();
     removeExercise.mockReset();
     refetchPlan.mockReset();
+    renamePlan.mockReset();
     refetchPlan.mockResolvedValue({ data: planFixture, isError: false });
     vi.mocked(toast.success).mockReset();
     vi.mocked(toast.error).mockReset();
@@ -132,6 +141,23 @@ describe("PlanDetailPage", () => {
       error: null,
       refetch: refetchPlan,
     });
+  });
+
+  it("shows an error and keeps the original name when renaming fails", async () => {
+    renamePlan.mockRejectedValue(
+      new Error("Nie udało się zmienić nazwy planu."),
+    );
+    renderPage();
+    fireEvent.click(screen.getByRole("button", { name: "Edytuj nazwę planu" }));
+    const input = screen.getByRole("textbox", { name: "Nazwa planu" });
+    fireEvent.change(input, { target: { value: "Nowa nazwa" } });
+    fireEvent.blur(input);
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith(
+        "Nie udało się zmienić nazwy planu.",
+      ),
+    );
+    expect(screen.getByRole("heading", { name: "Plan A" })).toBeInTheDocument();
   });
 
   it("renders plan header, phases and exercises", () => {
@@ -294,7 +320,7 @@ describe("PlanDetailPage", () => {
         </Routes>
       </MemoryRouter>,
     );
-    expect(screen.getByRole("status")).toHaveTextContent("Odświeżanie planu");
+    expect(screen.getByText("Odświeżanie planu…")).toBeInTheDocument();
     expect(screen.queryByText("Bieg")).toBeNull();
     expect(
       screen.getByRole("button", { name: "Wymień ćwiczenie Sparing" }),
