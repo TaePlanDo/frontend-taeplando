@@ -33,9 +33,15 @@ export class PlanDetailPage {
   }
 
   async firstExerciseName(): Promise<string> {
-    const heading = this.page.getByRole("heading", { level: 4 }).first();
-    await expect(heading).toBeVisible();
-    return (await heading.innerText()).trim();
+    return (await this.exerciseNames())[0];
+  }
+
+  async exerciseNames(): Promise<string[]> {
+    const headings = this.page.getByRole("heading", { level: 4 });
+    await expect(headings.first()).toBeVisible();
+    return headings.evaluateAll((nodes) =>
+      nodes.map((node) => (node.textContent ?? "").trim()),
+    );
   }
 
   async expectPlan(groupName: string): Promise<void> {
@@ -81,6 +87,76 @@ export class PlanDetailPage {
 
   async expectExerciseAbsent(name: string): Promise<void> {
     await expect(this.previewButton(name)).toHaveCount(0);
+  }
+
+  async reorderFirstReorderablePair(): Promise<void> {
+    const handles = this.page.getByRole("button", {
+      name: /^Przenieś ćwiczenie /,
+    });
+    await expect(handles.first()).toBeVisible();
+
+    const count = await handles.count();
+    for (let index = 0; index < count - 1; index++) {
+      if (
+        !(await handles.nth(index).isEnabled()) ||
+        !(await handles.nth(index + 1).isEnabled())
+      ) {
+        continue;
+      }
+
+      const names = await this.exerciseNames();
+      const expected = [...names];
+      [expected[index], expected[index + 1]] = [
+        expected[index + 1],
+        expected[index],
+      ];
+
+      await this.dragExercise(handles.nth(index), index + 1);
+      await expect.poll(async () => this.exerciseNames()).toEqual(expected);
+      return;
+    }
+
+    throw new Error("Expected a phase with at least two reorderable exercises");
+  }
+
+  private async dragExercise(
+    source: Locator,
+    targetExerciseIndex: number,
+  ): Promise<void> {
+    const target = this.page
+      .getByRole("heading", { level: 4 })
+      .nth(targetExerciseIndex);
+    await source.scrollIntoViewIfNeeded();
+    await target.scrollIntoViewIfNeeded();
+
+    const from = await source.boundingBox();
+    const to = await target.boundingBox();
+    if (!from || !to) {
+      throw new Error("Expected drag source and target to be visible");
+    }
+
+    const startX = from.x + from.width / 2;
+    const startY = from.y + from.height / 2;
+    const endX = to.x + to.width / 2;
+    const endY = to.y + to.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    // PointerSensor requires 6px movement before the drag activates.
+    await this.page.mouse.move(startX, startY + 8, { steps: 4 });
+    await this.page.mouse.move(endX, endY, { steps: 25 });
+    await this.page.mouse.up();
+  }
+
+  async renamePlan(newName: string): Promise<void> {
+    await this.page.getByRole("button", { name: "Edytuj nazwę planu" }).click();
+    const input = this.page.getByRole("textbox", { name: "Nazwa planu" });
+    await expect(input).toBeVisible();
+    await input.fill(newName);
+    await input.press("Enter");
+    await expect(
+      this.page.getByRole("heading", { level: 1, name: newName }),
+    ).toBeVisible();
   }
 
   async replaceExercise(name: string): Promise<void> {
