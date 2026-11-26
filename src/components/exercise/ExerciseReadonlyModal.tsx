@@ -3,6 +3,7 @@ import { Dumbbell, Layers3, Tag } from "lucide-react";
 import { CustomizedButton } from "@/components/shared/CustomizedButton";
 import { CustomizedSwitch } from "@/components/shared/CustomizedSwitch";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatMinuteCount } from "@/lib/format/plural";
 import type { Exercise, ExerciseDetails } from "@/types/exercise";
 
 import { AttributeRow } from "./AttributeRow";
@@ -33,7 +34,7 @@ export function ExerciseReadonlyModal(props: ExerciseReadonlyModalProps) {
 
   const age = `${exercise.min_age}-${exercise.max_age} lat`;
   const participants = `${exercise.min_participants}-${exercise.max_participants} osób`;
-  const duration = `${exercise.duration_minutes} minut`;
+  const duration = formatMinuteCount(exercise.duration_minutes);
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden">

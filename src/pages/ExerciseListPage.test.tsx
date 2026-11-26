@@ -327,6 +327,25 @@ describe("ExerciseListPage", () => {
     ).toBeInTheDocument();
   });
 
+  it.each([
+    [1, "1 minuta"],
+    [2, "2 minuty"],
+    [12, "12 minut"],
+    [22, "22 minuty"],
+  ])(
+    "shows the correctly inflected duration for %i minutes",
+    async (duration, expected) => {
+      state.items = [{ ...exercise, duration_minutes: duration }];
+      renderPage();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+      );
+      expect(
+        within(await screen.findByRole("dialog")).getByText(expected),
+      ).toBeInTheDocument();
+    },
+  );
+
   it("places the description between the name and exclusion switch", async () => {
     renderPage();
     fireEvent.click(
