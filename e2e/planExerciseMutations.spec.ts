@@ -1,10 +1,7 @@
-import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
-import { seedSystemData } from "./helpers/backend";
-import { startPlanGeneration } from "./helpers/startPlanGeneration";
+import { openGeneratedPlan } from "./helpers/openGeneratedPlan";
 import type { GroupFormValues } from "./pages/groups.page";
-import { PlanDetailPage } from "./pages/planDetail.page";
 import { test } from "./playwright";
 
 const groupValues = {
@@ -13,18 +10,6 @@ const groupValues = {
   maxAge: 14,
   durationMinutes: 20,
 } satisfies GroupFormValues;
-
-async function openGeneratedPlan(
-  page: Page,
-  values: GroupFormValues,
-): Promise<PlanDetailPage> {
-  seedSystemData();
-  const generation = await startPlanGeneration(page, values);
-  await generation.waitForPlanDetail();
-  const detail = new PlanDetailPage(page);
-  await detail.expectPlan(values.name);
-  return detail;
-}
 
 test.describe("plan exercise mutations", () => {
   test("opens alternatives and replaces an exercise", async ({ page }) => {
