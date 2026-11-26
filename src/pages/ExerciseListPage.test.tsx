@@ -327,6 +327,27 @@ describe("ExerciseListPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("places the description between the name and exclusion switch", async () => {
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Pokaż szczegóły: Ap chagi" }),
+    );
+    const dialog = await screen.findByRole("dialog");
+    const name = within(dialog).getByRole("heading", { name: "Ap chagi" });
+    const description = within(dialog).getByText("Opis");
+    const exclusion = within(dialog).getByRole("switch", {
+      name: "Wyklucz ćwiczenie",
+    });
+    expect(
+      name.compareDocumentPosition(description) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      description.compareDocumentPosition(exclusion) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it("closes the exercise preview", async () => {
     renderPage();
     fireEvent.click(
