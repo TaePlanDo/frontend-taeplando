@@ -31,6 +31,9 @@ const exercise: Exercise = {
   owner_user_id: "owner",
   scope: "PRIVATE",
   image_url: "https://example.com/image.png",
+  animation_url: "https://example.com/anim-dark.webp",
+  image_url_light: "https://example.com/thumb-light.webp",
+  animation_url_light: "https://example.com/anim-light.webp",
   name: "Ap chagi",
   description: "Opis",
   min_age: 7,
@@ -208,6 +211,10 @@ describe("ExerciseForm", () => {
         }),
       ),
     );
+    const payload = updateExercise.mock.calls[0][0].payload;
+    expect(payload).not.toHaveProperty("animation_url");
+    expect(payload).not.toHaveProperty("image_url_light");
+    expect(payload).not.toHaveProperty("animation_url_light");
   });
 
   it("rejects planning values outside the allowed range", async () => {

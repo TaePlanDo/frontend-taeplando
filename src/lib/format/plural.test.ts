@@ -3,8 +3,23 @@ import { describe, expect, it } from "vitest";
 import {
   formatExerciseCount,
   formatGroupCount,
+  formatMinuteCount,
   formatParticipantCount,
 } from "./plural";
+
+describe("formatMinuteCount", () => {
+  it.each([
+    [0, "0 minut"],
+    [1, "1 minuta"],
+    [2, "2 minuty"],
+    [5, "5 minut"],
+    [12, "12 minut"],
+    [21, "21 minut"],
+    [22, "22 minuty"],
+  ])("formats %i as %s", (count, expected) => {
+    expect(formatMinuteCount(count)).toBe(expected);
+  });
+});
 
 describe("formatParticipantCount", () => {
   it("uses Polish forms including teens and counts ending in 1", () => {

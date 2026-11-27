@@ -4,10 +4,10 @@ import { cn } from "cn";
 import { Card } from "@/components/ui/card";
 import { CustomizedAlertDialog } from "@/components/shared/CustomizedAlertDialog";
 import { CardItemActionButton } from "@/components/shared/CardItemActionButton";
-import { ExerciseImage } from "@/components/shared/ExerciseImage";
 import type { Exercise } from "@/types/exercise";
 
 import { AttributeBadges } from "./AttributeBadges";
+import { ExerciseThumbnail } from "./ExerciseThumbnail";
 
 type ExerciseCardItemProps = {
   exercise: Exercise;
@@ -37,10 +37,11 @@ export function ExerciseCardItem({
         className="absolute inset-0 cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         onClick={onView}
       />
-      <ExerciseImage
-        src={exercise.image_url}
-        forceFallback={isOffline}
-        className="pointer-events-none size-22 shrink-0 rounded-2xl bg-muted object-cover"
+      <ExerciseThumbnail
+        darkUrl={exercise.image_url}
+        lightUrl={exercise.image_url_light}
+        isOffline={isOffline}
+        className="size-22 rounded-2xl"
       />
       <div className="pointer-events-none flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-2">

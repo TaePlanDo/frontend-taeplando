@@ -1,8 +1,8 @@
 import { Clock3, Dumbbell, Tag } from "lucide-react";
 
 import { RatingMeter } from "@/components/exercise/RatingMeter";
+import { ExerciseThumbnail } from "@/components/exercise/ExerciseThumbnail";
 import { CardItemBadge } from "@/components/shared/CardItemBadge";
-import { ExerciseImage } from "@/components/shared/ExerciseImage";
 import type { ExerciseRatingKey } from "@/components/exercise/exerciseRatings";
 import type { CatalogReference } from "@/types/exercise";
 import { PLAN_RATING_COLUMNS, PLAN_RATING_GRID_CLASS } from "./planRatings";
@@ -10,6 +10,7 @@ import { PLAN_RATING_COLUMNS, PLAN_RATING_GRID_CLASS } from "./planRatings";
 type CardProps = {
   name: string;
   imageUrl: string | null;
+  imageUrlLight: string | null;
   number: number;
   equipment: CatalogReference[];
   trainingTypes: CatalogReference[];
@@ -22,6 +23,7 @@ type CardProps = {
 export function PlanExerciseAlternativeCard({
   name,
   imageUrl,
+  imageUrlLight,
   number,
   equipment,
   trainingTypes,
@@ -100,9 +102,10 @@ export function PlanExerciseAlternativeCard({
       <span className="flex h-14 w-5 shrink-0 items-center justify-center self-start text-sm font-semibold text-primary">
         {number}
       </span>
-      <ExerciseImage
-        src={imageUrl}
-        className="size-14 shrink-0 self-start rounded-xl bg-muted object-cover"
+      <ExerciseThumbnail
+        darkUrl={imageUrl}
+        lightUrl={imageUrlLight}
+        className="size-14 self-start rounded-xl"
       />
       {content}
       {selection ? (

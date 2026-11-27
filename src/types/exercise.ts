@@ -3,6 +3,9 @@ export type Exercise = {
   owner_user_id: string;
   scope: ExerciseScope;
   image_url: string | null;
+  animation_url: string | null;
+  image_url_light: string | null;
+  animation_url_light: string | null;
   name: string;
   description: string;
   min_age: number;

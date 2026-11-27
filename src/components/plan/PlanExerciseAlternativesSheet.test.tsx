@@ -13,6 +13,8 @@ const query = vi.hoisted(() => ({
   refetch: vi.fn(),
 }));
 const viewport = vi.hoisted(() => ({ desktop: false }));
+const appearance = vi.hoisted(() => ({ theme: "dark" as "dark" | "light" }));
+vi.mock("@/hooks/useTheme", () => ({ useTheme: () => appearance }));
 vi.mock("@/hooks/useIsDesktop", () => ({
   useIsDesktop: () => viewport.desktop,
 }));
@@ -25,6 +27,7 @@ const alternative: PlanExerciseAlternative = {
   exercise_id: "exercise-2",
   name: "Kopnięcia",
   image_url: null,
+  image_url_light: null,
   physical_difficulty: 3,
   technical_difficulty: 2,
   upper_body_load: 1,
@@ -57,6 +60,7 @@ describe("PlanExerciseAlternativesSheet", () => {
     query.isFetching = false;
     query.refetch.mockReset();
     viewport.desktop = false;
+    appearance.theme = "dark";
   });
 
   it("shows loading and empty states", () => {
@@ -106,6 +110,43 @@ describe("PlanExerciseAlternativesSheet", () => {
     fireEvent.click(screen.getByRole("radio", { name: "Wybierz Kopnięcia" }));
     fireEvent.click(submit);
     expect(onReplace).toHaveBeenCalledWith("exercise-2");
+  });
+
+  it("uses the current theme for both the source and alternative thumbnails", () => {
+    query.data = [
+      {
+        ...alternative,
+        image_url: "alternative-dark.webp",
+        image_url_light: "alternative-light.webp",
+      },
+    ];
+    const props = {
+      planId: "plan-1",
+      exercise: {
+        ...planFixture.exercises[0],
+        image_url_snapshot: "source-dark.webp",
+        image_url_light_snapshot: "source-light.webp",
+      },
+      number: 1,
+      open: true,
+      onOpenChange: vi.fn(),
+      onReplace: vi.fn(),
+    };
+    const { rerender } = render(<PlanExerciseAlternativesSheet {...props} />);
+    expect(
+      document.querySelector('img[src="source-dark.webp"]'),
+    ).toBeInTheDocument();
+    expect(
+      document.querySelector('img[src="alternative-dark.webp"]'),
+    ).toBeInTheDocument();
+    appearance.theme = "light";
+    rerender(<PlanExerciseAlternativesSheet {...props} />);
+    expect(
+      document.querySelector('img[src="source-light.webp"]'),
+    ).toBeInTheDocument();
+    expect(
+      document.querySelector('img[src="alternative-light.webp"]'),
+    ).toBeInTheDocument();
   });
 
   it("uses a modal overlay with a wider panel on desktop", () => {

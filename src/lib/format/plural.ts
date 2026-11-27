@@ -26,3 +26,7 @@ export function formatPlanCount(count: number): string {
 export function formatParticipantCount(count: number): string {
   return formatCount(count, "osoba", "osoby", "osób");
 }
+
+export function formatMinuteCount(count: number): string {
+  return formatCount(count, "minuta", "minuty", "minut");
+}

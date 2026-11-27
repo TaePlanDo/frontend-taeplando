@@ -102,6 +102,7 @@ it("replaces an exercise and displays the refreshed plan", async () => {
       trainer_exercise_id: "trainer-replacement",
       name: "Kopnięcia",
       image_url: null,
+      image_url_light: null,
       physical_difficulty: 2,
       technical_difficulty: 2,
       lower_body_load: 2,

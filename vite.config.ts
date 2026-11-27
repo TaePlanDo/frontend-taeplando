@@ -24,7 +24,13 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: "autoUpdate",
         injectRegister: "auto",
-        includeAssets: ["logo.png", "pwa-192x192.png", "pwa-512x512.png"],
+        includeAssets: [
+          "logo.png",
+          "pwa-192x192.png",
+          "pwa-512x512.png",
+          "exercise-placeholder-dark.svg",
+          "exercise-placeholder-light.svg",
+        ],
         manifest: {
           name: "TaePlanDo",
           short_name: "TaePlanDo",
